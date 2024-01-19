@@ -82,18 +82,18 @@ def list_by_id(list_id: int) -> Optional[models.MailingList]:
     return models.MailingList(**lst_data)
 
 
-def subscribers(query_text: Optional[str] = None) -> list[models.Subscriber]:
+def subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None) -> list[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 
     raw_results = []
     page_num = 1
-    partial_results, more = _fragment_of_subscribers(page_num, query_text)
+    partial_results, more = _fragment_of_subscribers(page_num, list_id, query_text)
     raw_results.extend(partial_results)
     print(f"subscribers(): Got {len(raw_results)} so far, more? {more}")
     while more:
         page_num += 1
-        partial_results, more = _fragment_of_subscribers(page_num, query_text)
+        partial_results, more = _fragment_of_subscribers(page_num, list_id, query_text)
         raw_results.extend(partial_results)
         print(f"subscribers(): Got {len(raw_results)} so far on page {page_num}, more? {more}")
 
@@ -102,14 +102,18 @@ def subscribers(query_text: Optional[str] = None) -> list[models.Subscriber]:
     return subscriber_list
 
 
-def _fragment_of_subscribers(page_num: int, query_text: Optional[str]) -> Tuple[list[dict], bool]:
+def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: Optional[str]) \
+        -> Tuple[list[dict], bool]:
     """
     Returns:
         Tuple of partial_results, more_to_retrieve
     """
-    per_page = 1_000
+    per_page = 500
 
     url = f'{url_base}{urls.subscribers}?page={page_num}&per_page={per_page}'
+
+    if list_id:
+        url += f'&list_id={list_id}'
 
     if query_text:
         url += f"&query={urllib.parse.urlencode({'query': query_text})}"
@@ -167,6 +171,24 @@ def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
 
 
 def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
+
+    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    results: list[dict] = raw_data['data']['results']
+
+    if not results:
+        return None
+
+    return models.Subscriber(**results[0])
+
+
+def create_subscriber() -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 

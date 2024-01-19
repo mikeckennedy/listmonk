@@ -1,5 +1,8 @@
 {
   "base_url": "https://listmonk.talkpython.fm",
   "username": "mkennedy",
-  "password": "4becfa4d-2a8e-4d1c-b2e9-1b39b935c87e"
+  "password": "",
+
+  "test_list_id": 5,
+  "test_list info" : "Python bytes just over 500 for now, uses minor paging."
 }

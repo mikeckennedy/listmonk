@@ -11,7 +11,8 @@ if file.exists():
 
 url = settings.get('base_url') or input("Enter the base URL for your instance: ")
 user = settings.get('username') or input("Enter the username for Umami: ")
-password = settings.get('password') or input("Enter the password for ")
+password = settings.get('password') or input("Enter the password for Umami: ")
+test_list_id = settings.get('test_list_id') or input("Enter the ID for a test list with subscribers: ")
 
 listmonk.set_url_base(url)
 print(f'Base url: {listmonk.get_base_url()}')
@@ -29,9 +30,9 @@ lst = listmonk.list_by_id(6)
 print(f'List by ID: {lst}')
 
 print()
-# subscribers = listmonk.subscribers()
-# print(f'{len(subscribers):,} subscribers returned')
-# print(subscribers[0])
+subscribers = listmonk.subscribers(list_id=test_list_id)
+print(f'{len(subscribers):,} subscribers returned')
+print(subscribers[0])
 # id=208494 created_at=datetime.datetime(2024, 1, 18, 8, 19, 23, 159797, tzinfo=TzInfo(UTC)) updated_
 # at=datetime.datetime(2024, 1, 18, 8, 19, 23, 159797,
 # tzinfo=TzInfo(UTC)) uuid='383621d2-34bc-4e41-beda-7bf5e3d4f04f' email='jduculan@yahoo.com' name='Friend'
