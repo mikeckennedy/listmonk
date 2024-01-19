@@ -9,6 +9,7 @@ from listmonk import models, urls  # noqa: F401
 
 __version__ = '0.1.0'
 
+# region global vars
 url_base: Optional[str] = None
 username: Optional[str] = None
 password: Optional[str] = None
@@ -24,9 +25,17 @@ core_headers: dict[str, Optional[str]] = {
 }
 
 
+# endregion
+
+# region def get_base_url() -> Optional[str]
+
 def get_base_url() -> Optional[str]:
     return url_base
 
+
+# endregion
+
+# region def set_url_base(url: str)
 
 def set_url_base(url: str):
     if not url or not url.strip():
@@ -35,6 +44,10 @@ def set_url_base(url: str):
     global url_base
     url_base = url.strip()
 
+
+# endregion
+
+# region def login(user_name: str, pw: str)
 
 def login(user_name: str, pw: str):
     global core_headers, username, password
@@ -54,6 +67,10 @@ def login(user_name: str, pw: str):
     return True
 
 
+# endregion
+
+# region def lists() -> list[models.MailingList]
+
 def lists() -> list[models.MailingList]:
     global core_headers
     validate_state(url=True, user=True)
@@ -66,6 +83,10 @@ def lists() -> list[models.MailingList]:
     list_of_lists = [models.MailingList(**d) for d in data.get('data', {}).get('results', [])]
     return list_of_lists
 
+
+# endregion
+
+# region def list_by_id(list_id: int) -> Optional[models.MailingList]
 
 def list_by_id(list_id: int) -> Optional[models.MailingList]:
     global core_headers
@@ -81,6 +102,10 @@ def list_by_id(list_id: int) -> Optional[models.MailingList]:
     lst_data = data.get('data')
     return models.MailingList(**lst_data)
 
+
+# endregion
+
+# region def subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None) -> list[models.Subscriber]
 
 def subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None) -> list[models.Subscriber]:
     global core_headers
@@ -101,6 +126,10 @@ def subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None)
 
     return subscriber_list
 
+
+# endregion
+
+# region def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: Optional[str])
 
 def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: Optional[str]) \
         -> Tuple[list[dict], bool]:
@@ -134,6 +163,10 @@ def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: 
     return local_results, more
 
 
+# endregion
+
+# region def subscriber_by_email(email: str) -> Optional[models.Subscriber]
+
 def subscriber_by_email(email: str) -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
@@ -151,6 +184,10 @@ def subscriber_by_email(email: str) -> Optional[models.Subscriber]:
 
     return models.Subscriber(**results[0])
 
+
+# endregion
+
+# region def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]
 
 def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
     global core_headers
@@ -170,6 +207,10 @@ def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
     return models.Subscriber(**results[0])
 
 
+# endregion
+
+# region subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]
+
 def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
@@ -187,6 +228,8 @@ def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
 
     return models.Subscriber(**results[0])
 
+
+# endregion
 
 def create_subscriber() -> Optional[models.Subscriber]:
     global core_headers
@@ -208,6 +251,8 @@ def create_subscriber() -> Optional[models.Subscriber]:
     return None
 
 
+# region def is_healthy() -> bool
+
 def is_healthy() -> bool:
     # noinspection PyBroadException
     try:
@@ -223,9 +268,16 @@ def is_healthy() -> bool:
         return False
 
 
+# endregion
+
+# region def verify_login() -> bool
 def verify_login() -> bool:
     return is_healthy()
 
+
+# endregion
+
+# region def validate_login(user_name, pw)
 
 def validate_login(user_name, pw):
     if not user_name:
@@ -234,9 +286,15 @@ def validate_login(user_name, pw):
         raise Exception("Password cannot be empty")
 
 
+# endregion
+
+# region def validate_state(url=False, user=False)
+
 def validate_state(url=False, user=False):
     if url and not url_base:
         raise Exception("URL Base must be set to proceed.")
 
     if user and core_headers.get('Authorization') is None:
         raise Exception("You must login before proceeding.")
+
+# endregion
