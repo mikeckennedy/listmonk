@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from pprint import pprint
 
 import listmonk
 
@@ -17,8 +16,9 @@ user = settings.get('username') or input("Enter the username for Umami: ")
 password = settings.get('password') or input("Enter the password for ")
 
 listmonk.set_url_base(url)
-status = listmonk.login(user, password)
-print(f"Logged in? {status}")
+
+print(f"Logged in? {listmonk.login(user, password)}")
+print(f"API Healthy?: {listmonk.is_healthy()}")
 print(f"Verify login: {listmonk.verify_login()}")
 print()
 

@@ -1,5 +1,6 @@
 from listmonk import impl
 from listmonk import models  # noqa: F401, E402
+from listmonk.impl import is_healthy  # noqa: F401, E402
 from listmonk.impl import lists, list_by_id  # noqa: F401, E402
 from listmonk.impl import login, verify_login  # noqa: F401, E402
 from listmonk.impl import set_url_base  # noqa: F401, E402
@@ -14,5 +15,6 @@ __all__ = [
     login, verify_login,
     set_url_base,
     lists, list_by_id,
-    subscribers
+    subscribers,
+    is_healthy,
 ]

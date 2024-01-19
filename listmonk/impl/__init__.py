@@ -99,7 +99,7 @@ def subscribers(query_text: Optional[str] = None) -> list[models.Subscriber]:
     return subscriber_list
 
 
-def verify_login() -> bool:
+def is_healthy() -> bool:
     # noinspection PyBroadException
     try:
         validate_state(url=True, user=True)
@@ -112,6 +112,10 @@ def verify_login() -> bool:
         return data.get('data', False)
     except Exception:
         return False
+
+
+def verify_login() -> bool:
+    return is_healthy()
 
 
 def validate_login(user_name, pw):
