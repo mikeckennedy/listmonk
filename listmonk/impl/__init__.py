@@ -160,6 +160,8 @@ def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
         return None
 
     return models.Subscriber(**results[0])
+
+
 def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
