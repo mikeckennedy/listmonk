@@ -110,7 +110,7 @@ def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: 
     """
     per_page = 500
 
-    url = f'{url_base}{urls.subscribers}?page={page_num}&per_page={per_page}'
+    url = f'{url_base}{urls.subscribers}?page={page_num}&per_page={per_page}&order_by=updated_at&order=DESC'
 
     if list_id:
         url += f'&list_id={list_id}'
