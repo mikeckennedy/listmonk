@@ -1,11 +1,9 @@
-import json
 import sys
 import urllib.parse
 from base64 import b64encode
 from typing import Optional
 
 import httpx
-from httpx._types import TimeoutTypes
 
 from listmonk import models, urls  # noqa: F401
 
@@ -16,7 +14,8 @@ username: Optional[str] = None
 password: Optional[str] = None
 
 user_agent = (f'Listmonk-Client v{__version__} / '
-              f'Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')
+              f'Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro} / '
+              f'{sys.platform.capitalize()}')
 
 core_headers: dict[str, Optional[str]] = {
     'Authorization': None,  # Set at login
@@ -79,7 +78,7 @@ def list_by_id(list_id: int) -> Optional[models.MailingList]:
     return models.MailingList(**lst_data)
 
 
-def subscribers(query_text: Optional[str] = None)  -> list[models.Subscriber]:
+def subscribers(query_text: Optional[str] = None) -> list[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 
@@ -90,6 +89,9 @@ def subscribers(query_text: Optional[str] = None)  -> list[models.Subscriber]:
 
     resp = httpx.get(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
+
+    # For paging:
+    # data: {"total":55712,"per_page":10,"page":1, ...}
 
     data = resp.json()
     subscriber_list = [models.Subscriber(**d) for d in data.get('data', {}).get('results', [])]
