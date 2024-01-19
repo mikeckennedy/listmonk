@@ -25,9 +25,20 @@ class MailingList(BaseModel):
 
 class Subscriber(BaseModel):
     id: int
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
-    uuid: str
     email: str
     name: str
-    attribs: dict[str, typing.Any]
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    uuid: typing.Optional[str] = None
+    lists: list[dict] = []
+    attribs: dict[str, typing.Any] = {}
+    status: typing.Optional[str] = None
+
+
+class CreateSubscriberModel(BaseModel):
+    email: str
+    name: str
+    status: str
+    lists: list[int] = []
+    preconfirm_subscriptions: bool
+    attribs: dict = {}

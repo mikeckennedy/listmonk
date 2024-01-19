@@ -231,24 +231,51 @@ def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
 
 # endregion
 
-def create_subscriber() -> Optional[models.Subscriber]:
+def create_subscriber(email: str, name: str, list_ids: list[int],
+                      pre_confirm: bool, attribs: dict) -> models.Subscriber:
     global core_headers
     validate_state(url=True, user=True)
+    email = (email or '').lower().strip()
+    name = (name or '').strip()
+    if not email:
+        raise ValueError("Email is required")
+    if not name:
+        raise ValueError("Name is required")
 
-    # TODO: Create the subscriber I guess ;)
-    # url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
-    #
-    # resp = httpx.get(url, headers=core_headers, follow_redirects=True)
-    # resp.raise_for_status()
-    #
-    # raw_data = resp.json()
-    # results: list[dict] = raw_data['data']['results']
-    #
-    # if not results:
-    #     return None
-    #
-    # return models.Subscriber(**results[0])
-    return None
+    model = models.CreateSubscriberModel(email=email, name=name, status='enabled', lists=list_ids,
+                                         preconfirm_subscriptions=pre_confirm, attribs=attribs)
+
+    url = f"{url_base}{urls.subscribers}"
+    resp = httpx.post(url, json=model.model_dump(), headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    # pprint(raw_data)
+    sub_data = raw_data['data']
+    return models.Subscriber(**sub_data)
+
+
+def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None) -> bool:
+    global core_headers
+    validate_state(url=True, user=True)
+    email = (email or '').lower().strip()
+    if not email and not overriding_subscriber_id:
+        raise ValueError("Email is required")
+
+    subscriber_id = overriding_subscriber_id
+    if not subscriber_id:
+        subscriber = subscriber_by_email(email)
+        if not subscriber:
+            return False
+        subscriber_id = subscriber.id
+
+    url = f"{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}"
+    print(f"DELETE URL: {url}")
+    resp = httpx.delete(url, headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    return raw_data.get('data')  # {'data': True}
 
 
 # region def is_healthy() -> bool

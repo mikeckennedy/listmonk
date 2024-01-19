@@ -51,3 +51,19 @@ print(f'Subscriber by id: {subscriber}')
 subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)
 print(f'Subscriber by uuid: {subscriber}')
 
+deletable_email = 'deletable_user@mkennedy.com'
+
+if listmonk.subscriber_by_email(deletable_email):
+    print(f"Deletable subscriber already exists: {deletable_email}, deleting them!")
+    listmonk.delete_subscriber(deletable_email)
+
+custom_data = {
+    'email': deletable_email,
+    'rating': 1,
+}
+
+new_subscriber = listmonk.create_subscriber(deletable_email, 'Deletable Mkennedy',
+                                            [test_list_id], pre_confirm=True, attribs=custom_data)
+print(f'Created subscriber: {new_subscriber}')
+success = listmonk.delete_subscriber(overriding_subscriber_id=new_subscriber.id)
+print(f"Deleted {deletable_email} successfully? {success}")
