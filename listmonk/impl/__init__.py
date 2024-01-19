@@ -90,7 +90,7 @@ def subscribers(query_text: Optional[str] = None) -> list[models.Subscriber]:
     resp = httpx.get(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
 
-    # For paging:
+    # TODO: For paging:
     # data: {"total":55712,"per_page":10,"page":1, ...}
 
     data = resp.json()
