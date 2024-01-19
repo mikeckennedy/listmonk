@@ -1,8 +1,11 @@
+import json
 import sys
+import urllib.parse
 from base64 import b64encode
 from typing import Optional
 
 import httpx
+from httpx._types import TimeoutTypes
 
 from listmonk import models, urls  # noqa: F401
 
@@ -67,13 +70,31 @@ def list_by_id(list_id: int) -> Optional[models.MailingList]:
 
     url = f'{url_base}{urls.lst}'
     url = url.format(list_id=list_id)
-    print(url)
-    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+
+    resp = httpx.get(url, headers=core_headers, follow_redirects=True, timeout=30)
     resp.raise_for_status()
 
     data = resp.json()
     lst_data = data.get('data')
     return models.MailingList(**lst_data)
+
+
+def subscribers(query_text: Optional[str] = None)  -> list[models.Subscriber]:
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f'{url_base}{urls.subscribers}?page=1&per_page=1000'
+    print(url)
+    if query_text:
+        url += f"&query={urllib.parse.urlencode({'query': query_text})}"
+
+    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    data = resp.json()
+    subscriber_list = [models.Subscriber(**d) for d in data.get('data', {}).get('results', [])]
+
+    return subscriber_list
 
 
 def verify_login() -> bool:

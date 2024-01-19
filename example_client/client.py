@@ -28,6 +28,10 @@ for lst in lists:
 
 lst = listmonk.list_by_id(6)
 print(lst)
+
+subscribers = listmonk.subscribers()
+print(f'{len(subscribers):,} subscribers returned')
+print(subscribers[0])
 # websites = umami.websites()
 # print(f"Found {len(websites):,} websites.")
 # print("First website in list:")

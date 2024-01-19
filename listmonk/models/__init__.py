@@ -1,3 +1,6 @@
+import datetime
+import typing
+
 import pydantic
 from pydantic import BaseModel
 
@@ -8,8 +11,8 @@ class SubscriberStatus(BaseModel):
 
 class MailingList(BaseModel):
     id: int
-    created_at: str
-    updated_at: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
     uuid: str
     name: str
     type: str
@@ -18,3 +21,13 @@ class MailingList(BaseModel):
     description: str
     subscriber_count: int
     subscriber_statuses: SubscriberStatus
+
+
+class Subscriber(BaseModel):
+    id: int
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    uuid: str
+    email: str
+    name: str
+    attribs: dict[str, typing.Any]
