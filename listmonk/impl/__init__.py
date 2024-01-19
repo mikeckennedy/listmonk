@@ -192,18 +192,20 @@ def create_subscriber() -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 
-    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
-
-    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
-    resp.raise_for_status()
-
-    raw_data = resp.json()
-    results: list[dict] = raw_data['data']['results']
-
-    if not results:
-        return None
-
-    return models.Subscriber(**results[0])
+    # TODO: Create the subscriber I guess ;)
+    # url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
+    #
+    # resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+    # resp.raise_for_status()
+    #
+    # raw_data = resp.json()
+    # results: list[dict] = raw_data['data']['results']
+    #
+    # if not results:
+    #     return None
+    #
+    # return models.Subscriber(**results[0])
+    return None
 
 
 def is_healthy() -> bool:
