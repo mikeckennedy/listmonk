@@ -1,7 +1,7 @@
 import sys
 import urllib.parse
 from base64 import b64encode
-from typing import Optional
+from typing import Optional, Tuple
 
 import httpx
 
@@ -82,21 +82,100 @@ def subscribers(query_text: Optional[str] = None) -> list[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 
-    url = f'{url_base}{urls.subscribers}?page=1&per_page=1000'
-    print(url)
+    raw_results = []
+    page_num = 1
+    partial_results, more = _fragment_of_subscribers(page_num, query_text)
+    raw_results.extend(partial_results)
+    print(f"subscribers(): Got {len(raw_results)} so far, more? {more}")
+    while more:
+        page_num += 1
+        partial_results, more = _fragment_of_subscribers(page_num, query_text)
+        raw_results.extend(partial_results)
+        print(f"subscribers(): Got {len(raw_results)} so far on page {page_num}, more? {more}")
+
+    subscriber_list = [models.Subscriber(**d) for d in raw_results]
+
+    return subscriber_list
+
+
+def _fragment_of_subscribers(page_num: int, query_text: Optional[str]) -> Tuple[list[dict], bool]:
+    """
+    Returns:
+        Tuple of partial_results, more_to_retrieve
+    """
+    per_page = 1_000
+
+    url = f'{url_base}{urls.subscribers}?page={page_num}&per_page={per_page}'
+
     if query_text:
         url += f"&query={urllib.parse.urlencode({'query': query_text})}"
 
     resp = httpx.get(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
 
-    # TODO: For paging:
+    # For paging:
     # data: {"total":55712,"per_page":10,"page":1, ...}
+    raw_data = resp.json()
+    data = raw_data['data']
 
-    data = resp.json()
-    subscriber_list = [models.Subscriber(**d) for d in data.get('data', {}).get('results', [])]
+    total = data.get('total', 0)
+    retrieved = per_page * page_num
+    more = retrieved < total
 
-    return subscriber_list
+    local_results = data.get('results', [])
+    return local_results, more
+
+
+def subscriber_by_email(email: str) -> Optional[models.Subscriber]:
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{email}'"
+
+    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    results: list[dict] = raw_data['data']['results']
+
+    if not results:
+        return None
+
+    return models.Subscriber(**results[0])
+
+
+def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.id={subscriber_id}"
+
+    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    results: list[dict] = raw_data['data']['results']
+
+    if not results:
+        return None
+
+    return models.Subscriber(**results[0])
+def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
+
+    resp = httpx.get(url, headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    results: list[dict] = raw_data['data']['results']
+
+    if not results:
+        return None
+
+    return models.Subscriber(**results[0])
 
 
 def is_healthy() -> bool:
