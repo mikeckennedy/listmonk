@@ -24,6 +24,10 @@ core_headers: dict[str, Optional[str]] = {
 }
 
 
+def get_base_url() -> Optional[str]:
+    return url_base
+
+
 def set_url_base(url: str):
     if not url or not url.strip():
         raise Exception("URL must not be empty")
