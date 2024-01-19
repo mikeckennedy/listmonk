@@ -1,63 +1,20 @@
-import typing
-
 import pydantic
+from pydantic import BaseModel
 
 
-class User(pydantic.BaseModel):
-    id: str
-    username: str
-    role: str
-    createdAt: str
-    isAdmin: bool
+class SubscriberStatus(BaseModel):
+    unconfirmed_count: int = pydantic.Field(alias="unconfirmed")
 
 
-class LoginResponse(pydantic.BaseModel):
-    token: str
-    user: User
-
-
-class TokenVerification(pydantic.BaseModel):
-    id: str
-    username: str
-    role: str
-    createdAt: str
-    isAdmin: bool
-
-
-class WebsiteTeam(pydantic.BaseModel):
+class MailingList(BaseModel):
+    id: int
+    created_at: str
+    updated_at: str
+    uuid: str
     name: str
-
-
-class WebsiteUser(pydantic.BaseModel):
-    username: str
-    id: str
-
-
-class TeamSiteDetails(pydantic.BaseModel):
-    id: str
-    teamId: str
-    websiteId: str
-    createdAt: str
-    team: WebsiteTeam
-
-
-class Website(pydantic.BaseModel):
-    id: str
-    name: typing.Optional[str] = None
-    domain: str
-    shareId: typing.Any
-    resetAt: typing.Any
-    userId: str
-    createdAt: str
-    updatedAt: str
-    deletedAt: typing.Any
-    teamWebsite: list[TeamSiteDetails]
-    user: WebsiteUser
-
-
-class WebsitesResponse(pydantic.BaseModel):
-    websites: list[Website] = pydantic.Field(alias="data")
-    count: int
-    page: int
-    pageSize: int
-    orderBy: typing.Optional[str] = None
+    type: str
+    optin: str
+    tags: list[str]
+    description: str
+    subscriber_count: int
+    subscriber_statuses: SubscriberStatus

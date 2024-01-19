@@ -50,7 +50,7 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["umami"]
+packages = ["listmonk"]
 exclude = [
     "/.github",
     "/tests",

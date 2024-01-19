@@ -1,4 +1,3 @@
-login = '/api/auth/login'
-websites = '/api/websites'
-events = '/api/send'
-verify = '/api/auth/verify'
+health = '/api/health'
+lists = '/api/lists'
+lst = '/api/lists/{list_id}'
