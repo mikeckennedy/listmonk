@@ -32,18 +32,17 @@ print(f'List by ID: {lst}')
 print()
 subscribers = listmonk.subscribers(list_id=test_list_id)
 print(f'{len(subscribers):,} subscribers returned')
-print(subscribers[0])
-# id=208494 created_at=datetime.datetime(2024, 1, 18, 8, 19, 23, 159797, tzinfo=TzInfo(UTC)) updated_
-# at=datetime.datetime(2024, 1, 18, 8, 19, 23, 159797,
-# tzinfo=TzInfo(UTC)) uuid='383621d2-34bc-4e41-beda-7bf5e3d4f04f' email='jduculan@yahoo.com' name='Friend'
-# attribs={'email': 'jduculan@yahoo.com',
-# 'first_name': '', 'groups': ['friendsofthetalkpython'], 'last_changed': '', 'last_name': '', 'location':
-# {'country_code': '', 'region': '', 'timezone': ''},
-# 'optin': {'confirm_ip_address': '162.243.162.68', 'confirm_time': '2022-04-26 15:31:42', 'latitude': '',
-# 'longitude': '', 'optin_ip_address': '', 'optin_time':
-# '2022-04-26 15:31:42'}, 'rating': 1}
 
-subscriber = listmonk.subscriber_by_email('jduculan@yahoo.com')
+# id=208495 created_at=datetime.datetime(2024, 1, 19, 20, 29, 8, 477242, tzinfo=TzInfo(UTC))
+# updated_at=datetime.datetime(2024, 1, 19, 20, 29, 8, 477242, tzinfo=TzInfo(UTC))
+# uuid='9a6b65de-c73d-4b9d-8e88-9bdd9439aff2' email='testuser_mkennedy@mkennedy.domain'
+# name='Michael Test Listmonk' attribs={'email': 'testuser_mkennedy@mkennedy.domain', 'first_name': '',
+# 'groups': ['friendsofthetalkpython'], 'last_changed': '', 'last_name': '',
+# 'location': {'country_code': '', 'region': '', 'timezone': ''},
+# 'optin': {'confirm_ip_address': '1.2.3.4', 'confirm_time': '2023-01-19 15:31:42',
+# 'latitude': '', 'longitude': '', 'optin_ip_address': '', 'optin_time': '2022-04-26 15:31:42'}, 'rating': 1}
+
+subscriber = listmonk.subscriber_by_email('testuser_mkennedy@mkennedy.domain')
 print(f'Subscriber by email: {subscriber}')
 
 subscriber = listmonk.subscriber_by_id(subscriber.id)
@@ -51,3 +50,4 @@ print(f'Subscriber by id: {subscriber}')
 
 subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)
 print(f'Subscriber by uuid: {subscriber}')
+
