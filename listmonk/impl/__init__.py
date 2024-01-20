@@ -9,6 +9,8 @@ from listmonk import models, urls  # noqa: F401
 
 __version__ = '0.1.0'
 
+from listmonk.models import SubscriberStatuses
+
 # region global vars
 url_base: Optional[str] = None
 username: Optional[str] = None
@@ -231,6 +233,9 @@ def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
 
 # endregion
 
+# region def create_subscriber(email: str, name: str, list_ids: list[int], pre_confirm: bool, attribs: dict)
+# -> models.Subscriber
+
 def create_subscriber(email: str, name: str, list_ids: list[int],
                       pre_confirm: bool, attribs: dict) -> models.Subscriber:
     global core_headers
@@ -255,6 +260,10 @@ def create_subscriber(email: str, name: str, list_ids: list[int],
     return models.Subscriber(**sub_data)
 
 
+# endregion
+
+# region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None) -> bool
+
 def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None) -> bool:
     global core_headers
     validate_state(url=True, user=True)
@@ -270,12 +279,59 @@ def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Opt
         subscriber_id = subscriber.id
 
     url = f"{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}"
-    print(f"DELETE URL: {url}")
     resp = httpx.delete(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
 
     raw_data = resp.json()
     return raw_data.get('data')  # {'data': True}
+
+
+# endregion
+
+# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int])
+
+def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int] = None, remove_from_lists: set[int] = None,
+                      status: SubscriberStatuses = SubscriberStatuses.enabled) -> models.Subscriber:
+    global core_headers
+    validate_state(url=True, user=True)
+    if subscriber is None or not subscriber.id:
+        raise ValueError("Subscriber is required")
+
+    add_to_lists = add_to_lists or set()
+    remove_from_lists = remove_from_lists or set()
+
+    existing_lists = set([int(lst.get('id')) for lst in subscriber.lists])
+    final_lists = (existing_lists - remove_from_lists)
+    final_lists.update(add_to_lists)
+
+    update_model = models.CreateSubscriberModel(
+        email=subscriber.email,
+        name=subscriber.name,
+        status=status,
+        lists=list(final_lists),
+        preconfirm_subscriptions=True,
+        attribs=subscriber.attribs
+    )
+
+    url = f"{url_base}{urls.subscriber.format(subscriber_id=subscriber.id)}"
+    resp = httpx.put(url, json=update_model.model_dump(), headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    return subscriber_by_id(subscriber.id)
+
+
+# endregion
+
+def disable_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
+    return update_subscriber(subscriber, status=SubscriberStatuses.disabled)
+
+
+def enable_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
+    return update_subscriber(subscriber, status=SubscriberStatuses.enabled)
+
+
+def block_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
+    return update_subscriber(subscriber, status=SubscriberStatuses.blocklisted)
 
 
 # region def is_healthy() -> bool

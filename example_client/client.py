@@ -65,5 +65,26 @@ custom_data = {
 new_subscriber = listmonk.create_subscriber(deletable_email, 'Deletable Mkennedy',
                                             [test_list_id], pre_confirm=True, attribs=custom_data)
 print(f'Created subscriber: {new_subscriber}')
-success = listmonk.delete_subscriber(overriding_subscriber_id=new_subscriber.id)
-print(f"Deleted {deletable_email} successfully? {success}")
+
+new_subscriber.name = 'Mr. ' + new_subscriber.name.upper()
+new_subscriber.attribs['rating'] = 7
+
+updated_subscriber = listmonk.update_subscriber(new_subscriber, {4, 6}, {5})
+print(f'Updated subscriber: {updated_subscriber}')
+# success = listmonk.delete_subscriber(overriding_subscriber_id=new_subscriber.id)
+# print(f"Deleted {deletable_email} successfully? {success}")
+
+
+updated_subscriber.attribs['subscription_note'] = \
+    "They asked to be unsubscribed so we disabled their account, but no block-listing yet."
+
+disabled_subscriber = listmonk.disable_subscriber(updated_subscriber)
+print("Disabled: ", disabled_subscriber)
+
+disabled_subscriber.attribs['blocklist_note'] = \
+    "They needed to be blocked!"
+
+listmonk.block_subscriber(disabled_subscriber)
+
+# re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
+# print("Re-enabled: ", re_enabled_subscriber)

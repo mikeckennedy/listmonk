@@ -1,8 +1,15 @@
 import datetime
+import enum
 import typing
 
 import pydantic
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
+
+
+class SubscriberStatuses(enum.StrEnum):
+    enabled = "enabled"
+    disabled = "disabled"
+    blocklisted = "blocklisted"
 
 
 class SubscriberStatus(BaseModel):
@@ -33,6 +40,11 @@ class Subscriber(BaseModel):
     lists: list[dict] = []
     attribs: dict[str, typing.Any] = {}
     status: typing.Optional[str] = None
+
+    @field_serializer('created_at', 'updated_at')
+    def serialize_date_times(self, fld: datetime, _info):
+        formatted_string = fld.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        return formatted_string
 
 
 class CreateSubscriberModel(BaseModel):
