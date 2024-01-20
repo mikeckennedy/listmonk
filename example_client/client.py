@@ -51,7 +51,7 @@ print(f'Subscriber by id: {subscriber}')
 subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)
 print(f'Subscriber by uuid: {subscriber}')
 
-deletable_email = 'deletable_user@mkennedy.com'
+deletable_email = 'deletable_user@mkennedy.domain'
 
 if listmonk.subscriber_by_email(deletable_email):
     print(f"Deletable subscriber already exists: {deletable_email}, deleting them!")
@@ -69,11 +69,9 @@ print(f'Created subscriber: {new_subscriber}')
 new_subscriber.name = 'Mr. ' + new_subscriber.name.upper()
 new_subscriber.attribs['rating'] = 7
 
+# TODO: Choose list IDs from your instance (can be seen in the UI or from the listing above)
 updated_subscriber = listmonk.update_subscriber(new_subscriber, {4, 6}, {5})
 print(f'Updated subscriber: {updated_subscriber}')
-# success = listmonk.delete_subscriber(overriding_subscriber_id=new_subscriber.id)
-# print(f"Deleted {deletable_email} successfully? {success}")
-
 
 updated_subscriber.attribs['subscription_note'] = \
     "They asked to be unsubscribed so we disabled their account, but no block-listing yet."
@@ -93,7 +91,7 @@ listmonk.delete_subscriber(deletable_email)
 
 to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
 from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'
-template_id = 3  # Default from listmonk setup.
+template_id = 3  # Default TX template ID from listmonk setup.
 template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
 if to_email != 'SUBSCRIBER_EMAIL_ON_YOUR_LIST':
     status = listmonk.send_transactional_email(to_email, template_id, from_email=from_email,
