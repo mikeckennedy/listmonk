@@ -19,6 +19,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 *  👥 Retrieve your **segmentation lists**,  list details, and subscribers.
 * 🙅 Unsubscribe and block users who don't want  to be contacted further.
 * 💥 Completely delete a subscriber from your instance.
+* 📧 Send transactional email with template data (i.e. password reset emails).
 
 ## Installation
 
@@ -28,6 +29,60 @@ Just `pip install listmonk`
 ## Usage
 
 ```python
-...
+
+import listmonk
+listmonk.set_url_base('https://yourlistmonkurl.com')
+
+listmonk.login('sammyz', '1234')
+valid: bool = listmonk.verify_login()
+
+# Is it alive and working?
+up: bool = listmonk.is_healthy()
+
+# Read data about your lists
+lists: list[] = listmonk.lists()
+list: MailingList = listmonk.list(list_id=7)
+
+# Various ways to access existing subscribers
+subscribers: list[] = listmonk.subscribers(list_id=9)
+
+subscriber: Subscriber = listmonk.subscriber_by_email('testuser@some.domain')
+subscriber: Subscriber = listmonk.subscriber_by_id(2001)
+subscriber: Subscriber = listmonk.subscriber_by_uuid('f6668cf0-1c...')
+
+# Create a new subscriber
+new_subscriber = listmonk.create_subscriber(
+           'testuser@some.domain', 'Jane Doe',
+           [1, 7, 9], pre_confirm=True, attribs={...} )
+
+# Change the email, custom rating, and add to lists 4 & 6, remove from 5.
+subscriber.email = 'newemail@some.domain'
+subscriber.attribs['rating'] = 7
+updated_subscriber = listmonk.update_subscriber(new_subscriber, {4, 6}, {5})
+
+# Disable then re-enable a subscriber
+subscriber = listmonk.disable_subscriber(subscriber)
+subscriber = listmonk.enable_subscriber(subscriber)
+
+# Block (unsubscribe) them
+listmonk.block_subscriber(subscriber)
+
+# Fully delete them from your system
+listmonk.delete_subscriber(subscriber.email)
+
+# Send an individual, transacational email (e.g. password reset)
+to_email = 'testuser@some.domain'
+from_email = 'app@your.domain'
+template_id = 3  # *TX* template ID from listmonk
+template_data = {'full_name': 'Test User', 'reset_code': 'abc123'}
+
+status: bool = listmonk.send_transactional_email(
+                     to_email, template_id, from_email=from_email, 
+                     template_data=template_data, content_type='html')
 ```
 
+
+
+## Want to contribute?
+
+PRs are welcome. Enjoy.

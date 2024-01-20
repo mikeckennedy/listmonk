@@ -9,7 +9,7 @@ settings = {}
 if file.exists():
     settings = json.loads(file.read_text())
 
-url = settings.get('base_url') or input("Enter the base URL for your instance: ")
+url = settings.get('base_url', '').strip('/') or input("Enter the base URL for your instance: ")
 user = settings.get('username') or input("Enter the username for Umami: ")
 password = settings.get('password') or input("Enter the password for Umami: ")
 test_list_id = settings.get('test_list_id') or input("Enter the ID for a test list with subscribers: ")
