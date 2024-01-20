@@ -91,8 +91,13 @@ print("Re-enabled: ", re_enabled_subscriber)
 
 listmonk.delete_subscriber(deletable_email)
 
+to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
+from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'
+template_id = 3  # Default from listmonk setup.
 template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
-status = listmonk.send_transactional_email('michael@talkpython.fm', 3,
-                                           from_email='hello@talkpython.fm', template_data=template_data,
-                                           content_type='html')
-print(f"Result of sending a tx email: {status}.")
+if to_email != 'SUBSCRIBER_EMAIL_ON_YOUR_LIST':
+    status = listmonk.send_transactional_email(to_email, template_id, from_email=from_email,
+                                               template_data=template_data, content_type='html')
+    print(f"Result of sending a tx email: {status}.")
+else:
+    print("Set email values to send transactional emails.")
