@@ -334,6 +334,39 @@ def block_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
     return update_subscriber(subscriber, status=SubscriberStatuses.blocklisted)
 
 
+# region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None) -> bool
+
+def send_transactional_email(subscriber_email: str, template_id: int, from_email: str, template_data: dict,
+                             messenger_channel: str = 'email', content_type: str = 'markdown') -> bool:
+    global core_headers
+    validate_state(url=True, user=True)
+    subscriber_email = (subscriber_email or '').lower().strip()
+    if not subscriber_email:
+        raise ValueError("Email is required")
+
+    body_data = {
+        'subscriber_email': subscriber_email,
+        'from_email': from_email,
+        'template_id': template_id,
+        'data': template_data,
+        'messenger': messenger_channel,
+        'content_type': content_type,
+    }
+    try:
+        url = f"{url_base}{urls.send_tx}"
+        resp = httpx.post(url, json=body_data, headers=core_headers, follow_redirects=True)
+        resp.raise_for_status()
+
+        raw_data = resp.json()
+        return raw_data.get('data')  # {'data': True}
+    except Exception as e:
+        # print(e)
+        # print(resp.text)
+        raise
+
+# endregion
+
+
 # region def is_healthy() -> bool
 
 def is_healthy() -> bool:

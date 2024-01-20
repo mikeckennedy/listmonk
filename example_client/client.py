@@ -86,5 +86,13 @@ disabled_subscriber.attribs['blocklist_note'] = \
 
 listmonk.block_subscriber(disabled_subscriber)
 
-# re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
-# print("Re-enabled: ", re_enabled_subscriber)
+re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
+print("Re-enabled: ", re_enabled_subscriber)
+
+listmonk.delete_subscriber(deletable_email)
+
+template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
+status = listmonk.send_transactional_email('michael@talkpython.fm', 3,
+                                           from_email='hello@talkpython.fm', template_data=template_data,
+                                           content_type='html')
+print(f"Result of sending a tx email: {status}.")
