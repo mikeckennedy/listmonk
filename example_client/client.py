@@ -42,7 +42,20 @@ print(f'{len(subscribers):,} subscribers returned')
 # 'optin': {'confirm_ip_address': '1.2.3.4', 'confirm_time': '2023-01-19 15:31:42',
 # 'latitude': '', 'longitude': '', 'optin_ip_address': '', 'optin_time': '2022-04-26 15:31:42'}, 'rating': 1}
 
-subscriber = listmonk.subscriber_by_email('testuser_mkennedy@mkennedy.domain')
+custom_data = {
+    'email': 'newemail@some.domain',
+    'rating': 1,
+}
+
+email = 'deletable_user@mkennedy.domain'
+if subscriber := listmonk.subscriber_by_email(email):
+    listmonk.delete_subscriber(subscriber.email)
+
+subscriber = listmonk.create_subscriber(email, 'Deletable Mkennedy',
+                                        {test_list_id}, pre_confirm=True, attribs=custom_data)
+print(f'Created subscriber: {subscriber}')
+
+subscriber = listmonk.subscriber_by_email(email)
 print(f'Subscriber by email: {subscriber}')
 
 subscriber = listmonk.subscriber_by_id(subscriber.id)
@@ -51,26 +64,11 @@ print(f'Subscriber by id: {subscriber}')
 subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)
 print(f'Subscriber by uuid: {subscriber}')
 
-deletable_email = 'deletable_user@mkennedy.domain'
-
-if listmonk.subscriber_by_email(deletable_email):
-    print(f"Deletable subscriber already exists: {deletable_email}, deleting them!")
-    listmonk.delete_subscriber(deletable_email)
-
-custom_data = {
-    'email': deletable_email,
-    'rating': 1,
-}
-
-new_subscriber = listmonk.create_subscriber(deletable_email, 'Deletable Mkennedy',
-                                            [test_list_id], pre_confirm=True, attribs=custom_data)
-print(f'Created subscriber: {new_subscriber}')
-
-new_subscriber.name = 'Mr. ' + new_subscriber.name.upper()
-new_subscriber.attribs['rating'] = 7
+subscriber.name = 'Mr. ' + subscriber.name.upper()
+subscriber.attribs['rating'] = 7
 
 # TODO: Choose list IDs from your instance (can be seen in the UI or from the listing above)
-updated_subscriber = listmonk.update_subscriber(new_subscriber, {4, 6}, {5})
+updated_subscriber = listmonk.update_subscriber(subscriber, {4, 6}, {5})
 print(f'Updated subscriber: {updated_subscriber}')
 
 updated_subscriber.attribs['subscription_note'] = \
@@ -87,11 +85,11 @@ listmonk.block_subscriber(disabled_subscriber)
 re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
 print("Re-enabled: ", re_enabled_subscriber)
 
-listmonk.delete_subscriber(deletable_email)
+listmonk.delete_subscriber(subscriber.email)
 
 to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
 from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'
-template_id = 3  # Default TX template ID from listmonk setup.
+template_id = 3  # *Transactional* template ID from your listmonk instance.
 template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
 if to_email != 'SUBSCRIBER_EMAIL_ON_YOUR_LIST':
     status = listmonk.send_transactional_email(to_email, template_id, from_email=from_email,

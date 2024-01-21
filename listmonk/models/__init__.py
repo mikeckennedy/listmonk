@@ -46,6 +46,10 @@ class Subscriber(BaseModel):
         formatted_string = fld.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         return formatted_string
 
+    @field_serializer('lists')
+    def serialize_lists(self, fld: list[int] | set[int], _info):
+        return [int(i) for i in fld]
+
 
 class CreateSubscriberModel(BaseModel):
     email: str

@@ -7,7 +7,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 from listmonk.models import SubscriberStatuses
 
@@ -233,10 +233,10 @@ def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
 
 # endregion
 
-# region def create_subscriber(email: str, name: str, list_ids: list[int], pre_confirm: bool, attribs: dict)
+# region def create_subscriber(email: str, name: str, list_ids: set[int], pre_confirm: bool, attribs: dict)
 # -> models.Subscriber
 
-def create_subscriber(email: str, name: str, list_ids: list[int],
+def create_subscriber(email: str, name: str, list_ids: set[int],
                       pre_confirm: bool, attribs: dict) -> models.Subscriber:
     global core_headers
     validate_state(url=True, user=True)
@@ -247,7 +247,7 @@ def create_subscriber(email: str, name: str, list_ids: list[int],
     if not name:
         raise ValueError("Name is required")
 
-    model = models.CreateSubscriberModel(email=email, name=name, status='enabled', lists=list_ids,
+    model = models.CreateSubscriberModel(email=email, name=name, status='enabled', lists=list(list_ids),
                                          preconfirm_subscriptions=pre_confirm, attribs=attribs)
 
     url = f"{url_base}{urls.subscribers}"
@@ -359,10 +359,11 @@ def send_transactional_email(subscriber_email: str, template_id: int, from_email
 
         raw_data = resp.json()
         return raw_data.get('data')  # {'data': True}
-    except Exception as e:
+    except Exception:
         # print(e)
         # print(resp.text)
         raise
+
 
 # endregion
 
