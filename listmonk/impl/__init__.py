@@ -7,7 +7,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 from listmonk.models import SubscriberStatuses
 
@@ -176,7 +176,8 @@ def subscriber_by_email(email: str) -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 
-    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{email}'"
+    encoded_email = email.replace('+', '%2b')
+    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
 
     resp = httpx.get(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
