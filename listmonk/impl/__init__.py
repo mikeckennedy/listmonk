@@ -54,6 +54,9 @@ def set_url_base(url: str):
 def login(user_name: str, pw: str):
     global core_headers, username, password
 
+    if not url_base or not url_base.strip():
+        raise Exception("base_url must be set before you can call login.")
+
     validate_login(user_name, pw)
     username = user_name
     password = pw
