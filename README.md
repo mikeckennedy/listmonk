@@ -86,4 +86,6 @@ status: bool = listmonk.send_transactional_email(
 
 ## Want to contribute?
 
-PRs are welcome. Enjoy.
+PRs are welcome. But please open an issue first to see if the proposed feature fits with the direction of this library.
+
+Enjoy.
