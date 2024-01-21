@@ -41,7 +41,7 @@ up: bool = listmonk.is_healthy()
 
 # Read data about your lists
 lists: list[] = listmonk.lists()
-list: MailingList = listmonk.list_by_id(list_id=7)
+the_list: MailingList = listmonk.list_by_id(list_id=7)
 
 # Various ways to access existing subscribers
 subscribers: list[] = listmonk.subscribers(list_id=9)
@@ -58,7 +58,10 @@ new_subscriber = listmonk.create_subscriber(
 # Change the email, custom rating, and add to lists 4 & 6, remove from 5.
 subscriber.email = 'newemail@some.domain'
 subscriber.attribs['rating'] = 7
-updated_subscriber = listmonk.update_subscriber(subscriber, {4, 6}, {5})
+subscriber = listmonk.update_subscriber(subscriber, {4, 6}, {5})
+
+# Confirm single-opt-ins via the API (e.g. for when you manage that on your platform)
+listmonk.confirm_optin(subscriber.uuid, the_list.uuid)
 
 # Disable then re-enable a subscriber
 subscriber = listmonk.disable_subscriber(subscriber)

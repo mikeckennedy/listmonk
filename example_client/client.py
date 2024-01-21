@@ -26,8 +26,8 @@ lists = listmonk.lists()
 for lst in lists:
     print(f'{lst.name} list: {lst}')
 
-lst = listmonk.list_by_id(6)
-print(f'List by ID: {lst}')
+the_list = listmonk.list_by_id(test_list_id)
+print(f'List by ID: {the_list}')
 
 print()
 subscribers = listmonk.subscribers(list_id=test_list_id)
@@ -68,8 +68,12 @@ subscriber.name = 'Mr. ' + subscriber.name.upper()
 subscriber.attribs['rating'] = 7
 
 # TODO: Choose list IDs from your instance (can be seen in the UI or from the listing above)
-updated_subscriber = listmonk.update_subscriber(subscriber, {4, 6}, {5})
+to_add = {the_list.id}  # Add all the lists here: {1, 7, 11}
+remove_from = set()  # Same as above
+updated_subscriber = listmonk.update_subscriber(subscriber, to_add, remove_from)
 print(f'Updated subscriber: {updated_subscriber}')
+
+print(f'Subscriber confirmed?: {listmonk.confirm_optin(subscriber.uuid, the_list.uuid)}')
 
 updated_subscriber.attribs['subscription_note'] = \
     "They asked to be unsubscribed so we disabled their account, but no block-listing yet."

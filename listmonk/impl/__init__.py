@@ -291,6 +291,47 @@ def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Opt
 
 # endregion
 
+
+# region def confirm_optin(subscriber_uuid: str, list_uuid: str) -> bool
+
+def confirm_optin(subscriber_uuid: str, list_uuid: str) -> bool:
+    global core_headers
+    validate_state(url=True, user=True)
+    if not subscriber_uuid:
+        raise ValueError("subscriber_uuid is required")
+    if not list_uuid:
+        raise ValueError("list_uuid is required")
+
+    #
+    # If there is a better endpoint / API for this, please let me know.
+    # We're reduced to basically submitting the form via web scraping.
+    #
+    payload = {
+        'l': list_uuid,
+        'confirm': 'true',
+
+    }
+    url = f"{url_base}{urls.opt_in.format(subscriber_uuid=subscriber_uuid)}"
+    resp = httpx.post(url, data=payload, follow_redirects=True)
+    resp.raise_for_status()
+
+    success_phrases = {
+        # New conformation was created now.
+        'Subscribed successfully.',
+        'Confirmed',
+
+        # They were already confirmed somehow previously.
+        'no subscriptions to confirm',
+        'No subscriptions'
+    }
+
+    text = resp.text or ''
+    return any(p in text for p in success_phrases)
+
+
+# endregion
+
+
 # region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int])
 
 def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int] = None, remove_from_lists: set[int] = None,

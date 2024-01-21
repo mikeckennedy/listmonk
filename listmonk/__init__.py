@@ -1,5 +1,6 @@
 from listmonk import impl
 from listmonk import models  # noqa: F401, E402
+from listmonk.impl import confirm_optin  # noqa: F401, E402
 from listmonk.impl import create_subscriber, delete_subscriber, update_subscriber  # noqa: F401, E402
 from listmonk.impl import disable_subscriber, enable_subscriber, block_subscriber  # noqa: F401, E402
 from listmonk.impl import is_healthy  # noqa: F401, E402
@@ -22,5 +23,6 @@ __all__ = [
     create_subscriber, delete_subscriber, update_subscriber,
     disable_subscriber, enable_subscriber, block_subscriber,
     send_transactional_email,
+    confirm_optin,
     is_healthy,
 ]
