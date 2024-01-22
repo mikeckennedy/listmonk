@@ -10,9 +10,9 @@ from listmonk.impl import send_transactional_email  # noqa: F401, E402
 from listmonk.impl import set_url_base, get_base_url  # noqa: F401, E402
 from listmonk.impl import subscribers, subscriber_by_email, subscriber_by_id, subscriber_by_uuid  # noqa: F401, E402
 
-__author__ = 'Michael Kennedy <michael@talkpython.fm>'
-__version__ = impl.__version__
-user_agent = impl.user_agent
+__author__: str = 'Michael Kennedy <michael@talkpython.fm>'
+__version__: str = impl.__version__
+user_agent: str = impl.user_agent
 
 __all__ = [
     models,
