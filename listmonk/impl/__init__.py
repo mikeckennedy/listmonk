@@ -7,7 +7,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.1.0'
+__version__ = '0.1.3'
 
 from listmonk.models import SubscriberStatuses
 
@@ -53,6 +53,9 @@ def set_url_base(url: str):
 
 def login(user_name: str, pw: str):
     global core_headers, username, password
+
+    if not url_base or not url_base.strip():
+        raise Exception("base_url must be set before you can call login.")
 
     validate_login(user_name, pw)
     username = user_name
@@ -173,7 +176,8 @@ def subscriber_by_email(email: str) -> Optional[models.Subscriber]:
     global core_headers
     validate_state(url=True, user=True)
 
-    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{email}'"
+    encoded_email = email.replace('+', '%2b')
+    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
 
     resp = httpx.get(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
@@ -233,10 +237,10 @@ def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
 
 # endregion
 
-# region def create_subscriber(email: str, name: str, list_ids: list[int], pre_confirm: bool, attribs: dict)
+# region def create_subscriber(email: str, name: str, list_ids: set[int], pre_confirm: bool, attribs: dict)
 # -> models.Subscriber
 
-def create_subscriber(email: str, name: str, list_ids: list[int],
+def create_subscriber(email: str, name: str, list_ids: set[int],
                       pre_confirm: bool, attribs: dict) -> models.Subscriber:
     global core_headers
     validate_state(url=True, user=True)
@@ -247,7 +251,7 @@ def create_subscriber(email: str, name: str, list_ids: list[int],
     if not name:
         raise ValueError("Name is required")
 
-    model = models.CreateSubscriberModel(email=email, name=name, status='enabled', lists=list_ids,
+    model = models.CreateSubscriberModel(email=email, name=name, status='enabled', lists=list(list_ids),
                                          preconfirm_subscriptions=pre_confirm, attribs=attribs)
 
     url = f"{url_base}{urls.subscribers}"
@@ -287,6 +291,47 @@ def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Opt
 
 
 # endregion
+
+
+# region def confirm_optin(subscriber_uuid: str, list_uuid: str) -> bool
+
+def confirm_optin(subscriber_uuid: str, list_uuid: str) -> bool:
+    global core_headers
+    validate_state(url=True, user=True)
+    if not subscriber_uuid:
+        raise ValueError("subscriber_uuid is required")
+    if not list_uuid:
+        raise ValueError("list_uuid is required")
+
+    #
+    # If there is a better endpoint / API for this, please let me know.
+    # We're reduced to basically submitting the form via web scraping.
+    #
+    payload = {
+        'l': list_uuid,
+        'confirm': 'true',
+
+    }
+    url = f"{url_base}{urls.opt_in.format(subscriber_uuid=subscriber_uuid)}"
+    resp = httpx.post(url, data=payload, follow_redirects=True)
+    resp.raise_for_status()
+
+    success_phrases = {
+        # New conformation was created now.
+        'Subscribed successfully.',
+        'Confirmed',
+
+        # They were already confirmed somehow previously.
+        'no subscriptions to confirm',
+        'No subscriptions'
+    }
+
+    text = resp.text or ''
+    return any(p in text for p in success_phrases)
+
+
+# endregion
+
 
 # region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int])
 
@@ -359,10 +404,11 @@ def send_transactional_email(subscriber_email: str, template_id: int, from_email
 
         raw_data = resp.json()
         return raw_data.get('data')  # {'data': True}
-    except Exception as e:
+    except Exception:
         # print(e)
         # print(resp.text)
         raise
+
 
 # endregion
 
