@@ -280,7 +280,7 @@ def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
 
 def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
     """
-    Retrieves the subscribe by uuid (e.g. "c37786af-e6ab-4260-9b49-740adbecb6ed")
+    Retrieves the subscribe by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
     Args:
         subscriber_uuid: UUID of the subscriber (e.g. "c37786af-e6ab-4260-9b49-740aaaa6ed")
     Returns: The subscribe if found, None otherwise.
@@ -346,7 +346,7 @@ def create_subscriber(email: str, name: str, list_ids: set[int],
 
 def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None) -> bool:
     """
-    Completely delete a subscriber from your system (it's as if they never were there).
+    Completely delete a subscriber from your system (it's as if they were never there).
     If your goal is to unsubscribe them, then use the block_subscriber method.
     Args:
         email: Email of the account to delete.
@@ -382,7 +382,7 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str) -> bool:
     """
     For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in
     via the API. You should only do this when they are actually opting in. If you have your own opt-in
-    form but it's via your code, then this makes sense.
+    form, but it's via your code, then this makes sense.
     Args:
         subscriber_uuid: The Subscriber.uuid value for the subscriber.
         list_uuid: The MailingList.uuid value for the list.
@@ -473,7 +473,7 @@ def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int] = No
 
 def disable_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
     """
-    Set a subscriber's status to disabled.
+    Set a subscriber's status to disable.
     Args:
         subscriber: The subscriber to disable.
     Returns: The updated subscriber object from the server.
@@ -487,7 +487,7 @@ def disable_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
 
 def enable_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
     """
-    Set a subscriber's status to enabled.
+    Set a subscriber's status to enable.
     Args:
         subscriber: The subscriber to enable.
     Returns: The updated subscriber object from the server.
