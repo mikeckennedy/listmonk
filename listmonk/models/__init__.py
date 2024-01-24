@@ -1,6 +1,6 @@
 import datetime
 import enum
-import typing
+from typing import Optional, Any
 
 import pydantic
 from pydantic import BaseModel, field_serializer
@@ -13,21 +13,21 @@ class SubscriberStatuses(enum.StrEnum):
 
 
 class SubscriberStatus(BaseModel):
-    unconfirmed_count: int = pydantic.Field(alias="unconfirmed")
+    unconfirmed_count: Optional[int] = pydantic.Field(alias="unconfirmed", default=None)
 
 
 class MailingList(BaseModel):
     id: int
     created_at: datetime.datetime
-    updated_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
     uuid: str
-    name: str
-    type: str
-    optin: str
+    name: Optional[str] = None
+    type: Optional[str] = None
+    optin: Optional[str] = None
     tags: list[str]
-    description: str
-    subscriber_count: int
-    subscriber_statuses: SubscriberStatus
+    description: Optional[str] = None
+    subscriber_count: Optional[int] = None
+    subscriber_statuses: Optional[SubscriberStatus] = None
 
 
 class Subscriber(BaseModel):
@@ -36,10 +36,10 @@ class Subscriber(BaseModel):
     name: str
     created_at: datetime.datetime
     updated_at: datetime.datetime
-    uuid: typing.Optional[str] = None
+    uuid: Optional[str] = None
     lists: list[dict] = []
-    attribs: dict[str, typing.Any] = {}
-    status: typing.Optional[str] = None
+    attribs: dict[str, Any] = {}
+    status: Optional[str] = None
 
     @field_serializer('created_at', 'updated_at')
     def serialize_date_times(self, fld: datetime, _info):

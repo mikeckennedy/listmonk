@@ -7,7 +7,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 from listmonk.errors import ValidationError, OperationNotAllowedError
 
