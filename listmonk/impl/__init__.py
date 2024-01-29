@@ -7,7 +7,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 from listmonk.errors import ValidationError, OperationNotAllowedError
 
@@ -513,14 +513,15 @@ def block_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
 
 # region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None) -> bool
 
-def send_transactional_email(subscriber_email: str, template_id: int, from_email: str, template_data: dict,
+def send_transactional_email(subscriber_email: str, template_id: int,
+                             from_email: Optional[str] = None, template_data: Optional[dict] = None,
                              messenger_channel: str = 'email', content_type: str = 'markdown') -> bool:
     """
     Send a transactional email through Listmonk to the recipient.
     Args:
         subscriber_email: The email address to send the email to (they must be a subscriber of *some* list on your server).
         template_id: The template ID to use for the email. It must be a "transactional" not campaign template.
-        from_email: The from address for the email. Must be a valid from address on your email sending provider (e.g. SendGrid).
+        from_email: The from address for the email. Can be omitted to use default email at your output provider.
         template_data: A dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.* }}.
         messenger_channel: Default is "email", if you have SMS or some other channel, you can use it here.
         content_type: Email format options include html, markdown, and plain.
@@ -534,12 +535,15 @@ def send_transactional_email(subscriber_email: str, template_id: int, from_email
 
     body_data = {
         'subscriber_email': subscriber_email,
-        'from_email': from_email,
         'template_id': template_id,
-        'data': template_data,
+        'data': template_data or {},
         'messenger': messenger_channel,
         'content_type': content_type,
     }
+    
+    if from_email is not None:
+        body_data['from_email'] = from_email
+
     try:
         url = f"{url_base}{urls.send_tx}"
         resp = httpx.post(url, json=body_data, headers=core_headers, follow_redirects=True)
