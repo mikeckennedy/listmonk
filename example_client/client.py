@@ -92,7 +92,7 @@ print("Re-enabled: ", re_enabled_subscriber)
 listmonk.delete_subscriber(subscriber.email)
 
 to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
-from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'
+from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN' # Optional
 template_id = 3  # *Transactional* template ID from your listmonk instance.
 template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
 if to_email != 'SUBSCRIBER_EMAIL_ON_YOUR_LIST':
