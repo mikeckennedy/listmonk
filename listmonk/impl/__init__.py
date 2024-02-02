@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import sys
 import urllib.parse
 from base64 import b64encode
@@ -9,7 +11,7 @@ from listmonk import models, urls  # noqa: F401
 
 __version__ = '0.1.6'
 
-from listmonk.errors import ValidationError, OperationNotAllowedError
+from listmonk.errors import ValidationError, OperationNotAllowedError, FileNotFoundError
 
 from listmonk.models import SubscriberStatuses
 
@@ -515,7 +517,8 @@ def block_subscriber(subscriber: models.Subscriber) -> models.Subscriber:
 
 def send_transactional_email(subscriber_email: str, template_id: int,
                              from_email: Optional[str] = None, template_data: Optional[dict] = None,
-                             messenger_channel: str = 'email', content_type: str = 'markdown') -> bool:
+                             messenger_channel: str = 'email', content_type: str = 'markdown',
+                             attachments: Optional[list[Path]] = None) -> bool:
     """
     Send a transactional email through Listmonk to the recipient.
     Args:
@@ -525,6 +528,7 @@ def send_transactional_email(subscriber_email: str, template_id: int,
         template_data: A dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.* }}.
         messenger_channel: Default is "email", if you have SMS or some other channel, you can use it here.
         content_type: Email format options include html, markdown, and plain.
+        attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
     Returns: True if the email send was successful, False otherwise. Errors may show up in the logs section of your Listmonk dashboard.
     """
     global core_headers
@@ -532,6 +536,12 @@ def send_transactional_email(subscriber_email: str, template_id: int,
     subscriber_email = (subscriber_email or '').lower().strip()
     if not subscriber_email:
         raise ValueError("Email is required")
+    
+    # Verify attachments
+    if attachments is not None:
+        for attachment in attachments:
+            if not attachment.exists() or not attachment.is_file():
+                raise FileNotFoundError(f"Attachment {attachment} does not exist")
 
     body_data = {
         'subscriber_email': subscriber_email,
@@ -546,7 +556,28 @@ def send_transactional_email(subscriber_email: str, template_id: int,
 
     try:
         url = f"{url_base}{urls.send_tx}"
-        resp = httpx.post(url, json=body_data, headers=core_headers, follow_redirects=True)
+
+        # Depending on existence of attachments, we need to send data in different ways
+        if attachments:
+            # Multiple files can be uploaded in one go as per the advanced httpx docs
+            # https://www.python-httpx.org/advanced/#multipart-file-encoding
+            files = [
+                ('file', (attachment.name, open(attachment, 'rb'))) for attachment in attachments
+            ]
+            # Data has to be sent as form field named data as per the listmonk API docs
+            # https://listmonk.app/docs/apis/transactional/#file-attachments
+            data = {
+                "data": json.dumps(body_data, ensure_ascii=False).encode('utf-8'),
+            }
+            # Need to remove content type header as it should not be JSON and is set 
+            # automatically by httpx including the correct boundary paramter
+            headers = core_headers.copy()
+            headers.pop('Content-Type')
+            
+            resp = httpx.post(url, data=data, files=files, headers=headers, follow_redirects=True)
+        else:
+            resp = httpx.post(url, json=body_data, headers=core_headers, follow_redirects=True)
+
         resp.raise_for_status()
 
         raw_data = resp.json()

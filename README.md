@@ -30,7 +30,9 @@ Just `pip install listmonk`
 
 ```python
 
+import pathlib
 import listmonk
+
 listmonk.set_url_base('https://yourlistmonkurl.com')
 
 listmonk.login('sammy_z', '1234')
@@ -82,6 +84,21 @@ template_data = {'full_name': 'Test User', 'reset_code': 'abc123'}
 status: bool = listmonk.send_transactional_email(
                      to_email, template_id, from_email=from_email, 
                      template_data=template_data, content_type='html')
+
+# You can also add one or multiple attachments with transactional mails
+attachments = [
+    pathlib.Path("/path/to/your/file1.pdf"),
+    pathlib.Path("/path/to/your/file2.png")
+]
+
+status: bool = listmonk.send_transactional_email(
+    to_email,
+    template_id,
+    from_email=from_email,
+    template_data=template_data,
+    attachments=attachments,
+    content_type='html'
+)
 ```
 
 ## Want to contribute?
