@@ -67,6 +67,12 @@ print(f'Subscriber by uuid: {subscriber}')
 subscriber.name = 'Mr. ' + subscriber.name.upper()
 subscriber.attribs['rating'] = 7
 
+query = f"subscribers.email = '{email}'"
+print("Searching for user with query: ", query)
+sub2 = listmonk.subscribers(query)
+print(f'Found {len(sub2):,} users with query.')
+print(f'Found {sub2[0].name} with email {sub2[0].email}')
+
 # TODO: Choose list IDs from your instance (can be seen in the UI or from the listing above)
 to_add = {the_list.id}  # Add all the lists here: {1, 7, 11}
 remove_from = set()  # Same as above
