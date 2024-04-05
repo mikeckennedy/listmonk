@@ -9,7 +9,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 from listmonk.errors import ValidationError, OperationNotAllowedError, FileNotFoundError
 
@@ -201,7 +201,7 @@ def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: 
         url += f'&list_id={list_id}'
 
     if query_text:
-        url += f"&query={urllib.parse.urlencode({'query': query_text})}"
+        url += f"&{urllib.parse.urlencode({'query': query_text})}"
 
     resp = httpx.get(url, headers=core_headers, follow_redirects=True)
     resp.raise_for_status()
