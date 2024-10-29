@@ -1,6 +1,6 @@
 [project]
 name = "listmonk"
-description = "Listmonk Email App API Client for Python"
+description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
@@ -14,11 +14,10 @@ authors = [
     { name = "Michael Kennedy", email = "michael@talkpython.fm" },
 ]
 classifiers = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
@@ -28,7 +27,7 @@ dependencies = [
     "httpx",
     "pydantic",
 ]
-version = "0.1.8"
+version = "0.2.0"
 
 
 [project.urls]

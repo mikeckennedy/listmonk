@@ -37,8 +37,8 @@ class Subscriber(BaseModel):
     created_at: datetime.datetime
     updated_at: datetime.datetime
     uuid: Optional[str] = None
-    lists: list[dict] = []
-    attribs: dict[str, Any] = {}
+    lists: list[dict] = pydantic.Field(default_factory=list)
+    attribs: dict[str, Any] = pydantic.Field(default_factory=dict)
     status: Optional[str] = None
 
     @field_serializer('created_at', 'updated_at')
@@ -55,6 +55,6 @@ class CreateSubscriberModel(BaseModel):
     email: str
     name: str
     status: str
-    lists: list[int] = []
+    lists: list[int] = pydantic.Field(default_factory=list)
     preconfirm_subscriptions: bool
-    attribs: dict = {}
+    attribs: dict = pydantic.Field(default_factory=dict)
