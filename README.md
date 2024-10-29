@@ -1,4 +1,4 @@
-# Listmonk Email App API Client for Python
+# Listmonk Email API Client for Python
 
 Client for the for open source, self-hosted [Listmonk email platform](https://listmonk.app) based on 
 [httpx](https://www.python-httpx.org) and [pydantic](https://pydantic.dev).  
