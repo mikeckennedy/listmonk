@@ -9,7 +9,7 @@ from listmonk.impl import login, verify_login  # noqa: F401, E402
 from listmonk.impl import send_transactional_email  # noqa: F401, E402
 from listmonk.impl import set_url_base, get_base_url  # noqa: F401, E402
 from listmonk.impl import subscribers, subscriber_by_email, subscriber_by_id, subscriber_by_uuid  # noqa: F401, E402
-from listmonk.impl import campaigns  # noqa: F401, E402
+from listmonk.impl import campaigns, campaign_by_id  # noqa: F401, E402
 
 
 __author__: str = 'Michael Kennedy <michael@talkpython.fm>'
@@ -27,5 +27,5 @@ __all__ = [
     send_transactional_email,
     confirm_optin,
     is_healthy,
-    campaigns,
+    campaigns, campaign_by_id,
 ]

@@ -792,3 +792,50 @@ def campaigns() -> list[models.Campaign]:
     return list_of_campaigns
 
 # endregion
+
+# region def list_by_id(list_id: int) -> Optional[models.MailingList]
+
+
+def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
+    """
+    Get the full details of a campaign with the given ID.
+    Args:
+        campaign_id: A campaign to get the details about, e.g. 7.
+    Returns: Campaign object with the full details of a campaign.
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.campaign_id}"
+    url = url.format(campaign_id=campaign_id)
+
+    resp = httpx.get(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+
+    data = resp.json()
+    campaign_data = data.get("data")
+
+    # This seems to be a bug and we'll just work around it until listmonk fixes it
+    # See https://github.com/knadh/listmonk/issues/2117
+    results: list[models.Campaign] = campaign_data.get('results', None)
+    if results:
+        found = False
+        for lst in results:
+            if lst.get('id', 'NO_VALUE') == campaign_id:
+                lst_data = lst
+                found = True
+                break
+
+        if not found:
+            raise Exception(f"Campaign with ID {campaign_id} not found.")
+
+    return models.Campaign(**campaign_data)
+
+
+# endregion
