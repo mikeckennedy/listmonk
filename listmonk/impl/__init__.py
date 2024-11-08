@@ -890,7 +890,7 @@ def create_campaign(
         template_id: int = 0,
         tags: list[str] = [],
         headers: list[dict] = []
-) -> Optional[models.CreateCampaignModel]:
+) -> Optional[models.Campaign]:
     """
 
     Create a new campaign with the given parameters.
@@ -956,6 +956,92 @@ def create_campaign(
     raw_data = resp.json()
     campaign_data = raw_data["data"]
     return models.Campaign(**campaign_data)
+
+
+# endregion
+
+# region def delete_campaign(campaign_id: Optional[str] = None) -> bool
+
+
+def delete_campaign(
+    campaign_id: Optional[int] = None
+) -> bool:
+    """
+    Completely delete a campaign from your system.
+
+    Args:
+        name: name of the campaign to delete.
+        overriding_campaign_id:  Optional ID of the campaign to delete (takes precedence) and is safer!
+    Returns: True if the campaign was successfully deleted, False otherwise.
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+
+    if not campaign_id:
+        raise ValueError("Campaign ID is required")
+
+    campaign = campaign_by_id(campaign_id)
+    if not campaign:
+        return False
+
+    url = f"{url_base}{urls.campaign_id.format(campaign_id=campaign_id)}"
+    resp = httpx.delete(url, auth=(username, password), headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    return raw_data.get("data")  # Looks like {'data': True}
+
+
+# endregion
+
+# region def update_campaign(campaign: models.Campaign)
+
+
+def update_campaign(
+    campaign: models.Campaign,
+) -> models.Campaign:
+    """
+
+    Update the given campaign with the provided campaign information.
+
+    Parameters:
+    - campaign: models.Campaign - The campaign object containing the updated information.
+
+    Returns:
+    - models.Campaign - The updated campaign object from api.
+
+    Raises:
+    - ValueError: If the campaign parameter is None or if the campaign id is not present.
+
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+    if campaign is None or not campaign.id:
+        raise ValueError("Campaign is required")
+
+    update_model = models.UpdateCampaignModel(
+        name=campaign.name,
+        subject=campaign.subject,
+        lists=campaign.lists,
+        from_email=campaign.from_email,
+        type=campaign.type,
+        content_type=campaign.content_type,
+        body=campaign.body,
+        altbody=campaign.altbody,
+        send_at=campaign.send_at,
+        messenger=campaign.messenger,
+        template_id=campaign.template_id,
+        tags=campaign.tags,
+        headers=campaign.headers
+    )
+
+    url = f"{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}"
+    resp = httpx.put(
+        url, auth=(username, password), json=update_model.model_dump(), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    return campaign_by_id(campaign.id)
 
 
 # endregion
