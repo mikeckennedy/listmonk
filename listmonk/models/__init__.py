@@ -1,7 +1,6 @@
 import datetime
 import enum
 from typing import Optional, Any
-from zoneinfo import ZoneInfo
 
 import pydantic
 from pydantic import BaseModel, field_serializer, field_validator
