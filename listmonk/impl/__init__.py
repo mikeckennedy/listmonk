@@ -2,6 +2,7 @@ import json
 import sys
 import urllib.parse
 from base64 import b64encode
+import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -50,6 +51,7 @@ def get_base_url() -> Optional[str]:
 
 # endregion
 
+
 # region def set_url_base(url: str)
 
 
@@ -78,6 +80,7 @@ def set_url_base(url: str):
 
 
 # endregion
+
 
 # region def login(user_name: str, pw: str)
 
@@ -396,7 +399,6 @@ def create_subscriber(
     resp.raise_for_status()
 
     raw_data = resp.json()
-    # pprint(raw_data)
     sub_data = raw_data["data"]
     return models.Subscriber(**sub_data)
 
@@ -770,7 +772,7 @@ def test_user_pw_on_server() -> bool:
         return False
 
 
-# region def lists() -> list[models.MailingList]
+# region def campaigns() -> list[models.Campaign]
 
 def campaigns() -> list[models.Campaign]:
     """
@@ -793,7 +795,7 @@ def campaigns() -> list[models.Campaign]:
 
 # endregion
 
-# region def list_by_id(list_id: int) -> Optional[models.MailingList]
+# region def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]
 
 
 def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
@@ -841,7 +843,7 @@ def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
 # endregion
 
 
-# region def list_by_id(list_id: int) -> Optional[models.MailingList]
+# region def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]
 
 
 def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]:
@@ -868,6 +870,92 @@ def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]
     preview = resp.text
 
     return models.CampaignPreview(preview=preview)
+
+
+# endregion
+
+# region def create_campaign(name: Optional[str] = None, subject: Optional[str] = None, list_ids: set[int] = None, from_email: Optional[str] = None,  type: Optional[str] = None, content_type: Optional[str] = None, body: Optional[str] = None, altbody: Optional[str] = None, send_at: Optional[datetime.datetime] = None, messenger: Optional[str] = None, template_id: int = 0, tags: list[str] = [], headers: list[dict] = [] ) -> Optional[models.CreateCampaignModel]  # noqa: F401, E402
+
+def create_campaign(
+        name: Optional[str] = None,
+        subject: Optional[str] = None,
+        list_ids: set[int] = None,
+        from_email: Optional[str] = None,
+        type: Optional[str] = None,
+        content_type: Optional[str] = None,
+        body: Optional[str] = None,
+        altbody: Optional[str] = None,
+        send_at: Optional[datetime.datetime] = None,
+        messenger: Optional[str] = None,
+        template_id: int = 0,
+        tags: list[str] = [],
+        headers: list[dict] = []
+) -> Optional[models.CreateCampaignModel]:
+    """
+
+    Create a new campaign with the given parameters.
+
+    Parameters:
+        name (Optional[str]): The name of the campaign.
+        subject (Optional[str]): The subject of the campaign.
+        list_ids (set[int]): A set of list IDs to send the campaign to. Defaults to 1.
+        from_email (Optional[str]): 'From' email in campaign emails. Defaults to value from settings if not provided.
+        type (Optional[str]): The type of the campaign: 'regular' or 'optin'.
+        content_type (Optional[str]): The content type of the campaign: 'richtext', 'html', 'markdown', 'plain'.
+        body (Optional[str]): The body of the campaign.
+        altbody (Optional[str]): The alternative text body of the campaign.
+        send_at (Optional[datetime.datetime]): Timestamp to schedule campaign.
+        messenger (Optional[str]): The messenger for the campaign. Usually 'email'
+        template_id (int): The template ID to be used for the campaign. Defaults to 1.
+        tags (list[str]): A list of tags for the campaign.
+        headers (list[dict]): A list of headers for the campaign.
+
+    Returns:
+        CreateCampaignModel: A model representing the created campaign.
+
+    Raises:
+        ValueError: If required parameters (name, subject, from_email) are not provided.
+
+    """
+    validate_state(url=True, user=True)
+    from_email = (from_email or "").lower().strip()
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Name is required")
+    if not subject:
+        raise ValueError("Subject is required")
+    if list_ids is None:  # The Default list is 1.
+        list_ids = [1]
+
+
+    model = models.CreateCampaignModel(
+        name=name,
+        subject=subject,
+        lists=list_ids,
+        from_email=from_email,
+        type=type,
+        content_type=content_type,
+        body=body,
+        altbody=altbody,
+        send_at=send_at,
+        messenger=messenger,
+        template_id=template_id,
+        tags=tags,
+        headers=headers
+    )
+    url = f"{url_base}{urls.campaigns}"
+    resp = httpx.post(
+        url,
+        auth=(username, password),
+        json=model.model_dump(),
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    campaign_data = raw_data["data"]
+    return models.Campaign(**campaign_data)
 
 
 # endregion

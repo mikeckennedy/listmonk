@@ -82,6 +82,31 @@ class Campaign(BaseModel):
     tags: list[str] = pydantic.Field(default_factory=list)
     template_id: int
     messenger: Optional[str] = None
+    headers: list[dict] = pydantic.Field(default_factory=dict)
+
+
+class CreateCampaignModel(BaseModel):
+    name: Optional[str] = None
+    subject: Optional[str] = None
+    lists: list[int] = pydantic.Field(default_factory=list)
+    from_email: Optional[str] = None
+    type: Optional[str] = None
+    content_type: Optional[str] = None
+    body: Optional[str] = None
+    altbody: Optional[str] = None
+    send_at: Optional[datetime.datetime] = None
+    messenger: Optional[str] = None
+    template_id: int
+    tags: list[str] = pydantic.Field(default_factory=list)
+    headers: list[dict] = pydantic.Field(default_factory=dict)
+
+    @field_serializer('send_at')
+    def serialize_date_times(self, fld: datetime, _info):
+        if fld:
+            # formatted_string = fld.astimezone().strftime('%Y-%m-%dT%H:%M:%SZ')
+            formatted_string = fld.astimezone().isoformat()
+            return formatted_string
+        return None
 
 
 class CampaignPreview(BaseModel):
