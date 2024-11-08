@@ -839,3 +839,35 @@ def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
 
 
 # endregion
+
+
+# region def list_by_id(list_id: int) -> Optional[models.MailingList]
+
+
+def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]:
+    """
+    Get the preview of a campaign with the given ID.
+    Args:
+        campaign_id: A campaign to get the details about, e.g. 7.
+    Returns: String preview of the campaign.
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.campaign_id_preview}"
+    url = url.format(campaign_id=campaign_id)
+
+    resp = httpx.get(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    preview = resp.text
+
+    return models.CampaignPreview(preview=preview)
+
+
+# endregion

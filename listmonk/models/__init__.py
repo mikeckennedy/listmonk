@@ -84,3 +84,6 @@ class Campaign(BaseModel):
     messenger: Optional[str] = None
 
 
+class CampaignPreview(BaseModel):
+    preview: Optional[str] = None
+
