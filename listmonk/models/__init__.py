@@ -58,3 +58,29 @@ class CreateSubscriberModel(BaseModel):
     lists: list[int] = pydantic.Field(default_factory=list)
     preconfirm_subscriptions: bool
     attribs: dict = pydantic.Field(default_factory=dict)
+
+
+class Campaign(BaseModel):
+    id: int
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+    views: int
+    clicks: int
+    lists: list[dict] = pydantic.Field(default_factory=list)
+    started_at: Optional[datetime.datetime] = None
+    to_send: int
+    sent: int
+    uuid: str
+    name: Optional[str] = None
+    type: Optional[str] = None
+    subject: Optional[str] = None
+    from_email: Optional[str] = None
+    body: Optional[str] = None
+    send_at: Optional[datetime.datetime] = None
+    status: Optional[str] = None
+    content_type: Optional[str] = None
+    tags: list[str] = pydantic.Field(default_factory=list)
+    template_id: int
+    messenger: Optional[str] = None
+
+

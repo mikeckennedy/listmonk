@@ -768,3 +768,27 @@ def test_user_pw_on_server() -> bool:
         return True
     except Exception:
         return False
+
+
+# region def lists() -> list[models.MailingList]
+
+def campaigns() -> list[models.Campaign]:
+    """
+    Get campaigns on the server.
+    Returns: List of Campaign objects with the full details of that campaign.
+    """
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.campaigns}?page=1&per_page=1000000"
+    resp = httpx.get(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    data = resp.json()
+    list_of_campaigns = [
+        models.Campaign(**d) for d in data.get("data", {}).get("results", [])
+    ]
+    return list_of_campaigns
+
+# endregion
