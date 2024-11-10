@@ -198,7 +198,7 @@ def subscribers(
         query_text: Custom query text such as "subscribers.attribs->>'city' = 'Portland'". See the full documentation at https://listmonk.app/docs/querying-and-segmentation/
         list_id: Pass a list ID and get the subscribers, matching the query, from that list.
     Returns: A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
-    """
+    """ #noqa
     global core_headers
     validate_state(url=True)
 
@@ -618,7 +618,7 @@ def send_transactional_email(
         content_type: Email format options include html, markdown, and plain.
         attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
     Returns: True if the email send was successful, False otherwise. Errors may show up in the logs section of your Listmonk dashboard.
-    """
+    """  # noqa
     global core_headers
     validate_state(url=True)
     subscriber_email = (subscriber_email or "").lower().strip()
