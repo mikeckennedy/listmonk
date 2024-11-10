@@ -5,5 +5,6 @@ class ValidationError(Exception):
 class OperationNotAllowedError(ValidationError):
     pass
 
+
 class FileNotFoundError(ValidationError):
     pass

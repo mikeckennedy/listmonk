@@ -7,13 +7,13 @@ from pydantic import BaseModel, field_serializer, field_validator
 
 
 class SubscriberStatuses(enum.StrEnum):
-    enabled = "enabled"
-    disabled = "disabled"
-    blocklisted = "blocklisted"
+    enabled = 'enabled'
+    disabled = 'disabled'
+    blocklisted = 'blocklisted'
 
 
 class SubscriberStatus(BaseModel):
-    unconfirmed_count: Optional[int] = pydantic.Field(alias="unconfirmed", default=None)
+    unconfirmed_count: Optional[int] = pydantic.Field(alias='unconfirmed', default=None)
 
 
 class MailingList(BaseModel):
@@ -43,7 +43,7 @@ class Subscriber(BaseModel):
 
     @field_serializer('created_at', 'updated_at')
     def serialize_date_times(self, fld: datetime, _info):
-        formatted_string = fld.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        formatted_string = fld.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         return formatted_string
 
     @field_serializer('lists')
@@ -111,7 +111,7 @@ class CreateCampaignModel(BaseModel):
 
 
 class UpdateCampaignModel(CreateCampaignModel):
-    @field_validator("lists", mode="before")
+    @field_validator('lists', mode='before')
     def serialize_lists(cls, fld):
         """
 
@@ -132,10 +132,10 @@ class UpdateCampaignModel(CreateCampaignModel):
         """
         if isinstance(fld, list):
             # Convert each item to integer IDs if it's a dictionary with 'id'
-            return [item["id"] if isinstance(item, dict) else item for item in fld]
+            return [item['id'] if isinstance(item, dict) else item for item in fld]
         return fld
 
-    @field_validator("send_at", mode="before")
+    @field_validator('send_at', mode='before')
     def serialize_send_at(cls, fld: datetime.datetime):
         """
 

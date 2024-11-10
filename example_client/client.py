@@ -9,17 +9,17 @@ settings = {}
 if file.exists():
     settings = json.loads(file.read_text())
 
-url = settings.get('base_url', '').strip('/') or input("Enter the base URL for your instance: ")
-user = settings.get('username') or input("Enter the username for Umami: ")
-password = settings.get('password') or input("Enter the password for Umami: ")
-test_list_id = settings.get('test_list_id') or input("Enter the ID for a test list with subscribers: ")
+url = settings.get('base_url', '').strip('/') or input('Enter the base URL for your instance: ')
+user = settings.get('username') or input('Enter the username for Umami: ')
+password = settings.get('password') or input('Enter the password for Umami: ')
+test_list_id = settings.get('test_list_id') or input('Enter the ID for a test list with subscribers: ')
 
 listmonk.set_url_base(url)
 print(f'Base url: {listmonk.get_base_url()}', flush=True)
 
-print(f"Logged in? {listmonk.login(user, password)}", flush=True)
-print(f"API Healthy?: {listmonk.is_healthy()}", flush=True)
-print(f"Verify login: {listmonk.verify_login()}", flush=True)
+print(f'Logged in? {listmonk.login(user, password)}', flush=True)
+print(f'API Healthy?: {listmonk.is_healthy()}', flush=True)
+print(f'Verify login: {listmonk.verify_login()}', flush=True)
 print()
 
 lists = listmonk.lists()
@@ -51,8 +51,9 @@ email = 'deletable_user@mkennedy.domain'
 if subscriber := listmonk.subscriber_by_email(email):
     listmonk.delete_subscriber(subscriber.email)
 
-subscriber = listmonk.create_subscriber(email, 'Deletable Mkennedy',
-                                        {test_list_id}, pre_confirm=True, attribs=custom_data)
+subscriber = listmonk.create_subscriber(
+    email, 'Deletable Mkennedy', {test_list_id}, pre_confirm=True, attribs=custom_data
+)
 print(f'Created subscriber: {subscriber}', flush=True)
 
 subscriber = listmonk.subscriber_by_email(email)
@@ -68,7 +69,7 @@ subscriber.name = 'Mr. ' + subscriber.name.upper()
 subscriber.attribs['rating'] = 7
 
 query = f"subscribers.email = '{email}'"
-print("Searching for user with query: ", query, flush=True)
+print('Searching for user with query: ', query, flush=True)
 sub2 = listmonk.subscribers(query)
 print(f'Found {len(sub2):,} users with query.', flush=True)
 print(f'Found {sub2[0].name} with email {sub2[0].email}', flush=True)
@@ -82,29 +83,30 @@ print(f'Updated subscriber: {updated_subscriber}', flush=True)
 
 print(f'Subscriber confirmed?: {listmonk.confirm_optin(subscriber.uuid, the_list.uuid)}', flush=True)
 
-updated_subscriber.attribs['subscription_note'] = \
-    "They asked to be unsubscribed so we disabled their account, but no block-listing yet."
+updated_subscriber.attribs['subscription_note'] = (
+    'They asked to be unsubscribed so we disabled their account, but no block-listing yet.'
+)
 
 disabled_subscriber = listmonk.disable_subscriber(updated_subscriber)
-print("Disabled: ", disabled_subscriber, flush=True)
+print('Disabled: ', disabled_subscriber, flush=True)
 
-disabled_subscriber.attribs['blocklist_note'] = \
-    "They needed to be blocked!"
+disabled_subscriber.attribs['blocklist_note'] = 'They needed to be blocked!'
 
 listmonk.block_subscriber(disabled_subscriber)
 
 re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
-print("Re-enabled: ", re_enabled_subscriber, flush=True)
+print('Re-enabled: ', re_enabled_subscriber, flush=True)
 
 listmonk.delete_subscriber(subscriber.email)
 
 to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
-from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN' # Optional
+from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'  # Optional
 template_id = 3  # *Transactional* template ID from your listmonk instance.
 template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
 if to_email != 'SUBSCRIBER_EMAIL_ON_YOUR_LIST':
-    status = listmonk.send_transactional_email(to_email, template_id, from_email=from_email,
-                                               template_data=template_data, content_type='html')
-    print(f"Result of sending a tx email: {status}.", flush=True)
+    status = listmonk.send_transactional_email(
+        to_email, template_id, from_email=from_email, template_data=template_data, content_type='html'
+    )
+    print(f'Result of sending a tx email: {status}.', flush=True)
 else:
-    print("Set email values to send transactional emails.", flush=True)
+    print('Set email values to send transactional emails.', flush=True)
