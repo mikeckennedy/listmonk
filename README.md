@@ -20,6 +20,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 * 🙅 Unsubscribe and block users who don't want  to be contacted further.
 * 💥 Completely delete a subscriber from your instance.
 * 📧 Send transactional email with template data (e.g. password reset emails).
+* 📨 Manage campaign (bulk) emails from the API.
 
 ## Installation
 
@@ -32,6 +33,7 @@ Just `pip install listmonk`
 
 import pathlib
 import listmonk
+from typing import Optional
 
 listmonk.set_url_base('https://yourlistmonkurl.com')
 
@@ -54,8 +56,8 @@ subscriber: Subscriber = listmonk.subscriber_by_uuid('f6668cf0-1c...')
 
 # Create a new subscriber
 new_subscriber = listmonk.create_subscriber(
-           'testuser@some.domain', 'Jane Doe',
-            {1, 7, 9}, pre_confirm=True, attribs={...} )
+    'testuser@some.domain', 'Jane Doe',
+    {1, 7, 9}, pre_confirm=True, attribs={...})
 
 # Change the email, custom rating, and add to lists 4 & 6, remove from 5.
 subscriber.email = 'newemail@some.domain'
@@ -82,8 +84,8 @@ template_id = 3  # *TX* template ID from listmonk
 template_data = {'full_name': 'Test User', 'reset_code': 'abc123'}
 
 status: bool = listmonk.send_transactional_email(
-                     to_email, template_id, from_email=from_email, 
-                     template_data=template_data, content_type='html')
+    to_email, template_id, from_email=from_email,
+    template_data=template_data, content_type='html')
 
 # You can also add one or multiple attachments with transactional mails
 attachments = [
@@ -104,22 +106,22 @@ status: bool = listmonk.send_transactional_email(
 from listmonk.models import Campaign
 from datetime import datetime, timedelta
 
-campaigns: list = listmonk.campaigns()
+campaigns: list[Campaign] = listmonk.campaigns()
 campaign: Campaign = listmonk.campaign_by_id(15)
 
 # Create a new Campaign
 listmonk.create_campaign(name='This is my Great Campaign!',
                          subject="You won't believe this!",
                          body='<p>Some Insane HTML!</p>',  # Optional
-                         altbody='Some Insane TXT!',  # Optional
+                         alt_body='Some Insane TXT!',  # Optional
                          send_at=datetime.now() + timedelta(hours=1),  # Optional
                          template_id=5,  # Optional Defaults to 1
-                         list_ids={1, 2},   # Optional Defaults to 1
+                         list_ids={1, 2},  # Optional Defaults to 1
                          tags=['good', 'better', 'best']  # Optional
-                        )
+                         )
 
 # Update A Campaign
-campaign_to_update: Campaign = listmonk.campaign_by_id(15)
+campaign_to_update: Optional[Campaign] = listmonk.campaign_by_id(15)
 campaign_to_update.name = "More Elegant Name"
 campaign_to_update.subject = "Even More Clickbait!!"
 campaign_to_update.body = "<p>There's a lot more we need to say so we're updating this programmatically!"
@@ -128,7 +130,7 @@ campaign_to_update.altbody = "There's a lot more we need to say so we're updatin
 listmonk.update_campaign(campaign_to_update)
 
 # Delete a Campaign
-campaign_to_delete: Campaign = listmonk.campaign_by_id(15)
+campaign_to_delete: Optional[Campaign] = listmonk.campaign_by_id(15)
 listmonk.delete_campaign(campaign_to_delete)
 
 # Preview Campaign

@@ -1,8 +1,8 @@
+import datetime
 import json
 import sys
+import typing
 import urllib.parse
-from base64 import b64encode
-import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -10,7 +10,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 from listmonk.errors import ValidationError, OperationNotAllowedError, FileNotFoundError
 
@@ -29,8 +29,8 @@ user_agent: str = (
 )
 
 core_headers: dict[str, Optional[str]] = {
-    'Content-Type': 'application/json',
-    'User-Agent': user_agent,
+    "Content-Type": "application/json",
+    "User-Agent": user_agent,
 }
 
 
@@ -121,7 +121,7 @@ def lists() -> list[models.MailingList]:
     Get mailing lists on the server.
     Returns: List of MailingList objects with the full details of that list.
     """
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.lists}?page=1&per_page=1000000"
     resp = httpx.get(
@@ -149,7 +149,7 @@ def list_by_id(list_id: int) -> Optional[models.MailingList]:
     Returns: MailingList object with the full details of a list.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.lst}"
     url = url.format(list_id=list_id)
@@ -166,13 +166,14 @@ def list_by_id(list_id: int) -> Optional[models.MailingList]:
     data = resp.json()
     lst_data = data.get("data")
 
-    # This seems to be a bug and we'll just work around it until listmonk fixes it
+    # This seems to be a bug, and we'll just work around it until listmonk fixes it
     # See https://github.com/knadh/listmonk/issues/2117
-    results: list[models.MailingList] = lst_data.get('results', None)
+    results: list[models.MailingList] = lst_data.get("results", None)
     if results:
         found = False
+        lst: dict[str, typing.Any]
         for lst in results:
-            if lst.get('id', 'NO_VALUE') == list_id:
+            if lst.get("id", "NO_VALUE") == list_id:
                 lst_data = lst
                 found = True
                 break
@@ -199,7 +200,7 @@ def subscribers(
     Returns: A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     raw_results = []
     page_num = 1
@@ -271,7 +272,7 @@ def subscriber_by_email(email: str) -> Optional[models.Subscriber]:
     Returns: The subscribe if found, None otherwise.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     encoded_email = email.replace("+", "%2b")
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
@@ -303,7 +304,7 @@ def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
     Returns: The subscribe if found, None otherwise.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.id={subscriber_id}"
 
@@ -328,13 +329,13 @@ def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]:
 
 def subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]:
     """
-    Retrieves the subscribe by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
+    Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
     Args:
         subscriber_uuid: UUID of the subscriber (e.g. "c37786af-e6ab-4260-9b49-740aaaa6ed")
     Returns: The subscribe if found, None otherwise.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
 
@@ -371,7 +372,7 @@ def create_subscriber(
     Returns: The Subscribe object that was created on the server with ID, UUID, and much more.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
     email = (email or "").lower().strip()
     name = (name or "").strip()
     if not email:
@@ -420,7 +421,7 @@ def delete_subscriber(
     Returns: True if they were successfully deleted, False otherwise.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
     email = (email or "").lower().strip()
     if not email and not overriding_subscriber_id:
         raise ValueError("Email is required")
@@ -433,7 +434,9 @@ def delete_subscriber(
         subscriber_id = subscriber.id
 
     url = f"{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}"
-    resp = httpx.delete(url, auth=(username, password), headers=core_headers, follow_redirects=True)
+    resp = httpx.delete(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
     resp.raise_for_status()
 
     raw_data = resp.json()
@@ -456,7 +459,7 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str) -> bool:
     Returns: True if they were successfully opted in.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
     if not subscriber_uuid:
         raise ValueError("subscriber_uuid is required")
     if not list_uuid:
@@ -512,7 +515,7 @@ def update_subscriber(
     Returns: The updated view of the subscriber object from the server.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
     if subscriber is None or not subscriber.id:
         raise ValueError("Subscriber is required")
 
@@ -534,7 +537,11 @@ def update_subscriber(
 
     url = f"{url_base}{urls.subscriber.format(subscriber_id=subscriber.id)}"
     resp = httpx.put(
-        url, auth=(username, password), json=update_model.model_dump(), headers=core_headers, follow_redirects=True
+        url,
+        auth=(username, password),
+        json=update_model.model_dump(),
+        headers=core_headers,
+        follow_redirects=True,
     )
     resp.raise_for_status()
 
@@ -613,7 +620,7 @@ def send_transactional_email(
     Returns: True if the email send was successful, False otherwise. Errors may show up in the logs section of your Listmonk dashboard.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
     subscriber_email = (subscriber_email or "").lower().strip()
     if not subscriber_email:
         raise ValueError("Email is required")
@@ -652,7 +659,7 @@ def send_transactional_email(
                 "data": json.dumps(body_data, ensure_ascii=False).encode("utf-8"),
             }
             # Need to remove content type header as it should not be JSON and is set
-            # automatically by httpx including the correct boundary paramter
+            # automatically by httpx including the correct boundary parameter
             headers = core_headers.copy()
             headers.pop("Content-Type")
 
@@ -694,7 +701,7 @@ def is_healthy() -> bool:
     """
     # noinspection PyBroadException
     try:
-        validate_state(url=True, user=True)
+        validate_state(url=True)
 
         url = f"{url_base}{urls.health}"
         resp = httpx.get(
@@ -740,7 +747,7 @@ def validate_login(user_name, pw):
 # region def validate_state(url=False, user=False)
 
 
-def validate_state(url=False, user=False):
+def validate_state(url=False):
     """
     Internal use only.
     """
@@ -774,12 +781,13 @@ def test_user_pw_on_server() -> bool:
 
 # region def campaigns() -> list[models.Campaign]
 
+
 def campaigns() -> list[models.Campaign]:
     """
     Get campaigns on the server.
     Returns: List of Campaign objects with the full details of that campaign.
     """
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.campaigns}?page=1&per_page=1000000"
     resp = httpx.get(
@@ -792,6 +800,7 @@ def campaigns() -> list[models.Campaign]:
         models.Campaign(**d) for d in data.get("data", {}).get("results", [])
     ]
     return list_of_campaigns
+
 
 # endregion
 
@@ -806,7 +815,7 @@ def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
     Returns: Campaign object with the full details of a campaign.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.campaign_id}"
     url = url.format(campaign_id=campaign_id)
@@ -822,20 +831,6 @@ def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
 
     data = resp.json()
     campaign_data = data.get("data")
-
-    # This seems to be a bug and we'll just work around it until listmonk fixes it
-    # See https://github.com/knadh/listmonk/issues/2117
-    results: list[models.Campaign] = campaign_data.get('results', None)
-    if results:
-        found = False
-        for lst in results:
-            if lst.get('id', 'NO_VALUE') == campaign_id:
-                lst_data = lst
-                found = True
-                break
-
-        if not found:
-            raise Exception(f"Campaign with ID {campaign_id} not found.")
 
     return models.Campaign(**campaign_data)
 
@@ -854,7 +849,7 @@ def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]
     Returns: String preview of the campaign.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     url = f"{url_base}{urls.campaign_id_preview}"
     url = url.format(campaign_id=campaign_id)
@@ -874,22 +869,23 @@ def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]
 
 # endregion
 
-# region def create_campaign(name: Optional[str] = None, subject: Optional[str] = None, list_ids: set[int] = None, from_email: Optional[str] = None,  type: Optional[str] = None, content_type: Optional[str] = None, body: Optional[str] = None, altbody: Optional[str] = None, send_at: Optional[datetime.datetime] = None, messenger: Optional[str] = None, template_id: int = 0, tags: list[str] = [], headers: list[dict] = [] ) -> Optional[models.CreateCampaignModel]  # noqa: F401, E402
+# region def create_campaign(...) -> Optional[models.CreateCampaignModel]  # noqa: F401, E402
+
 
 def create_campaign(
-        name: Optional[str] = None,
-        subject: Optional[str] = None,
-        list_ids: set[int] = None,
-        from_email: Optional[str] = None,
-        type: Optional[str] = None,
-        content_type: Optional[str] = None,
-        body: Optional[str] = None,
-        altbody: Optional[str] = None,
-        send_at: Optional[datetime.datetime] = None,
-        messenger: Optional[str] = None,
-        template_id: int = 0,
-        tags: list[str] = [],
-        headers: list[dict] = []
+    name: Optional[str] = None,
+    subject: Optional[str] = None,
+    list_ids: set[int] = None,
+    from_email: Optional[str] = None,
+    campaign_type: Optional[str] = None,
+    content_type: Optional[str] = None,
+    body: Optional[str] = None,
+    alt_body: Optional[str] = None,
+    send_at: Optional[datetime.datetime] = None,
+    messenger: Optional[str] = None,
+    template_id: int = 0,
+    tags: list[str] = None,  # noqa
+    headers=None,  # noqa
 ) -> Optional[models.Campaign]:
     """
 
@@ -900,10 +896,10 @@ def create_campaign(
         subject (Optional[str]): The subject of the campaign.
         list_ids (set[int]): A set of list IDs to send the campaign to. Defaults to 1.
         from_email (Optional[str]): 'From' email in campaign emails. Defaults to value from settings if not provided.
-        type (Optional[str]): The type of the campaign: 'regular' or 'optin'.
+        campaign_type (Optional[str]): The type of the campaign: 'regular' or 'optin'.
         content_type (Optional[str]): The content type of the campaign: 'richtext', 'html', 'markdown', 'plain'.
         body (Optional[str]): The body of the campaign.
-        altbody (Optional[str]): The alternative text body of the campaign.
+        alt_body (Optional[str]): The alternative text body of the campaign.
         send_at (Optional[datetime.datetime]): Timestamp to schedule campaign.
         messenger (Optional[str]): The messenger for the campaign. Usually 'email'
         template_id (int): The template ID to be used for the campaign. Defaults to 1.
@@ -917,7 +913,12 @@ def create_campaign(
         ValueError: If required parameters (name, subject, from_email) are not provided.
 
     """
-    validate_state(url=True, user=True)
+    if headers is None:
+        headers = []
+    if tags is None:
+        tags = []
+
+    validate_state(url=True)
     from_email = (from_email or "").lower().strip()
     name = (name or "").strip()
     if not name:
@@ -927,21 +928,20 @@ def create_campaign(
     if list_ids is None:  # The Default list is 1.
         list_ids = [1]
 
-
     model = models.CreateCampaignModel(
         name=name,
         subject=subject,
         lists=list_ids,
         from_email=from_email,
-        type=type,
+        type=campaign_type,
         content_type=content_type,
         body=body,
-        altbody=altbody,
+        altbody=alt_body,
         send_at=send_at,
         messenger=messenger,
         template_id=template_id,
         tags=tags,
-        headers=headers
+        headers=headers,
     )
     url = f"{url_base}{urls.campaigns}"
     resp = httpx.post(
@@ -963,19 +963,16 @@ def create_campaign(
 # region def delete_campaign(campaign_id: Optional[str] = None) -> bool
 
 
-def delete_campaign(
-    campaign_id: Optional[int] = None
-) -> bool:
+def delete_campaign(campaign_id: Optional[int] = None) -> bool:
     """
     Completely delete a campaign from your system.
 
     Args:
-        name: name of the campaign to delete.
-        overriding_campaign_id:  Optional ID of the campaign to delete (takes precedence) and is safer!
+        campaign_id: name of the campaign to delete.
     Returns: True if the campaign was successfully deleted, False otherwise.
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
 
     if not campaign_id:
         raise ValueError("Campaign ID is required")
@@ -985,7 +982,9 @@ def delete_campaign(
         return False
 
     url = f"{url_base}{urls.campaign_id.format(campaign_id=campaign_id)}"
-    resp = httpx.delete(url, auth=(username, password), headers=core_headers, follow_redirects=True)
+    resp = httpx.delete(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
     resp.raise_for_status()
 
     raw_data = resp.json()
@@ -1015,7 +1014,7 @@ def update_campaign(
 
     """
     global core_headers
-    validate_state(url=True, user=True)
+    validate_state(url=True)
     if campaign is None or not campaign.id:
         raise ValueError("Campaign is required")
 
@@ -1032,12 +1031,16 @@ def update_campaign(
         messenger=campaign.messenger,
         template_id=campaign.template_id,
         tags=campaign.tags,
-        headers=campaign.headers
+        headers=campaign.headers,
     )
 
     url = f"{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}"
     resp = httpx.put(
-        url, auth=(username, password), json=update_model.model_dump(), headers=core_headers, follow_redirects=True
+        url,
+        auth=(username, password),
+        json=update_model.model_dump(),
+        headers=core_headers,
+        follow_redirects=True,
     )
     resp.raise_for_status()
 
