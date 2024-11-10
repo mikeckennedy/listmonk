@@ -2,6 +2,7 @@ import json
 import sys
 import urllib.parse
 from base64 import b64encode
+import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -50,6 +51,7 @@ def get_base_url() -> Optional[str]:
 
 # endregion
 
+
 # region def set_url_base(url: str)
 
 
@@ -78,6 +80,7 @@ def set_url_base(url: str):
 
 
 # endregion
+
 
 # region def login(user_name: str, pw: str)
 
@@ -396,7 +399,6 @@ def create_subscriber(
     resp.raise_for_status()
 
     raw_data = resp.json()
-    # pprint(raw_data)
     sub_data = raw_data["data"]
     return models.Subscriber(**sub_data)
 
@@ -768,3 +770,278 @@ def test_user_pw_on_server() -> bool:
         return True
     except Exception:
         return False
+
+
+# region def campaigns() -> list[models.Campaign]
+
+def campaigns() -> list[models.Campaign]:
+    """
+    Get campaigns on the server.
+    Returns: List of Campaign objects with the full details of that campaign.
+    """
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.campaigns}?page=1&per_page=1000000"
+    resp = httpx.get(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    data = resp.json()
+    list_of_campaigns = [
+        models.Campaign(**d) for d in data.get("data", {}).get("results", [])
+    ]
+    return list_of_campaigns
+
+# endregion
+
+# region def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]
+
+
+def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]:
+    """
+    Get the full details of a campaign with the given ID.
+    Args:
+        campaign_id: A campaign to get the details about, e.g. 7.
+    Returns: Campaign object with the full details of a campaign.
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.campaign_id}"
+    url = url.format(campaign_id=campaign_id)
+
+    resp = httpx.get(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+
+    data = resp.json()
+    campaign_data = data.get("data")
+
+    # This seems to be a bug and we'll just work around it until listmonk fixes it
+    # See https://github.com/knadh/listmonk/issues/2117
+    results: list[models.Campaign] = campaign_data.get('results', None)
+    if results:
+        found = False
+        for lst in results:
+            if lst.get('id', 'NO_VALUE') == campaign_id:
+                lst_data = lst
+                found = True
+                break
+
+        if not found:
+            raise Exception(f"Campaign with ID {campaign_id} not found.")
+
+    return models.Campaign(**campaign_data)
+
+
+# endregion
+
+
+# region def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]
+
+
+def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]:
+    """
+    Get the preview of a campaign with the given ID.
+    Args:
+        campaign_id: A campaign to get the details about, e.g. 7.
+    Returns: String preview of the campaign.
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+
+    url = f"{url_base}{urls.campaign_id_preview}"
+    url = url.format(campaign_id=campaign_id)
+
+    resp = httpx.get(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    preview = resp.text
+
+    return models.CampaignPreview(preview=preview)
+
+
+# endregion
+
+# region def create_campaign(name: Optional[str] = None, subject: Optional[str] = None, list_ids: set[int] = None, from_email: Optional[str] = None,  type: Optional[str] = None, content_type: Optional[str] = None, body: Optional[str] = None, altbody: Optional[str] = None, send_at: Optional[datetime.datetime] = None, messenger: Optional[str] = None, template_id: int = 0, tags: list[str] = [], headers: list[dict] = [] ) -> Optional[models.CreateCampaignModel]  # noqa: F401, E402
+
+def create_campaign(
+        name: Optional[str] = None,
+        subject: Optional[str] = None,
+        list_ids: set[int] = None,
+        from_email: Optional[str] = None,
+        type: Optional[str] = None,
+        content_type: Optional[str] = None,
+        body: Optional[str] = None,
+        altbody: Optional[str] = None,
+        send_at: Optional[datetime.datetime] = None,
+        messenger: Optional[str] = None,
+        template_id: int = 0,
+        tags: list[str] = [],
+        headers: list[dict] = []
+) -> Optional[models.Campaign]:
+    """
+
+    Create a new campaign with the given parameters.
+
+    Parameters:
+        name (Optional[str]): The name of the campaign.
+        subject (Optional[str]): The subject of the campaign.
+        list_ids (set[int]): A set of list IDs to send the campaign to. Defaults to 1.
+        from_email (Optional[str]): 'From' email in campaign emails. Defaults to value from settings if not provided.
+        type (Optional[str]): The type of the campaign: 'regular' or 'optin'.
+        content_type (Optional[str]): The content type of the campaign: 'richtext', 'html', 'markdown', 'plain'.
+        body (Optional[str]): The body of the campaign.
+        altbody (Optional[str]): The alternative text body of the campaign.
+        send_at (Optional[datetime.datetime]): Timestamp to schedule campaign.
+        messenger (Optional[str]): The messenger for the campaign. Usually 'email'
+        template_id (int): The template ID to be used for the campaign. Defaults to 1.
+        tags (list[str]): A list of tags for the campaign.
+        headers (list[dict]): A list of headers for the campaign.
+
+    Returns:
+        CreateCampaignModel: A model representing the created campaign.
+
+    Raises:
+        ValueError: If required parameters (name, subject, from_email) are not provided.
+
+    """
+    validate_state(url=True, user=True)
+    from_email = (from_email or "").lower().strip()
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Name is required")
+    if not subject:
+        raise ValueError("Subject is required")
+    if list_ids is None:  # The Default list is 1.
+        list_ids = [1]
+
+
+    model = models.CreateCampaignModel(
+        name=name,
+        subject=subject,
+        lists=list_ids,
+        from_email=from_email,
+        type=type,
+        content_type=content_type,
+        body=body,
+        altbody=altbody,
+        send_at=send_at,
+        messenger=messenger,
+        template_id=template_id,
+        tags=tags,
+        headers=headers
+    )
+    url = f"{url_base}{urls.campaigns}"
+    resp = httpx.post(
+        url,
+        auth=(username, password),
+        json=model.model_dump(),
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    campaign_data = raw_data["data"]
+    return models.Campaign(**campaign_data)
+
+
+# endregion
+
+# region def delete_campaign(campaign_id: Optional[str] = None) -> bool
+
+
+def delete_campaign(
+    campaign_id: Optional[int] = None
+) -> bool:
+    """
+    Completely delete a campaign from your system.
+
+    Args:
+        name: name of the campaign to delete.
+        overriding_campaign_id:  Optional ID of the campaign to delete (takes precedence) and is safer!
+    Returns: True if the campaign was successfully deleted, False otherwise.
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+
+    if not campaign_id:
+        raise ValueError("Campaign ID is required")
+
+    campaign = campaign_by_id(campaign_id)
+    if not campaign:
+        return False
+
+    url = f"{url_base}{urls.campaign_id.format(campaign_id=campaign_id)}"
+    resp = httpx.delete(url, auth=(username, password), headers=core_headers, follow_redirects=True)
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    return raw_data.get("data")  # Looks like {'data': True}
+
+
+# endregion
+
+# region def update_campaign(campaign: models.Campaign)
+
+
+def update_campaign(
+    campaign: models.Campaign,
+) -> models.Campaign:
+    """
+
+    Update the given campaign with the provided campaign information.
+
+    Parameters:
+    - campaign: models.Campaign - The campaign object containing the updated information.
+
+    Returns:
+    - models.Campaign - The updated campaign object from api.
+
+    Raises:
+    - ValueError: If the campaign parameter is None or if the campaign id is not present.
+
+    """
+    global core_headers
+    validate_state(url=True, user=True)
+    if campaign is None or not campaign.id:
+        raise ValueError("Campaign is required")
+
+    update_model = models.UpdateCampaignModel(
+        name=campaign.name,
+        subject=campaign.subject,
+        lists=campaign.lists,
+        from_email=campaign.from_email,
+        type=campaign.type,
+        content_type=campaign.content_type,
+        body=campaign.body,
+        altbody=campaign.altbody,
+        send_at=campaign.send_at,
+        messenger=campaign.messenger,
+        template_id=campaign.template_id,
+        tags=campaign.tags,
+        headers=campaign.headers
+    )
+
+    url = f"{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}"
+    resp = httpx.put(
+        url, auth=(username, password), json=update_model.model_dump(), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    return campaign_by_id(campaign.id)
+
+
+# endregion

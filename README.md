@@ -99,6 +99,42 @@ status: bool = listmonk.send_transactional_email(
     attachments=attachments,
     content_type='html'
 )
+
+# Access existing campaigns
+from listmonk.models import Campaign
+from datetime import datetime, timedelta
+
+campaigns: list = listmonk.campaigns()
+campaign: Campaign = listmonk.campaign_by_id(15)
+
+# Create a new Campaign
+listmonk.create_campaign(name='This is my Great Campaign!',
+                         subject="You won't believe this!",
+                         body='<p>Some Insane HTML!</p>',  # Optional
+                         altbody='Some Insane TXT!',  # Optional
+                         send_at=datetime.now() + timedelta(hours=1),  # Optional
+                         template_id=5,  # Optional Defaults to 1
+                         list_ids={1, 2},   # Optional Defaults to 1
+                         tags=['good', 'better', 'best']  # Optional
+                        )
+
+# Update A Campaign
+campaign_to_update: Campaign = listmonk.campaign_by_id(15)
+campaign_to_update.name = "More Elegant Name"
+campaign_to_update.subject = "Even More Clickbait!!"
+campaign_to_update.body = "<p>There's a lot more we need to say so we're updating this programmatically!"
+campaign_to_update.altbody = "There's a lot more we need to say so we're updating this programmatically!"
+
+listmonk.update_campaign(campaign_to_update)
+
+# Delete a Campaign
+campaign_to_delete: Campaign = listmonk.campaign_by_id(15)
+listmonk.delete_campaign(campaign_to_delete)
+
+# Preview Campaign
+listmonk.campaign_preview_by_id(15)
+
+
 ```
 
 ## Want to contribute?
