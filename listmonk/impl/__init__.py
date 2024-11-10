@@ -883,7 +883,7 @@ def create_campaign(
     alt_body: Optional[str] = None,
     send_at: Optional[datetime.datetime] = None,
     messenger: Optional[str] = None,
-    template_id: int = 0,
+    template_id: int = None,
     tags: list[str] = None,  # noqa
     headers=None,  # noqa
 ) -> Optional[models.Campaign]:

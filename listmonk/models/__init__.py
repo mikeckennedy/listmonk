@@ -97,7 +97,7 @@ class CreateCampaignModel(BaseModel):
     altbody: Optional[str] = None
     send_at: Optional[datetime.datetime] = None
     messenger: Optional[str] = None
-    template_id: int
+    template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
     headers: list[dict] = pydantic.Field(default_factory=dict)
 
