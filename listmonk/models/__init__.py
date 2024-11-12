@@ -110,29 +110,6 @@ class CreateCampaignModel(BaseModel):
 
 
 class UpdateCampaignModel(CreateCampaignModel):
-    @field_validator('lists', mode='before')
-    def serialize_lists(cls, fld):
-        """
-
-        Since we are passing a campaign object to our update method the campaign.lists is a dict and needs to be
-        converted to a list of int's
-
-        This method serializes a list by converting each item to integer IDs
-        if the item is a dictionary with a key 'id'.
-
-        Parameters:
-            cls: The class where the method is defined.
-            fld: The list to be serialized.
-
-        Return:
-            A new list with items converted to integer IDs if they are dictionaries with a key 'id',
-            otherwise returns the original list.
-
-        """
-        if isinstance(fld, list):
-            # Convert each item to integer IDs if it's a dictionary with 'id'
-            return [item['id'] if isinstance(item, dict) else item for item in fld]
-        return fld
 
     @field_validator('send_at', mode='before')
     def serialize_send_at(cls, fld: datetime.datetime):

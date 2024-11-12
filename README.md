@@ -126,6 +126,7 @@ campaign_to_update.name = "More Elegant Name"
 campaign_to_update.subject = "Even More Clickbait!!"
 campaign_to_update.body = "<p>There's a lot more we need to say so we're updating this programmatically!"
 campaign_to_update.altbody = "There's a lot more we need to say so we're updating this programmatically!"
+campaign_to_update.lists = [3, 4]
 
 listmonk.update_campaign(campaign_to_update)
 
