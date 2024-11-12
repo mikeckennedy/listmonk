@@ -1018,10 +1018,12 @@ def update_campaign(
     if campaign is None or not campaign.id:
         raise ValueError("Campaign is required")
 
+    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists]
+
     update_model = models.UpdateCampaignModel(
         name=campaign.name,
         subject=campaign.subject,
-        lists=campaign.lists,
+        lists=update_lists,
         from_email=campaign.from_email,
         type=campaign.type,
         content_type=campaign.content_type,
