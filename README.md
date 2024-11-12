@@ -135,9 +135,31 @@ campaign_to_delete: Optional[Campaign] = listmonk.campaign_by_id(15)
 listmonk.delete_campaign(campaign_to_delete)
 
 # Preview Campaign
-listmonk.campaign_preview_by_id(15)
+preview_html = listmonk.campaign_preview_by_id(15)
+print(preview_html)
 
+# Access existing Templates
+from listmonk.models import Template
+templates: list[Template] = listmonk.templates()
+template: Template = listmonk.template_by_id(2)
 
+# Create a new Template
+new_template = listmonk.create_template(
+    name='NEW TEMPLATE',
+    body='<p>Some Insane HTML! {{ template "content" . }} </p>',
+    type='campaign',
+)
+
+# Update A Template
+new_template.name = "Bob's Great Template"
+listmonk.update_template(new_template)
+
+# Delete a Template
+listmonk.delete_template(3)
+
+# Preview Template
+preview_html = listmonk.template_preview_by_id(3)
+print(preview_html)
 ```
 
 ## Want to contribute?
