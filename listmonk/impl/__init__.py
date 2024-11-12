@@ -198,7 +198,7 @@ def subscribers(
         query_text: Custom query text such as "subscribers.attribs->>'city' = 'Portland'". See the full documentation at https://listmonk.app/docs/querying-and-segmentation/
         list_id: Pass a list ID and get the subscribers, matching the query, from that list.
     Returns: A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
-    """ #noqa
+    """ # noqa
     global core_headers
     validate_state(url=True)
 
@@ -883,7 +883,7 @@ def create_campaign(
     alt_body: Optional[str] = None,
     send_at: Optional[datetime.datetime] = None,
     messenger: Optional[str] = None,
-    template_id: int = None,
+    template_id: Optional[int] = None,
     tags: list[str] = None,  # noqa
     headers=None,  # noqa
 ) -> Optional[models.Campaign]:
