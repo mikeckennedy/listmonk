@@ -97,14 +97,13 @@ class CreateCampaignModel(BaseModel):
     altbody: Optional[str] = None
     send_at: Optional[datetime.datetime] = None
     messenger: Optional[str] = None
-    template_id: int
+    template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
     headers: list[dict] = pydantic.Field(default_factory=dict)
 
     @field_serializer('send_at')
     def serialize_date_times(self, fld: datetime, _info):
         if fld:
-            # formatted_string = fld.astimezone().strftime('%Y-%m-%dT%H:%M:%SZ')
             formatted_string = fld.astimezone().isoformat()
             return formatted_string
         return None
@@ -158,3 +157,25 @@ class UpdateCampaignModel(CreateCampaignModel):
 
 class CampaignPreview(BaseModel):
     preview: Optional[str] = None
+
+
+class Template(BaseModel):
+    id: int
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+    name: Optional[str] = None
+    body: Optional[str] = None
+    type: Optional[str] = None
+    is_default: Optional[bool] = None
+
+
+class CreateTemplateModel(BaseModel):
+    name: Optional[str] = None
+    body: Optional[str] = None
+    type: Optional[str] = None
+    is_default: Optional[bool] = False
+
+
+class TemplatePreview(BaseModel):
+    preview: Optional[str] = None
+

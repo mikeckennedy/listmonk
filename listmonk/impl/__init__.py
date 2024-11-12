@@ -883,7 +883,7 @@ def create_campaign(
     alt_body: Optional[str] = None,
     send_at: Optional[datetime.datetime] = None,
     messenger: Optional[str] = None,
-    template_id: int = 0,
+    template_id: int = None,
     tags: list[str] = None,  # noqa
     headers=None,  # noqa
 ) -> Optional[models.Campaign]:
@@ -1045,6 +1045,273 @@ def update_campaign(
     resp.raise_for_status()
 
     return campaign_by_id(campaign.id)
+
+
+# endregion
+
+
+# region def templates() -> list[models.Template]
+
+
+def templates() -> list[models.Template]:
+    """
+    This function retrieves a list of all templates available in the system.
+
+    Returns:
+        list of models.Template objects representing the templates available in the system.
+    """
+    validate_state(url=True)
+
+    url = f"{url_base}{urls.templates}?page=1&per_page=1000000"
+    resp = httpx.get(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    data = resp.json()
+    list_of_templates = [
+        models.Template(**d) for d in data.get("data", [])
+    ]
+    return list_of_templates
+
+
+# endregion
+
+
+# region def create_template(...) -> Optional[models.CreateTemplateModel]  # noqa: F401, E402
+
+
+def create_template(
+        name: Optional[str] = None,
+        body: Optional[str] = None,
+        type: Optional[str] = None,
+        is_default: Optional[bool] = None,
+) -> Optional[models.Template]:
+    """
+    Create a template with the specified details.
+
+    Parameters:
+        name (Optional[str]): The name of the template.
+        body (Optional[str]): The body content of the template.
+        type (Optional[str]): The type of the template.
+        is_default (Optional[bool]): Indicates if the template is the default one.
+
+    Returns:
+        Optional[models.Template]: An instance of models.Template representing the created template.
+    """
+    validate_state(url=True)
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Name is required")
+    if not body:
+        raise ValueError("Body is required")
+    if """{{ template "content" . }}""" not in body:
+        raise ValueError("""The placeholder {{ template "content" . }} should appear exactly once in the template.""")
+
+    model = models.CreateTemplateModel(
+        name=name,
+        body=body,
+        type=type,
+        is_default=is_default,
+    )
+
+    url = f"{url_base}{urls.templates}"
+    resp = httpx.post(
+        url,
+        auth=(username, password),
+        json=model.model_dump(),
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    template_data = raw_data["data"]
+    return models.Template(**template_data)
+
+
+# endregion
+
+
+# region def template_by_id(template_id: int) -> Optional[models.template]
+
+
+def template_by_id(template_id: int) -> Optional[models.Template]:
+    """
+    Retrieve a template by its ID.
+
+    Parameters:
+    template_id (int): The ID of the template to retrieve.
+
+    Returns:
+    Optional[models.Template]: The template object retrieved based on the ID provided.
+    """
+    global core_headers
+    validate_state(url=True)
+
+    url = f"{url_base}{urls.template_id}"
+    url = url.format(template_id=template_id)
+
+    resp = httpx.get(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+
+    data = resp.json()
+    template_data = data.get("data")
+
+    return models.Template(**template_data)
+
+
+# endregion
+
+# region def template_preview_by_id(template_id: int) -> Optional[models.TemplatePreview]
+
+
+def template_preview_by_id(template_id: int) -> Optional[models.TemplatePreview]:
+    """
+    Get the preview of a template with the given ID.
+    Args:
+        template_id: A campaign to get the details about, e.g. 7.
+    Returns: String preview of the template with lorem ipsum.
+    """
+    global core_headers
+    validate_state(url=True)
+
+    url = f"{url_base}{urls.template_id_preview}"
+    url = url.format(template_id=template_id)
+
+    resp = httpx.get(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    preview = resp.text
+
+    return models.TemplatePreview(preview=preview)
+
+
+# endregion
+
+
+# region def delete_template(template_id: Optional[str] = None) -> bool
+
+
+def delete_template(template_id: Optional[int] = None) -> bool:
+    """
+    Completely delete a template from your system.
+
+    Args:
+        template_id: name of the template to delete.
+    Returns: True if the template was successfully deleted, False otherwise.
+    """
+    global core_headers
+    validate_state(url=True)
+
+    if not template_id:
+        raise ValueError("Template ID is required")
+
+    template = template_by_id(template_id)
+    if not template:
+        return False
+
+    url = f"{url_base}{urls.template_id.format(template_id=template_id)}"
+    resp = httpx.delete(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    return raw_data.get("data")  # Looks like {'data': True}
+
+
+# endregion
+
+
+# region def update_template(template: models.Template)
+
+
+def update_template(
+    template: models.Template,
+) -> models.Template:
+    """
+
+        Update a template in the system.
+
+        Parameters:
+            template: models.Template - the template object to be updated
+
+        Returns:
+            models.Template - the updated template object after the update operation
+
+    """
+    global core_headers
+    validate_state(url=True)
+    if template is None or not template.id:
+        raise ValueError("Template is required")
+
+    update_model = models.CreateTemplateModel(
+        name=template.name,
+        body=template.body,
+        type=template.type,
+    )
+
+    url = f"{url_base}{urls.template_id.format(template_id=template.id)}"
+    resp = httpx.put(
+        url,
+        auth=(username, password),
+        json=update_model.model_dump(),
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    resp.raise_for_status()
+
+    return template_by_id(template.id)
+
+
+# endregion
+
+
+# region def set_default_template(template_id: Optional[str] = None) -> bool
+
+
+def set_default_template(template_id: Optional[int] = None) -> bool:
+    """
+
+    Set the given template ID as the default template.
+
+    Parameters:
+        template_id (Optional[int]): The ID of the template to set as default. If not provided, a ValueError is raised.
+
+    Returns:
+        bool: True if the default template was set successfully, False otherwise.
+
+    """
+    global core_headers
+    validate_state(url=True)
+
+    if not template_id:
+        raise ValueError("Template ID is required")
+
+    template = template_by_id(template_id)
+    if not template:
+        return False
+
+    url = f"{url_base}{urls.template_id_default.format(template_id=template_id)}"
+    resp = httpx.put(
+        url, auth=(username, password), headers=core_headers, follow_redirects=True
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    return raw_data.get("data")  # Looks like {'data': True}
 
 
 # endregion
