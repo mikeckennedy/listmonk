@@ -3,7 +3,7 @@ name = "listmonk"
 description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = [
     "email",
     "newsletters",
