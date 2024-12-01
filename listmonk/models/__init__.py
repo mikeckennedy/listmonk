@@ -1,12 +1,12 @@
 import datetime
-import enum
 from typing import Optional, Any
 
 import pydantic
 from pydantic import BaseModel, field_serializer, field_validator
+from strenum import LowercaseStrEnum
 
 
-class SubscriberStatuses(enum.StrEnum):
+class SubscriberStatuses(LowercaseStrEnum):
     enabled = 'enabled'
     disabled = 'disabled'
     blocklisted = 'blocklisted'

@@ -3,7 +3,7 @@ name = "listmonk"
 description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = [
     "email",
     "newsletters",
@@ -27,7 +27,7 @@ dependencies = [
     "httpx",
     "pydantic",
 ]
-version = "0.3.0"
+version = "0.3.1"
 
 
 [project.urls]
