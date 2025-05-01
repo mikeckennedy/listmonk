@@ -136,6 +136,102 @@ def lists() -> list[models.MailingList]:
     return list_of_lists
 
 
+def create_list(
+    list_name: str,
+    list_type: str = "public",
+    optin: str = "single",
+    tags: Optional[list[str]] = None,
+    description: Optional[str] = None,
+) -> models.MailingList:
+    """
+    Create a new mailing list on the server.
+
+    Args:
+        list_name: Name of the new list.
+        list_type: Type of list. Options: "private", "public". Defaults to "public".
+        optin: Opt-in type. Options: "single", "double". Defaults to "single".
+        tags: Optional list of tags associated with the list.
+        description: Optional description for the new list.
+
+    Returns:
+        The MailingList object that was created on the server.
+    """
+    global core_headers
+    validate_state(url=True)
+    list_name = (list_name or "").strip()
+    if not list_name:
+        raise ValueError("List name is required")
+    if list_type not in ["public", "private"]:
+        raise ValueError("list_type must be either 'public' or 'private'")
+    if optin not in ["single", "double"]:
+        raise ValueError("optin must be either 'single' or 'double'")
+
+    payload = {
+        "name": list_name,
+        "type": list_type,
+        "optin": optin,
+    }
+    if tags is not None:
+        payload["tags"] = tags
+    if description is not None:
+        payload["description"] = description
+
+    url = f"{url_base}{urls.lists}"
+    resp = httpx.post(
+        url,
+        auth=(username, password),
+        json=payload,
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    list_data = raw_data["data"]
+    return models.MailingList(**list_data)
+
+
+def delete_list(list_id: int) -> bool:
+    """
+    Delete a specific list by its ID.
+
+    Args:
+        list_id: The ID of the list to delete.
+
+    Returns:
+        True if the list was successfully deleted, False otherwise.
+    """
+    global core_headers
+    validate_state(url=True)
+
+    if not list_id:
+        raise ValueError("List ID is required to delete a list.")
+
+    # Check if the list exists first (optional, but good practice)
+    # This prevents attempting to delete a non-existent list, though the API might handle it gracefully.
+    existing_list = list_by_id(list_id)
+    if not existing_list:
+        # Or raise an error? Depending on desired behavior.
+        return False
+
+    url = f"{url_base}{urls.lst}"
+    url = url.format(list_id=list_id)
+
+    resp = httpx.delete(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    # Expecting {'data': True} on success
+    return raw_data.get("data", False)
+
+
+
 # endregion
 
 # region def list_by_id(list_id: int) -> Optional[models.MailingList]

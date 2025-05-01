@@ -22,6 +22,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 * 📧 Send transactional email with template data (e.g. password reset emails).
 * 📨 Manage campaign (bulk) emails from the API.
 * 🎨 Edit and create templates to control the over all look and feel of campaigns.
+* 📝 Create and delete lists.
 
 ## Installation
 
@@ -43,6 +44,9 @@ valid: bool = listmonk.verify_login()
 
 # Is it alive and working?
 up: bool = listmonk.is_healthy()
+
+# Create a new list
+new_list = listmonk.create_list(list_name="my_new_list")
 
 # Read data about your lists
 lists: list[] = listmonk.lists()
