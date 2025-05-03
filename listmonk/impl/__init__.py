@@ -606,6 +606,7 @@ def send_transactional_email(
     messenger_channel: str = "email",
     content_type: str = "markdown",
     attachments: Optional[list[Path]] = None,
+    email_headers: list[dict[str, Optional[str]]] = None,
 ) -> bool:
     """
     Send a transactional email through Listmonk to the recipient.
@@ -617,6 +618,7 @@ def send_transactional_email(
         messenger_channel: Default is "email", if you have SMS or some other channel, you can use it here.
         content_type: Email format options include html, markdown, and plain.
         attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
+        email_headers: Optional array of e-mail headers to include in all messages sent from this server. eg: [{"X-Custom": "value"}, {"X-Custom2": "value"}]
     Returns: True if the email send was successful, False otherwise. Errors may show up in the logs section of your Listmonk dashboard.
     """  # noqa
     global core_headers
@@ -637,6 +639,7 @@ def send_transactional_email(
         "data": template_data or {},
         "messenger": messenger_channel,
         "content_type": content_type,
+        "headers": email_headers or [],
     }
 
     if from_email is not None:
