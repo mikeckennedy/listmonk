@@ -37,7 +37,7 @@ Tracker = "https://github.com/mikeckennedy/listmonk/issues"
 Source = "https://github.com/mikeckennedy/listmonk"
 
 [build-system]
-requires = ["hatchling>=1.21.0", "hatch-vcs>=0.3.0"]
+requires = ["hatchling>=1.27.0", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
 
