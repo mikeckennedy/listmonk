@@ -1,6 +1,7 @@
 {
   "base_url": "Where your instance hosted? e.g. https://mail.yoursite.com",
   "NOTE": "It's important in v4.0 that these credentials are an API account/key, not regular user",
+  "username_pw_note": "As of the latest Listmonk, you must use an API user, not your actual credentials.",
   "username": "user_at_listmonk_instance",
   "password": "password_at_listmonk_instance",
   "test_list_id": 5,
