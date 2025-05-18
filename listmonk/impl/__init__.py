@@ -825,7 +825,6 @@ def test_user_pw_on_server(timeout_config: Optional[httpx.Timeout] = None) -> bo
         resp = httpx.get(
             url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
         )
-        # resp2 = requests.get(url, auth=(username, password))
         resp.raise_for_status()
 
         return True
@@ -1151,6 +1150,7 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 # region def create_template(...) -> Optional[models.CreateTemplateModel]  # noqa: F401, E402
 
 
+# noinspection PyShadowingBuiltins
 def create_template(
     name: Optional[str] = None,
     body: Optional[str] = None,
