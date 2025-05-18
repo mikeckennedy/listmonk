@@ -110,7 +110,6 @@ class CreateCampaignModel(BaseModel):
 
 
 class UpdateCampaignModel(CreateCampaignModel):
-
     @field_validator('send_at', mode='before')
     def serialize_send_at(cls, fld: datetime.datetime):
         """
@@ -155,4 +154,3 @@ class CreateTemplateModel(BaseModel):
 
 class TemplatePreview(BaseModel):
     preview: Optional[str] = None
-
