@@ -3,7 +3,7 @@ import json
 import sys
 import urllib.parse
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 import httpx
 
@@ -119,6 +119,7 @@ def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Mailing
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: List of MailingList objects with the full details of that list.
     """
+    # noinspection DuplicatedCode
     validate_state(url=True)
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
 
@@ -147,6 +148,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: MailingList object with the full details of a list.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -280,6 +282,7 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
     validate_state(url=True)
 
     encoded_email = email.replace('+', '%2b')
+    # noinspection DuplicatedCode
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
 
     resp = httpx.get(
@@ -315,6 +318,7 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
 
     url = f'{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.id={subscriber_id}'
 
+    # noinspection DuplicatedCode
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
@@ -348,6 +352,7 @@ def subscriber_by_uuid(
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
 
+    # noinspection DuplicatedCode
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
 
     resp = httpx.get(
@@ -407,6 +412,7 @@ def create_subscriber(
         attribs=attribs,
     )
 
+    # noinspection DuplicatedCode
     url = f'{url_base}{urls.subscribers}'
     resp = httpx.post(
         url,
@@ -456,6 +462,7 @@ def delete_subscriber(
             return False
         subscriber_id = subscriber.id
 
+    # noinspection DuplicatedCode
     url = f'{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}'
     resp = httpx.delete(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
@@ -872,6 +879,7 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: Campaign object with the full details of a campaign.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -910,6 +918,7 @@ def campaign_preview_by_id(
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: String preview of the campaign.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -1007,6 +1016,7 @@ def create_campaign(
         tags=tags,
         headers=headers,
     )
+    # noinspection DuplicatedCode
     url = f'{url_base}{urls.campaigns}'
     resp = httpx.post(
         url,
@@ -1045,6 +1055,7 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
         raise ValueError('Campaign ID is required')
 
     campaign = campaign_by_id(campaign_id, timeout_config)
+    # noinspection DuplicatedCode
     if not campaign:
         return False
 
@@ -1133,6 +1144,7 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
     Returns:
         list of models.Template objects representing the templates available in the system.
     """
+    # noinspection DuplicatedCode
     validate_state(url=True)
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
 
@@ -1191,6 +1203,7 @@ def create_template(
         is_default=is_default,
     )
 
+    # noinspection DuplicatedCode
     url = f'{url_base}{urls.templates}'
     resp = httpx.post(
         url,
@@ -1224,6 +1237,7 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
     Returns:
         Optional[models.Template]: The template object retrieved based on the ID provided.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -1261,6 +1275,7 @@ def template_preview_by_id(
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: String preview of the template with lorem ipsum.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -1296,6 +1311,7 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: True if the template was successfully deleted, False otherwise.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -1380,6 +1396,7 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
     Returns:
         bool: True if the default template was set successfully, False otherwise.
     """
+    # noinspection DuplicatedCode
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -1439,7 +1456,7 @@ def create_list(
     if optin not in ['single', 'double']:
         raise ValueError("optin must be either 'single' or 'double'")
 
-    payload = {
+    payload: dict[str, Any] = {
         'name': list_name,
         'type': list_type,
         'optin': optin,
