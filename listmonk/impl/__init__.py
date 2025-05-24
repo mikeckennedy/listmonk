@@ -9,7 +9,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.3.6'
+__version__ = '0.3.7'
 
 from listmonk.errors import ValidationError, OperationNotAllowedError, FileNotFoundError
 
@@ -190,7 +190,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
 
 
 def subscribers(
-    query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None
+        query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None
 ) -> list[models.Subscriber]:
     """
     Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.
@@ -226,7 +226,7 @@ def subscribers(
 
 
 def _fragment_of_subscribers(
-    page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx.Timeout] = None
+        page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx.Timeout] = None
 ) -> Tuple[list[dict], bool]:
     """
     Internal use only.
@@ -335,7 +335,7 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
 
 
 def subscriber_by_uuid(
-    subscriber_uuid: str, timeout_config: Optional[httpx.Timeout] = None
+        subscriber_uuid: str, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
@@ -370,12 +370,12 @@ def subscriber_by_uuid(
 
 
 def create_subscriber(
-    email: str,
-    name: str,
-    list_ids: set[int],
-    pre_confirm: bool,
-    attribs: dict,
-    timeout_config: Optional[httpx.Timeout] = None,
+        email: str,
+        name: str,
+        list_ids: set[int],
+        pre_confirm: bool,
+        attribs: dict,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Subscriber:
     """
     Create a new subscriber on the Listmonk server.
@@ -429,9 +429,9 @@ def create_subscriber(
 
 
 def delete_subscriber(
-    email: Optional[str] = None,
-    overriding_subscriber_id: Optional[int] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
+        email: Optional[str] = None,
+        overriding_subscriber_id: Optional[int] = None,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> bool:
     """
     Completely delete a subscriber from your system (it's as if they were never there).
@@ -521,11 +521,11 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
 
 
 def update_subscriber(
-    subscriber: models.Subscriber,
-    add_to_lists: set[int] = None,
-    remove_from_lists: set[int] = None,
-    status: SubscriberStatuses = SubscriberStatuses.enabled,
-    timeout_config: Optional[httpx.Timeout] = None,
+        subscriber: models.Subscriber,
+        add_to_lists: set[int] = None,
+        remove_from_lists: set[int] = None,
+        status: SubscriberStatuses = SubscriberStatuses.enabled,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Subscriber:
     """
     Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
@@ -581,7 +581,7 @@ def update_subscriber(
 
 
 def disable_subscriber(
-    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+        subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
 ) -> models.Subscriber:
     """
     Set a subscriber's status to disable.
@@ -599,7 +599,7 @@ def disable_subscriber(
 
 
 def enable_subscriber(
-    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+        subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
 ) -> models.Subscriber:
     """
     Set a subscriber's status to enable.
@@ -617,7 +617,7 @@ def enable_subscriber(
 
 
 def block_subscriber(
-    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+        subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
 ) -> models.Subscriber:
     """
     Add a subscriber to the blocklist, AKA unsubscribe them.
@@ -635,14 +635,15 @@ def block_subscriber(
 
 
 def send_transactional_email(
-    subscriber_email: str,
-    template_id: int,
-    from_email: Optional[str] = None,
-    template_data: Optional[dict] = None,
-    messenger_channel: str = 'email',
-    content_type: str = 'markdown',
-    attachments: Optional[list[Path]] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
+        subscriber_email: str,
+        template_id: int,
+        from_email: Optional[str] = None,
+        template_data: Optional[dict] = None,
+        messenger_channel: str = 'email',
+        content_type: str = 'markdown',
+        attachments: Optional[list[Path]] = None,
+        email_headers: list[dict[str, Optional[str]]] = None,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> bool:
     """
     Send a transactional email through Listmonk to the recipient.
@@ -654,6 +655,7 @@ def send_transactional_email(
         messenger_channel: Default is "email", if you have SMS or some other channel, you can use it here.
         content_type: Email format options include html, markdown, and plain.
         attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
+        email_headers: Optional array of e-mail headers to include in all messages sent from this server. eg: [{"X-Custom": "value"}, {"X-Custom2": "value"}]
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
     Returns: True if the email send was successful, False otherwise. Errors may show up in the logs section of your Listmonk dashboard.
     """
@@ -676,6 +678,7 @@ def send_transactional_email(
         'data': template_data or {},
         'messenger': messenger_channel,
         'content_type': content_type,
+        'headers': email_headers or [],
     }
 
     if from_email is not None:
@@ -898,7 +901,7 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
 
 
 def campaign_preview_by_id(
-    campaign_id: int, timeout_config: Optional[httpx.Timeout] = None
+        campaign_id: int, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.CampaignPreview]:
     """
     Get the preview of a campaign with the given ID.
@@ -933,20 +936,20 @@ def campaign_preview_by_id(
 
 
 def create_campaign(
-    name: Optional[str] = None,
-    subject: Optional[str] = None,
-    list_ids: set[int] = None,
-    from_email: Optional[str] = None,
-    campaign_type: Optional[str] = None,
-    content_type: Optional[str] = None,
-    body: Optional[str] = None,
-    alt_body: Optional[str] = None,
-    send_at: Optional[datetime.datetime] = None,
-    messenger: Optional[str] = None,
-    template_id: Optional[int] = None,
-    tags: list[str] = None,  # noqa
-    headers=None,  # noqa
-    timeout_config: Optional[httpx.Timeout] = None,
+        name: Optional[str] = None,
+        subject: Optional[str] = None,
+        list_ids: set[int] = None,
+        from_email: Optional[str] = None,
+        campaign_type: Optional[str] = None,
+        content_type: Optional[str] = None,
+        body: Optional[str] = None,
+        alt_body: Optional[str] = None,
+        send_at: Optional[datetime.datetime] = None,
+        messenger: Optional[str] = None,
+        template_id: Optional[int] = None,
+        tags: list[str] = None,  # noqa
+        headers=None,  # noqa
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
     Create a new campaign with the given parameters.
@@ -1061,8 +1064,8 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
 
 
 def update_campaign(
-    campaign: models.Campaign,
-    timeout_config: Optional[httpx.Timeout] = None,
+        campaign: models.Campaign,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Campaign:
     """
     Update the given campaign with the provided campaign information.
@@ -1152,11 +1155,11 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 
 # noinspection PyShadowingBuiltins
 def create_template(
-    name: Optional[str] = None,
-    body: Optional[str] = None,
-    type: Optional[str] = None,
-    is_default: Optional[bool] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
+        name: Optional[str] = None,
+        body: Optional[str] = None,
+        type: Optional[str] = None,
+        is_default: Optional[bool] = None,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Template]:
     """
     Create a template with the specified details.
@@ -1249,7 +1252,7 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
 
 
 def template_preview_by_id(
-    template_id: int, timeout_config: Optional[httpx.Timeout] = None
+        template_id: int, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.TemplatePreview]:
     """
     Get the preview of a template with the given ID.
@@ -1321,8 +1324,8 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
 
 
 def update_template(
-    template: models.Template,
-    timeout_config: Optional[httpx.Timeout] = None,
+        template: models.Template,
+        timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Template:
     """
     Update a template in the system.
@@ -1397,5 +1400,118 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
     raw_data = resp.json()
     return raw_data.get('data')  # Looks like {'data': True}
 
+
+# endregion
+
+
+# region def set_default_template(template_id: Optional[str] = None) -> bool
+
+
+def create_list(
+        list_name: str,
+        list_type: str = 'public',
+        optin: str = 'single',
+        tags: Optional[list[str]] = None,
+        description: Optional[str] = None,
+) -> models.MailingList:
+    """
+    Create a new mailing list on the server.
+    Args:
+        list_name: Name of the new list.
+        list_type: Type of list. Options: "private", "public". Defaults to "public".
+        optin: Opt-in type. Options: "single", "double". Defaults to "single".
+        tags: Optional list of tags associated with the list.
+        description: Optional description for the new list.
+    Returns:
+        The MailingList object that was created on the server.
+    """
+    global core_headers
+
+    validate_state(url=True)
+    list_name = (list_name or '').strip()
+
+    if not list_name:
+        raise ValueError('List name is required')
+
+    if list_type not in ['public', 'private']:
+        raise ValueError("list_type must be either 'public' or 'private'")
+
+    if optin not in ['single', 'double']:
+        raise ValueError("optin must be either 'single' or 'double'")
+
+    payload = {
+        'name': list_name,
+        'type': list_type,
+        'optin': optin,
+    }
+
+    if tags is not None:
+        payload['tags'] = tags
+
+    if description is not None:
+        payload['description'] = description
+
+    url = f'{url_base}{urls.lists}'
+
+    resp = httpx.post(
+        url,
+        auth=(username, password),
+        json=payload,
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    resp.raise_for_status()
+
+    raw_data = resp.json()
+    list_data = raw_data['data']
+
+    return models.MailingList(**list_data)
+
+
+# endregion
+
+
+# region def delete_list(list_id: int) -> bool:
+
+def delete_list(list_id: int) -> bool:
+    """
+    Delete a specific list by its ID.
+    Args:
+        list_id: The ID of the list to delete.
+    Returns:
+        True if the list was successfully deleted, False otherwise.
+    """
+
+    global core_headers
+
+    validate_state(url=True)
+
+    if not list_id:
+        raise ValueError('List ID is required to delete a list.')
+
+    # Check if the list exists first (optional, but good practice)
+    # This prevents attempting to delete a non-existent list, though the API might handle it gracefully.
+    existing_list = list_by_id(list_id)
+
+    if not existing_list:
+        # Or raise an error? Depending on desired behavior.
+
+        return False
+
+    url = f'{url_base}{urls.lst}'
+    url = url.format(list_id=list_id)
+
+    resp = httpx.delete(
+        url,
+        auth=(username, password),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    raw_data = resp.json()
+
+    # Expecting {'data': True} on success
+    return raw_data.get('data', False)
 
 # endregion
