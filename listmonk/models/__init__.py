@@ -125,7 +125,7 @@ class UpdateCampaignModel(CreateCampaignModel):
             datetime.datetime: Returns the serialized datetime field or None if the provided field is in the past.
 
         """
-        if isinstance(fld, datetime.datetime): # type: ignore
+        if isinstance(fld, datetime.datetime):  # type: ignore
             now = datetime.datetime.now(datetime.timezone.utc)
             if fld < now:
                 return None
@@ -155,3 +155,7 @@ class CreateTemplateModel(BaseModel):
 
 class TemplatePreview(BaseModel):
     preview: Optional[str] = None
+
+
+class ListmonkFileNotFoundError(ValidationError):
+    pass

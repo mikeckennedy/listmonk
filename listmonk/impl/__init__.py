@@ -47,10 +47,10 @@ def _validate_and_parse_json_response(resp: httpx.Response) -> dict[str, Any]:
         ValidationError: If response is empty or contains invalid JSON
     """
     resp.raise_for_status()
-    
+
     if not resp.content:
         raise ValidationError('Empty response from server')
-    
+
     try:
         return resp.json()
     except (ValueError, json.JSONDecodeError) as e:
@@ -147,7 +147,11 @@ def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Mailing
 
     url = f'{url_base}{urls.lists}?page=1&per_page=1000000'
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     data = _validate_and_parse_json_response(resp)
     list_of_lists = [models.MailingList(**d) for d in data.get('data', {}).get('results', [])]
@@ -210,7 +214,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
 
 
 def subscribers(
-        query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None
+    query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None
 ) -> list[models.Subscriber]:
     """
     Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.
@@ -227,7 +231,7 @@ def subscribers(
     raw_results = []
     page_num = 1
     partial_results, more = _fragment_of_subscribers(page_num, list_id, query_text, timeout_config)
-    raw_results.extend(partial_results) # type: ignore
+    raw_results.extend(partial_results)  # type: ignore
     # Logging someday: print(f"subscribers(): Got {len(raw_results)} so far, more? {more}")
     while more:
         page_num += 1
@@ -235,7 +239,7 @@ def subscribers(
         raw_results.extend(partial_results)  # type: ignore
         # Logging someday: print(f"subscribers(): Got {len(raw_results)} so far on page {page_num}, more? {more}")
 
-    subscriber_list = [models.Subscriber(**d) for d in raw_results] # type: ignore
+    subscriber_list = [models.Subscriber(**d) for d in raw_results]  # type: ignore
 
     return subscriber_list
 
@@ -246,7 +250,7 @@ def subscribers(
 
 
 def _fragment_of_subscribers(
-        page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx.Timeout] = None
+    page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx.Timeout] = None
 ) -> Tuple[list[dict[str, Any]], bool]:
     """
     Internal use only.
@@ -265,7 +269,11 @@ def _fragment_of_subscribers(
         url += f'&{urllib.parse.urlencode({"query": query_text})}'
 
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     # For paging:
     # data: {"total":55712,"per_page":10,"page":1, ...}
@@ -302,7 +310,11 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
 
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     results: list[dict[str, Any]] = raw_data['data']['results']
@@ -310,7 +322,7 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
     if not results:
         return None
 
-    return models.Subscriber(**results[0]) # type: ignore
+    return models.Subscriber(**results[0])  # type: ignore
 
 
 # endregion
@@ -334,7 +346,11 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
 
     # noinspection DuplicatedCode
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     results: list[dict[str, Any]] = raw_data['data']['results']
@@ -351,7 +367,7 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
 
 
 def subscriber_by_uuid(
-        subscriber_uuid: str, timeout_config: Optional[httpx.Timeout] = None
+    subscriber_uuid: str, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
@@ -368,7 +384,11 @@ def subscriber_by_uuid(
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
 
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     results: list[dict[str, Any]] = raw_data['data']['results']
@@ -385,12 +405,12 @@ def subscriber_by_uuid(
 
 
 def create_subscriber(
-        email: str,
-        name: str,
-        list_ids: set[int],
-        pre_confirm: bool,
-        attribs: dict[str, Any],
-        timeout_config: Optional[httpx.Timeout] = None,
+    email: str,
+    name: str,
+    list_ids: set[int],
+    pre_confirm: bool,
+    attribs: dict[str, Any],
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Subscriber:
     """
     Create a new subscriber on the Listmonk server.
@@ -443,9 +463,9 @@ def create_subscriber(
 
 
 def delete_subscriber(
-        email: Optional[str] = None,
-        overriding_subscriber_id: Optional[int] = None,
-        timeout_config: Optional[httpx.Timeout] = None,
+    email: Optional[str] = None,
+    overriding_subscriber_id: Optional[int] = None,
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> bool:
     """
     Completely delete a subscriber from your system (it's as if they were never there).
@@ -473,7 +493,11 @@ def delete_subscriber(
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}'
     resp = httpx.delete(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     return bool(raw_data.get('data'))  # Looks like {'data': True}
@@ -512,7 +536,13 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
         'confirm': 'true',
     }
     url = f'{url_base}{urls.opt_in.format(subscriber_uuid=subscriber_uuid)}'
-    resp = httpx.post(url, auth=httpx.BasicAuth(username or '', password or ''), data=payload, follow_redirects=True, timeout=timeout_config)
+    resp = httpx.post(
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        data=payload,
+        follow_redirects=True,
+        timeout=timeout_config,
+    )
     resp.raise_for_status()
 
     success_phrases = {
@@ -534,11 +564,11 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
 
 
 def update_subscriber(
-        subscriber: models.Subscriber,
-        add_to_lists: Optional[set[int]] = None,
-        remove_from_lists: Optional[set[int]] = None,
-        status: SubscriberStatuses = SubscriberStatuses.enabled,
-        timeout_config: Optional[httpx.Timeout] = None,
+    subscriber: models.Subscriber,
+    add_to_lists: Optional[set[int]] = None,
+    remove_from_lists: Optional[set[int]] = None,
+    status: SubscriberStatuses = SubscriberStatuses.enabled,
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Subscriber]:
     """
     Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
@@ -550,18 +580,18 @@ def update_subscriber(
         remove_from_lists: Any list to remove from this subscriber.
         status: The status of the subscriber: enabled, disabled, blacklisted from SubscriberStatuses.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The updated view of the subsccursriber object from the server.
+    Returns: The updated view of the subscriber object from the server.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
-    if subscriber is None or not subscriber.id: # type: ignore
+    if subscriber is None or not subscriber.id:  # type: ignore
         raise ValueError('Subscriber is required')
 
     add_to_lists = add_to_lists or set()
     remove_from_lists = remove_from_lists or set()
 
-    existing_lists = {int(lst['id']) for lst in subscriber.lists} # type: ignore
+    existing_lists = {int(lst['id']) for lst in subscriber.lists}  # type: ignore
     final_lists = existing_lists - remove_from_lists
     final_lists.update(add_to_lists)
 
@@ -594,7 +624,7 @@ def update_subscriber(
 
 
 def disable_subscriber(
-        subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to disable.
@@ -612,7 +642,7 @@ def disable_subscriber(
 
 
 def enable_subscriber(
-        subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to enable.
@@ -630,7 +660,7 @@ def enable_subscriber(
 
 
 def block_subscriber(
-        subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Add a subscriber to the blocklist, AKA unsubscribe them.
@@ -648,15 +678,15 @@ def block_subscriber(
 
 
 def send_transactional_email(
-        subscriber_email: str,
-        template_id: int,
-        from_email: Optional[str] = None,
-        template_data: Optional[dict[str, Any]] = None,
-        messenger_channel: str = 'email',
-        content_type: str = 'markdown',
-        attachments: Optional[list[Path]] = None,
-        email_headers: Optional[list[dict[str, Optional[str]]]] = None,
-        timeout_config: Optional[httpx.Timeout] = None,
+    subscriber_email: str,
+    template_id: int,
+    from_email: Optional[str] = None,
+    template_data: Optional[dict[str, Any]] = None,
+    messenger_channel: str = 'email',
+    content_type: str = 'markdown',
+    attachments: Optional[list[Path]] = None,
+    email_headers: Optional[list[dict[str, Optional[str]]]] = None,
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> bool:
     """
     Send a transactional email through Listmonk to the recipient.
@@ -760,7 +790,11 @@ def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
 
         url = f'{url_base}{urls.health}'
         resp = httpx.get(
-            url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+            url,
+            auth=httpx.BasicAuth(username or '', password or ''),
+            headers=core_headers,
+            follow_redirects=True,
+            timeout=timeout_config,
         )
         data = _validate_and_parse_json_response(resp)
         return data.get('data', False)
@@ -835,7 +869,11 @@ def test_user_pw_on_server(timeout_config: Optional[httpx.Timeout] = None) -> bo
     try:
         url = f'{url_base}{urls.health}'
         resp = httpx.get(
-            url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+            url,
+            auth=httpx.BasicAuth(username or '', password or ''),
+            headers=core_headers,
+            follow_redirects=True,
+            timeout=timeout_config,
         )
         resp.raise_for_status()
 
@@ -859,7 +897,11 @@ def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Cam
 
     url = f'{url_base}{urls.campaigns}?page=1&per_page=1000000'
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     data = _validate_and_parse_json_response(resp)
     list_of_campaigns = [models.Campaign(**d) for d in data.get('data', {}).get('results', [])]
@@ -909,7 +951,7 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
 
 
 def campaign_preview_by_id(
-        campaign_id: int, timeout_config: Optional[httpx.Timeout] = None
+    campaign_id: int, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.CampaignPreview]:
     """
     Get the preview of a campaign with the given ID.
@@ -945,20 +987,20 @@ def campaign_preview_by_id(
 
 
 def create_campaign(
-        name: Optional[str] = None,
-        subject: Optional[str] = None,
-        list_ids: Optional[set[int]] = None,
-        from_email: Optional[str] = None,
-        campaign_type: Optional[str] = None,
-        content_type: Optional[str] = None,
-        body: Optional[str] = None,
-        alt_body: Optional[str] = None,
-        send_at: Optional[datetime.datetime] = None,
-        messenger: Optional[str] = None,
-        template_id: Optional[int] = None,
-        tags: Optional[list[str]] = None,  # noqa
-        headers: Optional[dict[str, Optional[str]]] = None,  # noqa
-        timeout_config: Optional[httpx.Timeout] = None,
+    name: Optional[str] = None,
+    subject: Optional[str] = None,
+    list_ids: Optional[set[int]] = None,
+    from_email: Optional[str] = None,
+    campaign_type: Optional[str] = None,
+    content_type: Optional[str] = None,
+    body: Optional[str] = None,
+    alt_body: Optional[str] = None,
+    send_at: Optional[datetime.datetime] = None,
+    messenger: Optional[str] = None,
+    template_id: Optional[int] = None,
+    tags: Optional[list[str]] = None,  # noqa
+    headers: Optional[dict[str, Optional[str]]] = None,  # noqa
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
     Create a new campaign with the given parameters.
@@ -1059,7 +1101,11 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign_id)}'
     resp = httpx.delete(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     return bool(raw_data.get('data'))  # Looks like {'data': True}
@@ -1071,8 +1117,8 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
 
 
 def update_campaign(
-        campaign: models.Campaign,
-        timeout_config: Optional[httpx.Timeout] = None,
+    campaign: models.Campaign,
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
     Update the given campaign with the provided campaign information.
@@ -1090,10 +1136,10 @@ def update_campaign(
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
-    if campaign is None or not campaign.id: # type: ignore
+    if campaign is None or not campaign.id:  # type: ignore
         raise ValueError('Campaign is required')
 
-    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists] # type: ignore
+    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists]  # type: ignore
 
     update_model = models.UpdateCampaignModel(
         name=campaign.name,
@@ -1108,7 +1154,7 @@ def update_campaign(
         messenger=campaign.messenger,
         template_id=campaign.template_id,
         tags=campaign.tags,
-        headers=campaign.headers, # type: ignore
+        headers=campaign.headers,  # type: ignore
     )
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}'
@@ -1146,7 +1192,11 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 
     url = f'{url_base}{urls.templates}?page=1&per_page=1000000'
     resp = httpx.get(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     data = _validate_and_parse_json_response(resp)
     list_of_templates = [models.Template(**d) for d in data.get('data', [])]
@@ -1161,11 +1211,11 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 
 # noinspection PyShadowingBuiltins
 def create_template(
-        name: Optional[str] = None,
-        body: Optional[str] = None,
-        type: Optional[str] = None,
-        is_default: Optional[bool] = None,
-        timeout_config: Optional[httpx.Timeout] = None,
+    name: Optional[str] = None,
+    body: Optional[str] = None,
+    type: Optional[str] = None,
+    is_default: Optional[bool] = None,
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Template]:
     """
     Create a template with the specified details.
@@ -1247,7 +1297,7 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
     data = _validate_and_parse_json_response(resp)
     template_data = data.get('data', {})
 
-    return models.Template(**template_data) # type: ignore
+    return models.Template(**template_data)  # type: ignore
 
 
 # endregion
@@ -1256,7 +1306,7 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
 
 
 def template_preview_by_id(
-        template_id: int, timeout_config: Optional[httpx.Timeout] = None
+    template_id: int, timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.TemplatePreview]:
     """
     Get the preview of a template with the given ID.
@@ -1315,7 +1365,11 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
 
     url = f'{url_base}{urls.template_id.format(template_id=template_id)}'
     resp = httpx.delete(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     return bool(raw_data.get('data'))  # Looks like {'data': True}
@@ -1328,8 +1382,8 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
 
 
 def update_template(
-        template: models.Template,
-        timeout_config: Optional[httpx.Timeout] = None,
+    template: models.Template,
+    timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Template]:
     """
     Update a template in the system.
@@ -1344,7 +1398,7 @@ def update_template(
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
-    if template is None or not template.id: # type: ignore
+    if template is None or not template.id:  # type: ignore
         raise ValueError('Template is required')
 
     update_model = models.CreateTemplateModel(
@@ -1398,7 +1452,11 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
 
     url = f'{url_base}{urls.template_id_default.format(template_id=template_id)}'
     resp = httpx.put(
-        url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     return bool(raw_data.get('data'))  # Looks like {'data': True}
@@ -1411,11 +1469,11 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
 
 
 def create_list(
-        list_name: str,
-        list_type: str = 'public',
-        optin: str = 'single',
-        tags: Optional[list[str]] = None,
-        description: Optional[str] = None,
+    list_name: str,
+    list_type: str = 'public',
+    optin: str = 'single',
+    tags: Optional[list[str]] = None,
+    description: Optional[str] = None,
 ) -> Optional[models.MailingList]:
     """
     Create a new mailing list on the server.
@@ -1474,6 +1532,7 @@ def create_list(
 
 # region def delete_list(list_id: int) -> bool:
 
+
 def delete_list(list_id: int) -> bool:
     """
     Delete a specific list by its ID.
@@ -1513,5 +1572,6 @@ def delete_list(list_id: int) -> bool:
 
     # Expecting {'data': True} on success
     return raw_data.get('data', False)
+
 
 # endregion
