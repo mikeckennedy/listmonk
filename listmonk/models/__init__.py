@@ -111,7 +111,7 @@ class CreateCampaignModel(BaseModel):
 
 class UpdateCampaignModel(CreateCampaignModel):
     @field_validator('send_at', mode='before')
-    def serialize_send_at(cls, fld: datetime.datetime):
+    def serialize_send_at(self, fld: datetime.datetime):
         """
 
         Serialize the provided datetime field to prepare for sending, considering the specified send_at time.

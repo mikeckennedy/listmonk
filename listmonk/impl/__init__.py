@@ -235,7 +235,7 @@ def subscribers(
         raw_results.extend(partial_results)  # type: ignore
         # Logging someday: print(f"subscribers(): Got {len(raw_results)} so far on page {page_num}, more? {more}")
 
-    subscriber_list = [models.Subscriber(**d) for d in raw_results]
+    subscriber_list = [models.Subscriber(**d) for d in raw_results] # type: ignore
 
     return subscriber_list
 
@@ -337,7 +337,7 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
         url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
     raw_data = _validate_and_parse_json_response(resp)
-    results: list[dict] = raw_data['data']['results']
+    results: list[dict[str, Any]] = raw_data['data']['results']
 
     if not results:
         return None
@@ -371,7 +371,7 @@ def subscriber_by_uuid(
         url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
     raw_data = _validate_and_parse_json_response(resp)
-    results: list[dict] = raw_data['data']['results']
+    results: list[dict[str, Any]] = raw_data['data']['results']
 
     if not results:
         return None
@@ -389,7 +389,7 @@ def create_subscriber(
         name: str,
         list_ids: set[int],
         pre_confirm: bool,
-        attribs: dict,
+        attribs: dict[str, Any],
         timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Subscriber:
     """
@@ -476,7 +476,7 @@ def delete_subscriber(
         url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
     raw_data = _validate_and_parse_json_response(resp)
-    return raw_data.get('data')  # Looks like {'data': True}
+    return bool(raw_data.get('data'))  # Looks like {'data': True}
 
 
 # endregion
@@ -535,11 +535,11 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
 
 def update_subscriber(
         subscriber: models.Subscriber,
-        add_to_lists: set[int] = None,
-        remove_from_lists: set[int] = None,
+        add_to_lists: Optional[set[int]] = None,
+        remove_from_lists: Optional[set[int]] = None,
         status: SubscriberStatuses = SubscriberStatuses.enabled,
         timeout_config: Optional[httpx.Timeout] = None,
-) -> models.Subscriber:
+) -> Optional[models.Subscriber]:
     """
     Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
     from adding them to and removing them from lists. You can enable, disable, and block them here. But if that
@@ -550,18 +550,18 @@ def update_subscriber(
         remove_from_lists: Any list to remove from this subscriber.
         status: The status of the subscriber: enabled, disabled, blacklisted from SubscriberStatuses.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The updated view of the subscriber object from the server.
+    Returns: The updated view of the subsccursriber object from the server.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
-    if subscriber is None or not subscriber.id:
+    if subscriber is None or not subscriber.id: # type: ignore
         raise ValueError('Subscriber is required')
 
     add_to_lists = add_to_lists or set()
     remove_from_lists = remove_from_lists or set()
 
-    existing_lists = set([int(lst.get('id')) for lst in subscriber.lists])
+    existing_lists = {int(lst['id']) for lst in subscriber.lists} # type: ignore
     final_lists = existing_lists - remove_from_lists
     final_lists.update(add_to_lists)
 
@@ -595,7 +595,7 @@ def update_subscriber(
 
 def disable_subscriber(
         subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
-) -> models.Subscriber:
+) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to disable.
     Args:
@@ -613,7 +613,7 @@ def disable_subscriber(
 
 def enable_subscriber(
         subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
-) -> models.Subscriber:
+) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to enable.
     Args:
@@ -631,7 +631,7 @@ def enable_subscriber(
 
 def block_subscriber(
         subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
-) -> models.Subscriber:
+) -> Optional[models.Subscriber]:
     """
     Add a subscriber to the blocklist, AKA unsubscribe them.
     Args:
@@ -651,11 +651,11 @@ def send_transactional_email(
         subscriber_email: str,
         template_id: int,
         from_email: Optional[str] = None,
-        template_data: Optional[dict] = None,
+        template_data: Optional[dict[str, Any]] = None,
         messenger_channel: str = 'email',
         content_type: str = 'markdown',
         attachments: Optional[list[Path]] = None,
-        email_headers: list[dict[str, Optional[str]]] = None,
+        email_headers: Optional[list[dict[str, Optional[str]]]] = None,
         timeout_config: Optional[httpx.Timeout] = None,
 ) -> bool:
     """
@@ -735,7 +735,7 @@ def send_transactional_email(
             )
 
         raw_data = _validate_and_parse_json_response(resp)
-        return raw_data.get('data')  # {'data': True}
+        return bool(raw_data.get('data'))  # {'data': True}
     except Exception:
         # Maybe some logging here at some point.
         raise
@@ -787,7 +787,7 @@ def verify_login(timeout_config: Optional[httpx.Timeout] = None) -> bool:
 # region def validate_login(user_name, pw)
 
 
-def validate_login(user_name, pw):
+def validate_login(user_name: str, pw: str):
     """
     Internal use only.
     """
@@ -802,7 +802,7 @@ def validate_login(user_name, pw):
 # region def validate_state(url=False, user=False)
 
 
-def validate_state(url=False):
+def validate_state(url: bool = False) -> None:
     """
     Internal use only.
     """
@@ -895,7 +895,9 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
         timeout=timeout_config,
     )
     data = _validate_and_parse_json_response(resp)
-    campaign_data = data.get('data')
+    campaign_data = data.get('data', {})
+    if not campaign_data:
+        return None
 
     return models.Campaign(**campaign_data)
 
@@ -945,7 +947,7 @@ def campaign_preview_by_id(
 def create_campaign(
         name: Optional[str] = None,
         subject: Optional[str] = None,
-        list_ids: set[int] = None,
+        list_ids: Optional[set[int]] = None,
         from_email: Optional[str] = None,
         campaign_type: Optional[str] = None,
         content_type: Optional[str] = None,
@@ -954,8 +956,8 @@ def create_campaign(
         send_at: Optional[datetime.datetime] = None,
         messenger: Optional[str] = None,
         template_id: Optional[int] = None,
-        tags: list[str] = None,  # noqa
-        headers=None,  # noqa
+        tags: Optional[list[str]] = None,  # noqa
+        headers: Optional[list[dict[str, Optional[str]]]] = None,  # noqa
         timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
@@ -997,12 +999,12 @@ def create_campaign(
     if not subject:
         raise ValueError('Subject is required')
     if list_ids is None:  # The Default list is 1.
-        list_ids = [1]
+        list_ids = {1}
 
     model = models.CreateCampaignModel(
         name=name,
         subject=subject,
-        lists=list_ids,
+        lists=list(list_ids),
         from_email=from_email,
         type=campaign_type,
         content_type=content_type,
@@ -1060,7 +1062,7 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
         url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
     raw_data = _validate_and_parse_json_response(resp)
-    return raw_data.get('data')  # Looks like {'data': True}
+    return bool(raw_data.get('data'))  # Looks like {'data': True}
 
 
 # endregion
@@ -1071,7 +1073,7 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
 def update_campaign(
         campaign: models.Campaign,
         timeout_config: Optional[httpx.Timeout] = None,
-) -> models.Campaign:
+) -> Optional[models.Campaign]:
     """
     Update the given campaign with the provided campaign information.
 
@@ -1088,15 +1090,15 @@ def update_campaign(
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
-    if campaign is None or not campaign.id:
+    if campaign is None or not campaign.id: # type: ignore
         raise ValueError('Campaign is required')
 
-    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists]
+    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists] # type: ignore
 
     update_model = models.UpdateCampaignModel(
         name=campaign.name,
         subject=campaign.subject,
-        lists=update_lists,
+        lists=list(update_lists),  # Convert to list to ensure type is known # type: ignore
         from_email=campaign.from_email,
         type=campaign.type,
         content_type=campaign.content_type,
@@ -1106,7 +1108,7 @@ def update_campaign(
         messenger=campaign.messenger,
         template_id=campaign.template_id,
         tags=campaign.tags,
-        headers=campaign.headers,
+        headers=campaign.headers, # type: ignore
     )
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}'
@@ -1243,9 +1245,9 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
         timeout=timeout_config,
     )
     data = _validate_and_parse_json_response(resp)
-    template_data = data.get('data')
+    template_data = data.get('data', {})
 
-    return models.Template(**template_data)
+    return models.Template(**template_data) # type: ignore
 
 
 # endregion
@@ -1316,7 +1318,7 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
         url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
     raw_data = _validate_and_parse_json_response(resp)
-    return raw_data.get('data')  # Looks like {'data': True}
+    return bool(raw_data.get('data'))  # Looks like {'data': True}
 
 
 # endregion
@@ -1328,7 +1330,7 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
 def update_template(
         template: models.Template,
         timeout_config: Optional[httpx.Timeout] = None,
-) -> models.Template:
+) -> Optional[models.Template]:
     """
     Update a template in the system.
 
@@ -1342,7 +1344,7 @@ def update_template(
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
-    if template is None or not template.id:
+    if template is None or not template.id: # type: ignore
         raise ValueError('Template is required')
 
     update_model = models.CreateTemplateModel(
@@ -1399,7 +1401,7 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
         url, auth=httpx.BasicAuth(username or '', password or ''), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
     raw_data = _validate_and_parse_json_response(resp)
-    return raw_data.get('data')  # Looks like {'data': True}
+    return bool(raw_data.get('data'))  # Looks like {'data': True}
 
 
 # endregion
@@ -1414,7 +1416,7 @@ def create_list(
         optin: str = 'single',
         tags: Optional[list[str]] = None,
         description: Optional[str] = None,
-) -> models.MailingList:
+) -> Optional[models.MailingList]:
     """
     Create a new mailing list on the server.
     Args:
