@@ -957,7 +957,7 @@ def create_campaign(
         messenger: Optional[str] = None,
         template_id: Optional[int] = None,
         tags: Optional[list[str]] = None,  # noqa
-        headers: Optional[list[dict[str, Optional[str]]]] = None,  # noqa
+        headers: Optional[dict[str, Optional[str]]] = None,  # noqa
         timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """

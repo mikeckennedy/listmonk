@@ -35,19 +35,19 @@ class Subscriber(BaseModel):
     email: str
     name: str
     created_at: datetime.datetime
-    updated_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
     uuid: Optional[str] = None
-    lists: list[dict] = pydantic.Field(default_factory=list)
+    lists: list[dict[str, Any]] = pydantic.Field(default_factory=list)
     attribs: dict[str, Any] = pydantic.Field(default_factory=dict)
     status: Optional[str] = None
 
     @field_serializer('created_at', 'updated_at')
-    def serialize_date_times(self, fld: datetime, _info):
+    def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> str:
         formatted_string = fld.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         return formatted_string
 
     @field_serializer('lists')
-    def serialize_lists(self, fld: list[int] | set[int], _info):
+    def serialize_lists(self, fld: list[int] | set[int], _info: Any) -> list[int]:
         return [int(i) for i in fld]
 
 
@@ -57,7 +57,7 @@ class CreateSubscriberModel(BaseModel):
     status: str
     lists: list[int] = pydantic.Field(default_factory=list)
     preconfirm_subscriptions: bool
-    attribs: dict = pydantic.Field(default_factory=dict)
+    attribs: dict[str, Any] = pydantic.Field(default_factory=dict)
 
 
 class Campaign(BaseModel):
@@ -66,7 +66,7 @@ class Campaign(BaseModel):
     updated_at: Optional[datetime.datetime] = None
     views: int
     clicks: int
-    lists: list[dict] = pydantic.Field(default_factory=list)
+    lists: list[dict[str, Any]] = pydantic.Field(default_factory=list)
     started_at: Optional[datetime.datetime] = None
     to_send: int
     sent: int
@@ -83,7 +83,7 @@ class Campaign(BaseModel):
     tags: list[str] = pydantic.Field(default_factory=list)
     template_id: int
     messenger: Optional[str] = None
-    headers: list[dict] = pydantic.Field(default_factory=dict)
+    headers: dict[str, Optional[str]] = pydantic.Field(default_factory=dict)
 
 
 class CreateCampaignModel(BaseModel):
@@ -99,10 +99,10 @@ class CreateCampaignModel(BaseModel):
     messenger: Optional[str] = None
     template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
-    headers: dict = pydantic.Field(default_factory=dict)
+    headers: dict[str, Optional[str]] = pydantic.Field(default_factory=dict)
 
     @field_serializer('send_at')
-    def serialize_date_times(self, fld: datetime, _info):
+    def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> str:
         if fld:
             formatted_string = fld.astimezone().isoformat()
             return formatted_string
@@ -124,7 +124,7 @@ class UpdateCampaignModel(CreateCampaignModel):
             datetime.datetime: Returns the serialized datetime field or None if the provided field is in the past.
 
         """
-        if isinstance(fld, datetime.datetime):
+        if isinstance(fld, datetime.datetime): # type: ignore
             now = datetime.datetime.now(datetime.timezone.utc)
             if fld < now:
                 return None
