@@ -6,5 +6,5 @@ class OperationNotAllowedError(ValidationError):
     pass
 
 
-class FileNotFoundError(ValidationError):
+class ListmonkFileNotFoundError(ValidationError):
     pass
