@@ -984,7 +984,7 @@ def create_campaign(
         ValueError: If required parameters (name, subject, from_email) are not provided.
     """
     if headers is None:
-        headers = []
+        headers = {}
     if tags is None:
         tags = []
 

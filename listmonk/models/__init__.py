@@ -99,7 +99,7 @@ class CreateCampaignModel(BaseModel):
     messenger: Optional[str] = None
     template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
-    headers: list[dict] = pydantic.Field(default_factory=dict)
+    headers: dict = pydantic.Field(default_factory=dict)
 
     @field_serializer('send_at')
     def serialize_date_times(self, fld: datetime, _info):
