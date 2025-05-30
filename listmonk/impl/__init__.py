@@ -35,6 +35,28 @@ core_headers: dict[str, Optional[str]] = {
 
 # endregion
 
+
+def _validate_and_parse_json_response(resp: httpx.Response) -> dict:
+    """
+    Internal helper to validate HTTP response and parse JSON with proper error handling.
+    Args:
+        resp: The httpx Response object
+    Returns:
+        Parsed JSON data as dictionary
+    Raises:
+        ValidationError: If response is empty or contains invalid JSON
+    """
+    resp.raise_for_status()
+    
+    if not resp.content:
+        raise ValidationError('Empty response from server')
+    
+    try:
+        return resp.json()
+    except (ValueError, json.JSONDecodeError) as e:
+        raise ValidationError(f'Invalid JSON response from server: {e}')
+
+
 # region def get_base_url() -> Optional[str]
 
 
@@ -127,9 +149,7 @@ def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Mailing
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    data = resp.json()
+    data = _validate_and_parse_json_response(resp)
     list_of_lists = [models.MailingList(**d) for d in data.get('data', {}).get('results', [])]
     return list_of_lists
 
@@ -163,9 +183,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
-
-    data = resp.json()
+    data = _validate_and_parse_json_response(resp)
     lst_data = data.get('data')
 
     # This seems to be a bug, and we'll just work around it until listmonk fixes it
@@ -249,11 +267,9 @@ def _fragment_of_subscribers(
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
     # For paging:
     # data: {"total":55712,"per_page":10,"page":1, ...}
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     data = raw_data['data']
 
     total = data.get('total', 0)
@@ -288,9 +304,7 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     results: list[dict] = raw_data['data']['results']
 
     if not results:
@@ -322,9 +336,7 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     results: list[dict] = raw_data['data']['results']
 
     if not results:
@@ -358,9 +370,7 @@ def subscriber_by_uuid(
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     results: list[dict] = raw_data['data']['results']
 
     if not results:
@@ -422,9 +432,7 @@ def create_subscriber(
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     sub_data = raw_data['data']
     return models.Subscriber(**sub_data)
 
@@ -467,9 +475,7 @@ def delete_subscriber(
     resp = httpx.delete(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     return raw_data.get('data')  # Looks like {'data': True}
 
 
@@ -728,9 +734,7 @@ def send_transactional_email(
                 timeout=timeout_config,
             )
 
-        resp.raise_for_status()
-
-        raw_data = resp.json()
+        raw_data = _validate_and_parse_json_response(resp)
         return raw_data.get('data')  # {'data': True}
     except Exception:
         # Maybe some logging here at some point.
@@ -758,9 +762,7 @@ def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
         resp = httpx.get(
             url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
         )
-        resp.raise_for_status()
-
-        data = resp.json()
+        data = _validate_and_parse_json_response(resp)
         return data.get('data', False)
     except Exception:
         return False
@@ -859,9 +861,7 @@ def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Cam
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    data = resp.json()
+    data = _validate_and_parse_json_response(resp)
     list_of_campaigns = [models.Campaign(**d) for d in data.get('data', {}).get('results', [])]
     return list_of_campaigns
 
@@ -894,9 +894,7 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
-
-    data = resp.json()
+    data = _validate_and_parse_json_response(resp)
     campaign_data = data.get('data')
 
     return models.Campaign(**campaign_data)
@@ -1026,9 +1024,7 @@ def create_campaign(
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     campaign_data = raw_data['data']
     return models.Campaign(**campaign_data)
 
@@ -1063,9 +1059,7 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
     resp = httpx.delete(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     return raw_data.get('data')  # Looks like {'data': True}
 
 
@@ -1152,9 +1146,7 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
     resp = httpx.get(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    data = resp.json()
+    data = _validate_and_parse_json_response(resp)
     list_of_templates = [models.Template(**d) for d in data.get('data', [])]
     return list_of_templates
 
@@ -1213,9 +1205,7 @@ def create_template(
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     template_data = raw_data['data']
     return models.Template(**template_data)
 
@@ -1252,9 +1242,7 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
-
-    data = resp.json()
+    data = _validate_and_parse_json_response(resp)
     template_data = data.get('data')
 
     return models.Template(**template_data)
@@ -1327,9 +1315,7 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
     resp = httpx.delete(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     return raw_data.get('data')  # Looks like {'data': True}
 
 
@@ -1412,9 +1398,7 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
     resp = httpx.put(
         url, auth=(username, password), headers=core_headers, follow_redirects=True, timeout=timeout_config
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     return raw_data.get('data')  # Looks like {'data': True}
 
 
@@ -1477,9 +1461,7 @@ def create_list(
         headers=core_headers,
         follow_redirects=True,
     )
-    resp.raise_for_status()
-
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
     list_data = raw_data['data']
 
     return models.MailingList(**list_data)
@@ -1525,8 +1507,7 @@ def delete_list(list_id: int) -> bool:
         follow_redirects=True,
         timeout=30,
     )
-    resp.raise_for_status()
-    raw_data = resp.json()
+    raw_data = _validate_and_parse_json_response(resp)
 
     # Expecting {'data': True} on success
     return raw_data.get('data', False)
