@@ -102,7 +102,7 @@ class CreateCampaignModel(BaseModel):
     headers: dict[str, Optional[str]] = pydantic.Field(default_factory=dict)
 
     @field_serializer('send_at')
-    def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> str:
+    def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> Optional[str]:
         if fld:
             formatted_string = fld.astimezone().isoformat()
             return formatted_string
