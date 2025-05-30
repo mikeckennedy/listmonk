@@ -11,7 +11,7 @@ from listmonk import models, urls  # noqa: F401
 
 __version__ = '0.3.8'
 
-from listmonk.errors import ValidationError, OperationNotAllowedError, FileNotFoundError
+from listmonk.errors import ValidationError, OperationNotAllowedError, ListmonkFileNotFoundError
 
 from listmonk.models import SubscriberStatuses
 
@@ -713,7 +713,7 @@ def send_transactional_email(
     if attachments is not None:
         for attachment in attachments:
             if not attachment.exists() or not attachment.is_file():
-                raise FileNotFoundError(f'Attachment {attachment} does not exist')
+                raise ListmonkFileNotFoundError(f'Attachment {attachment} does not exist')
 
     body_data = {
         'subscriber_email': subscriber_email,

@@ -155,7 +155,3 @@ class CreateTemplateModel(BaseModel):
 
 class TemplatePreview(BaseModel):
     preview: Optional[str] = None
-
-
-class ListmonkFileNotFoundError(ValidationError):
-    pass
