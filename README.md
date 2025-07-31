@@ -167,6 +167,20 @@ preview_html = listmonk.template_preview_by_id(3)
 print(preview_html)
 ```
 
+## F.A.Q.
+
+### I got httpx.HTTPStatusError: Client error '403 Forbidden'
+
+If you encounter an error like this in your console:
+
+```text
+httpx.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''
+```
+
+It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.
+
+**Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)]
+
 ## Want to contribute?
 
 PRs are welcome. But please open an issue first to see if the proposed feature fits with the direction of this library.
