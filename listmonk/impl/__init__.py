@@ -8,7 +8,7 @@ from typing import Any, Optional, Tuple
 
 import httpx
 
-from listmonk import models, urls  # noqa: F401
+from listmonk import models, urls
 
 __version__ = version('listmonk')
 
