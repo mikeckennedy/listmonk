@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional, Any
+from typing import Any, Optional
 
 import pydantic
 from pydantic import BaseModel, field_serializer, field_validator

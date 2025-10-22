@@ -3,7 +3,7 @@ import json
 import sys
 import urllib.parse
 from pathlib import Path
-from typing import Optional, Tuple, Any
+from typing import Any, Optional, Tuple
 
 import httpx
 
@@ -11,8 +11,7 @@ from listmonk import models, urls  # noqa: F401
 
 __version__ = '0.3.8'
 
-from listmonk.errors import ValidationError, OperationNotAllowedError, ListmonkFileNotFoundError
-
+from listmonk.errors import ListmonkFileNotFoundError, OperationNotAllowedError, ValidationError
 from listmonk.models import SubscriberStatuses
 
 # region global vars
@@ -401,7 +400,10 @@ def subscriber_by_uuid(
 
 # endregion
 
-# region def create_subscriber(email: str, name: str, list_ids: set[int], pre_confirm: bool, attribs: dict, timeout_config: Optional[httpx.Timeout] = None)
+# region def create_subscriber(
+#       email: str, name: str, list_ids: set[int], pre_confirm: bool,
+#       attribs: dict, timeout_config: Optional[httpx.Timeout] = None
+# )
 
 
 def create_subscriber(
@@ -459,7 +461,7 @@ def create_subscriber(
 
 # endregion
 
-# region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool
+# region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool  # noqa: E501
 
 
 def delete_subscriber(
@@ -560,7 +562,7 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
 
 # endregion
 
-# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int], status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx.Timeout] = None)
+# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int], status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx.Timeout] = None)  # noqa: E501
 
 
 def update_subscriber(
@@ -674,7 +676,7 @@ def block_subscriber(
 
 # endregion
 
-# region def send_transactional_email(subscriber_email: str, template_id: int, from_email: Optional[str] = None, template_data: Optional[dict] = None, messenger_channel: str = "email", content_type: str = "markdown", attachments: Optional[list[Path]] = None)
+# region def send_transactional_email(subscriber_email: str, template_id: int, from_email: Optional[str] = None, template_data: Optional[dict] = None, messenger_channel: str = "email", content_type: str = "markdown", attachments: Optional[list[Path]] = None)  # noqa: E501
 
 
 def send_transactional_email(
@@ -700,8 +702,10 @@ def send_transactional_email(
         attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
         email_headers: Optional array of e-mail headers to include in all messages sent from this server. eg: [{"X-Custom": "value"}, {"X-Custom2": "value"}]
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if the email send was successful, False otherwise. Errors may show up in the logs section of your Listmonk dashboard.
-    """
+
+    Returns: True if the email send was successful, False otherwise.
+    Errors may show up in the logs section of your Listmonk dashboard.
+    """  # noqa: E501
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
