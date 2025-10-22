@@ -2,6 +2,7 @@ import datetime
 import json
 import sys
 import urllib.parse
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
@@ -9,7 +10,7 @@ import httpx
 
 from listmonk import models, urls  # noqa: F401
 
-__version__ = '0.3.8'
+__version__ = version('listmonk')
 
 from listmonk.errors import ListmonkFileNotFoundError, OperationNotAllowedError, ValidationError
 from listmonk.models import SubscriberStatuses
