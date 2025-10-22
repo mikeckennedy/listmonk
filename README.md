@@ -1,7 +1,7 @@
 # Listmonk Email API Client for Python
 
-Client for the for open source, self-hosted [Listmonk email platform](https://listmonk.app) based on 
-[httpx](https://www.python-httpx.org) and [pydantic](https://pydantic.dev).  
+Client for the for open source, self-hosted [Listmonk email platform](https://listmonk.app) based on
+[httpx](https://www.python-httpx.org) and [pydantic](https://pydantic.dev).
 
 `listmonk` is intended for integrating your Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/) but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segmentate users (into separate lists).
 
@@ -11,23 +11,22 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 
 ## Core Features
 
-* ➕**Add a subscriber** to your subscribed users. 
-* 🙎 Get **subscriber details** by email, ID, UUID, and more.
-* 📝 **Modify subscriber details** (including custom attribute collection).
-* 🔍 **Search** your users based on app and custom attributes.
-* 🏥 Check the **health and connectivity** of your instance.
-*  👥 Retrieve your **segmentation lists**,  list details, and subscribers.
-* 🙅 Unsubscribe and block users who don't want  to be contacted further.
-* 💥 Completely delete a subscriber from your instance.
-* 📧 Send transactional email with template data (e.g. password reset emails).
-* 📨 Manage campaign (bulk) emails from the API.
-* 🎨 Edit and create templates to control the over all look and feel of campaigns.
-* 📝 Create and delete lists.
+- ➕**Add a subscriber** to your subscribed users.
+- 🙎 Get **subscriber details** by email, ID, UUID, and more.
+- 📝 **Modify subscriber details** (including custom attribute collection).
+- 🔍 **Search** your users based on app and custom attributes.
+- 🏥 Check the **health and connectivity** of your instance.
+- 👥 Retrieve your **segmentation lists**, list details, and subscribers.
+- 🙅 Unsubscribe and block users who don't want to be contacted further.
+- 💥 Completely delete a subscriber from your instance.
+- 📧 Send transactional email with template data (e.g. password reset emails).
+- 📨 Manage campaign (bulk) emails from the API.
+- 🎨 Edit and create templates to control the over all look and feel of campaigns.
+- 📝 Create and delete lists.
 
 ## Installation
 
 Just `pip install listmonk`
-
 
 ## Usage
 
@@ -148,7 +147,7 @@ from listmonk.models import Template
 templates: list[Template] = listmonk.templates()
 template: Template = listmonk.template_by_id(2)
 
-# Create a new Template
+# Create a new Template for Campaigns
 new_template = listmonk.create_template(
     name='NEW TEMPLATE',
     body='<p>Some Insane HTML! {{ template "content" . }} </p>',
@@ -165,7 +164,29 @@ listmonk.delete_template(3)
 # Preview Template
 preview_html = listmonk.template_preview_by_id(3)
 print(preview_html)
+
+# Create a new template for Transactional Emails
+new_tx_template = listmonk.create_template(
+    name='NEW TX TEMPLATE',
+    subject='Your Transactional Email Subject',
+    body='<p>Some Insane HTML! {{ .Subscriber.FirstName }}</p>',
+    type='tx',
+)
 ```
+
+## F.A.Q.
+
+### I got httpx.HTTPStatusError: Client error '403 Forbidden'
+
+If you encounter an error like this in your console:
+
+```text
+httpx.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''
+```
+
+It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.
+
+**Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)]
 
 ## Want to contribute?
 

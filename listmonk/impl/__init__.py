@@ -1215,6 +1215,7 @@ def create_template(
     body: Optional[str] = None,
     type: Optional[str] = None,
     is_default: Optional[bool] = None,
+    subject: Optional[str] = None,
     timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Template]:
     """
@@ -1242,6 +1243,7 @@ def create_template(
 
     model = models.CreateTemplateModel(
         name=name,
+        subject=subject,
         body=body,
         type=type,
         is_default=is_default,
@@ -1403,6 +1405,7 @@ def update_template(
 
     update_model = models.CreateTemplateModel(
         name=template.name,
+        subject=template.subject,
         body=template.body,
         type=template.type,
     )
