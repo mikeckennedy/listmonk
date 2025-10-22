@@ -141,6 +141,7 @@ class Template(BaseModel):
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
     name: Optional[str] = None
+    subject: Optional[str] = None
     body: Optional[str] = None
     type: Optional[str] = None
     is_default: Optional[bool] = None
@@ -148,6 +149,7 @@ class Template(BaseModel):
 
 class CreateTemplateModel(BaseModel):
     name: Optional[str] = None
+    subject: Optional[str] = None
     body: Optional[str] = None
     type: Optional[str] = None
     is_default: Optional[bool] = False
