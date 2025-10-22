@@ -160,3 +160,5 @@ cython_debug/
 .idea/
 settings.json
 /.claude/settings.local.json
+
+.ruff_cache/
