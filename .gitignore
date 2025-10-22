@@ -162,3 +162,4 @@ settings.json
 /.claude/settings.local.json
 
 .ruff_cache/
+/.ruff_cache
