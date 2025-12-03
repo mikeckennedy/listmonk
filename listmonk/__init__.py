@@ -3,6 +3,7 @@ from listmonk import (
     models,
 )
 from listmonk.impl import (
+    add_subscribers_to_lists,
     block_subscriber,
     campaign_by_id,
     campaign_preview_by_id,
@@ -56,6 +57,7 @@ __all__ = [
     'subscriber_by_id',
     'subscriber_by_uuid',
     'create_subscriber',
+    'add_subscribers_to_lists',
     'delete_subscriber',
     'update_subscriber',
     'disable_subscriber',
