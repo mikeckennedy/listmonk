@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.3.9] - 2026-01-05
+
+### Added
+* Add add_subscribers_to_lists function (thanks @MochaSteve256)
+
+### Changed
+* Loosen some of the types to allow more flexible usage (avoid type errors when DTOs/ViewModels/etc have VALUE|None typing but are known to be in a good state)
+* Refactor client implementation to improve organization and maintainability
+
 ## [0.3.8] - 2025-10-22
 
 ### Added
@@ -41,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v2026.01.05...HEAD
+[2026.01.05]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...v2026.01.05
 [0.3.8]: https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.8
 
