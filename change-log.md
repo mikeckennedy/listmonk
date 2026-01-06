@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v2026.01.05...HEAD
-[2026.01.05]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...v2026.01.05
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.9...HEAD
+[0.3.9]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.8
 
