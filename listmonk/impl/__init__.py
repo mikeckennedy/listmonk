@@ -1,6 +1,7 @@
 import datetime
 import json
 import sys
+import typing
 import urllib.parse
 from importlib.metadata import version
 from pathlib import Path
@@ -511,7 +512,9 @@ def delete_subscriber(
 # region def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional[httpx.Timeout] = None) -> bool
 
 
-def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional[httpx.Timeout] = None) -> bool:
+def confirm_optin(
+    subscriber_uuid: Optional[str], list_uuid: Optional[str], timeout_config: Optional[httpx.Timeout] = None
+) -> bool:
     """
     For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in
     via the API. You should only do this when they are actually opting in. If you have your own opt-in
@@ -565,7 +568,10 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
 
 
 def add_subscribers_to_lists(
-    subscriber_ids: set[int], list_ids: set[int], timeout_config: Optional[httpx.Timeout] = None
+    subscriber_ids: typing.Iterable[int],
+    list_ids: typing.Iterable[int],
+    timeout_config: Optional[httpx.Timeout] = None,
+    status: str = 'confirmed',
 ) -> bool:
     """
     Add a number of subscribers to a number of lists.
@@ -579,13 +585,21 @@ def add_subscribers_to_lists(
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
 
-    if not subscriber_ids or subscriber_ids.issubset({0}):
+    unique_subscriber_ids = set(subscriber_ids)
+    unique_list_ids = set(list_ids)
+
+    if not unique_subscriber_ids or unique_subscriber_ids.issubset({0}):
         return False
 
-    if not list_ids or list_ids.issubset({0}):
+    if not unique_list_ids or unique_list_ids.issubset({0}):
         return False
 
-    payload = {'ids': list(subscriber_ids), 'action': 'add', 'target_list_ids': list(list_ids), 'status': 'confirmed'}
+    payload = {
+        'ids': list(unique_subscriber_ids),
+        'action': 'add',
+        'target_list_ids': list(unique_list_ids),
+        'status': status,
+    }
 
     url = f'{url_base}{urls.subscriber_lists}'
 
@@ -610,7 +624,7 @@ def add_subscribers_to_lists(
 
 
 def update_subscriber(
-    subscriber: models.Subscriber,
+    subscriber: Optional[models.Subscriber],
     add_to_lists: Optional[set[int]] = None,
     remove_from_lists: Optional[set[int]] = None,
     status: SubscriberStatuses = SubscriberStatuses.enabled,
@@ -670,7 +684,7 @@ def update_subscriber(
 
 
 def disable_subscriber(
-    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+    subscriber: Optional[models.Subscriber], timeout_config: Optional[httpx.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to disable.
