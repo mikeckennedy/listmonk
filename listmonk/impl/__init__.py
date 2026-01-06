@@ -563,6 +563,49 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
 
 # endregion
 
+
+def add_subscribers_to_lists(
+    subscriber_ids: set[int], list_ids: set[int], timeout_config: Optional[httpx.Timeout] = None
+) -> bool:
+    """
+    Add a number of subscribers to a number of lists.
+    Args:
+        subscriber_ids: List of subscriber IDs.
+        list_ids: List of lists to subscribe to.
+        timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    Returns: True on success, False on fail.
+    """
+    global core_headers
+    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    validate_state(url=True)
+
+    if not subscriber_ids or subscriber_ids.issubset({0}):
+        return False
+
+    if not list_ids or list_ids.issubset({0}):
+        return False
+
+    payload = {'ids': list(subscriber_ids), 'action': 'add', 'target_list_ids': list(list_ids), 'status': 'confirmed'}
+
+    url = f'{url_base}{urls.subscriber_lists}'
+
+    resp = httpx.put(
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        json=payload,
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
+    )
+
+    try:
+        resp.raise_for_status()
+    except Exception:
+        return False
+
+    return True
+
+
 # region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int], status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx.Timeout] = None)  # noqa: E501
 
 
