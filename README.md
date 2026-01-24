@@ -22,7 +22,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 - 📧 Send transactional email with template data (e.g. password reset emails).
 - 📨 Manage campaign (bulk) emails from the API.
 - 🎨 Edit and create templates to control the over all look and feel of campaigns.
-- 📝 Create and delete lists.
+- 📝 Create, edit and delete lists.
 
 ## Installation
 

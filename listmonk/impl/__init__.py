@@ -1640,3 +1640,85 @@ def delete_list(list_id: int) -> bool:
 
 
 # endregion
+
+
+# region def update_list(list_id: int) -> Optional[models.MailingList]
+
+
+def update_list(
+    list_id: int,
+    list_name: Optional[str] = None,
+    list_type: Optional[str] = None,
+    status: Optional[str] = None,
+    optin: Optional[str] = None,
+    tags: Optional[list[str]] = None,
+    description: Optional[str] = None,
+) -> Optional[models.MailingList]:
+    """
+    Updates an existing mailing list on the server.
+    Args:
+        list_id: List ID
+        list_name: Optional update name of the list.
+        list_type: Optional update type of list. Options: "private", "public".
+        optin: Optianal update opt-in type. Options: "single", "double".
+        tags: Optional update list of tags associated with the list.
+        description: Optional update description for the list.
+    Returns:
+        The MailingList object that was created on the server.
+    """
+    global core_headers
+
+    validate_state(url=True)
+
+    if not list_id:
+        raise ValueError('List ID is required')
+
+    if list_type not in [None, 'public', 'private']:
+        raise ValueError("list_type must be either 'public' or 'private'")
+
+    if status not in [None, 'active', 'archived']:
+        raise ValueError("status must be either 'active' or 'archived'")
+
+    if optin not in [None, 'single', 'double']:
+        raise ValueError("optin must be either 'single' or 'double'")
+
+    payload: dict[str, Any] = {
+
+    }
+    
+    if list_name is not None:
+        list_name = (list_name or '').strip()
+        payload['name'] = list_name
+
+    if list_type is not None:
+        payload['list_type'] = list_type
+
+    if optin is not None:
+        payload['optin'] = optin
+
+    if status is not None:
+        payload['status'] = status
+
+    if tags is not None:
+        payload['tags'] = tags
+
+    if description is not None:
+        payload['description'] = description
+
+    url = f'{url_base}{urls.lst}'
+    url = url.format(list_id=list_id)
+
+    resp = httpx.put(
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        json=payload,
+        headers=core_headers,
+        follow_redirects=True,
+    )
+    raw_data = _validate_and_parse_json_response(resp)
+    list_data = raw_data['data']
+
+    return models.MailingList(**list_data)
+
+
+# endregion
