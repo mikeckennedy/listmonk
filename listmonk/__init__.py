@@ -37,6 +37,7 @@ from listmonk.impl import (
     update_campaign,
     update_subscriber,
     update_template,
+    update_list,
     verify_login,
 )
 
@@ -81,4 +82,5 @@ __all__ = [
     'set_default_template',
     'create_list',
     'delete_list',
+    'update_list',
 ]
