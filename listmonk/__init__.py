@@ -35,9 +35,9 @@ from listmonk.impl import (
     template_preview_by_id,
     templates,
     update_campaign,
+    update_list,
     update_subscriber,
     update_template,
-    update_list,
     verify_login,
 )
 

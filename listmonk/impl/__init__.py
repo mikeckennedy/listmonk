@@ -1682,10 +1682,8 @@ def update_list(
     if optin not in [None, 'single', 'double']:
         raise ValueError("optin must be either 'single' or 'double'")
 
-    payload: dict[str, Any] = {
+    payload: dict[str, Any] = {}
 
-    }
-    
     if list_name is not None:
         list_name = (list_name or '').strip()
         payload['name'] = list_name
