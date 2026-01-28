@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+* Add update_list function (thanks @ChrisH861, PR #27)
 
 ### Changed
 
