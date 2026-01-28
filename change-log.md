@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-* Add update_list function (thanks @ChrisH861, PR #27)
 
 ### Changed
 
@@ -19,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+
+## [0.3.10] - 2026-01-28
+
+### Added
+* Add update_list function (thanks @ChrisH861, PR #27)
 
 ## [0.3.9] - 2026-01-05
 
@@ -51,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.9...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.10...HEAD
+[0.3.10]: https://github.com/mikeckennedy/listmonk/compare/v0.3.9...v0.3.10
 [0.3.9]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.8
 
