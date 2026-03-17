@@ -83,7 +83,7 @@ class Campaign(BaseModel):
     tags: list[str] = pydantic.Field(default_factory=list)
     template_id: int
     messenger: Optional[str] = None
-    headers: dict[str, Optional[str]] = pydantic.Field(default_factory=dict)
+    headers: list[dict[str, Optional[str]]] = pydantic.Field(default_factory=list)
 
 
 class CreateCampaignModel(BaseModel):
@@ -99,7 +99,7 @@ class CreateCampaignModel(BaseModel):
     messenger: Optional[str] = None
     template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
-    headers: dict[str, Optional[str]] = pydantic.Field(default_factory=dict)
+    headers: list[dict[str, Optional[str]]] = pydantic.Field(default_factory=list)
 
     @field_serializer('send_at')
     def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> Optional[str]:
