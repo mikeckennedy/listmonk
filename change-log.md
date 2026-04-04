@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.3.11] - 2026-04-03
+
+### Fixed
+* Fix campaign creation failing with listmonk server 6.0.0 - `headers` field now correctly uses a list of dictionaries instead of a plain dictionary (PR #28)
+
 ## [0.3.10] - 2026-01-28
 
 ### Added
@@ -55,7 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.10...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.11...HEAD
+[0.3.11]: https://github.com/mikeckennedy/listmonk/compare/v0.3.10...v0.3.11
 [0.3.10]: https://github.com/mikeckennedy/listmonk/compare/v0.3.9...v0.3.10
 [0.3.9]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.8
