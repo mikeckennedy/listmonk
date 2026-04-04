@@ -52,6 +52,10 @@ python example_client/client.py
 - Functions that fetch collections: `{resources}` (e.g., `subscribers`, `campaigns`)
 - CRUD operations: `create_{resource}`, `update_{resource}`, `delete_{resource}`
 
+## Package Reference Guides
+
+The `dev-docs/package-guides/` directory (from [python-package-guides-for-agents](https://github.com/mikeckennedy/python-package-guides-for-agents)) contains detailed API reference docs for key dependencies and the Listmonk server API. Consult these when working with httpx, Pydantic, or the Listmonk REST API rather than relying solely on training data.
+
 ## Testing and Examples
 
 No formal test suite exists. The `example_client/client.py` serves as both documentation and integration testing, demonstrating all major API operations against a real Listmonk instance.
