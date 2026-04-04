@@ -163,3 +163,6 @@ settings.json
 
 .ruff_cache/
 /.ruff_cache
+.claude/agents
+.claude/commands
+
