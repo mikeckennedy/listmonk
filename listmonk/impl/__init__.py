@@ -411,7 +411,7 @@ def subscriber_by_uuid(
 def create_subscriber(
     email: str,
     name: Optional[str] = None,
-    list_ids: set[int] = None, # type: ignore - can't set it to set() because of mutable default argument gotcha
+    list_ids: set[int] = None,  # type: ignore - can't set it to set() because of mutable default argument gotcha
     pre_confirm: bool = False,
     attribs: Optional[dict[str, Any]] = None,
     timeout_config: Optional[httpx.Timeout] = None,
