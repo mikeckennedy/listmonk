@@ -33,7 +33,7 @@ class MailingList(BaseModel):
 class Subscriber(BaseModel):
     id: int
     email: str
-    name: str
+    name: Optional[str] = None
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
     uuid: Optional[str] = None
@@ -53,7 +53,7 @@ class Subscriber(BaseModel):
 
 class CreateSubscriberModel(BaseModel):
     email: str
-    name: str
+    name: Optional[str] = None
     status: str
     lists: list[int] = pydantic.Field(default_factory=list)
     preconfirm_subscriptions: bool

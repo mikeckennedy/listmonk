@@ -403,17 +403,17 @@ def subscriber_by_uuid(
 # endregion
 
 # region def create_subscriber(
-#       email: str, name: str, list_ids: set[int], pre_confirm: bool,
+#       email: str, name: Optional[str] = None, list_ids: set[int], pre_confirm: bool,
 #       attribs: dict, timeout_config: Optional[httpx.Timeout] = None
 # )
 
 
 def create_subscriber(
     email: str,
-    name: str,
-    list_ids: set[int],
-    pre_confirm: bool,
-    attribs: dict[str, Any],
+    name: Optional[str] = None,
+    list_ids: set[int] = None, # type: ignore - can't set it to set() because of mutable default argument gotcha
+    pre_confirm: bool = False,
+    attribs: Optional[dict[str, Any]] = None,
     timeout_config: Optional[httpx.Timeout] = None,
 ) -> models.Subscriber:
     """
@@ -434,16 +434,13 @@ def create_subscriber(
     name = (name or '').strip()
     if not email:
         raise ValueError('Email is required')
-    if not name:
-        raise ValueError('Name is required')
-
     model = models.CreateSubscriberModel(
         email=email,
-        name=name,
+        name=name or '',
         status='enabled',
-        lists=list(list_ids),
+        lists=list(list_ids or []),
         preconfirm_subscriptions=pre_confirm,
-        attribs=attribs,
+        attribs=attribs or {},
     )
 
     # noinspection DuplicatedCode
