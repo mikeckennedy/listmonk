@@ -16,9 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Fixed
-* Fix `confirm_optin()` returning `False` on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes #23)
 
 ### Security
+
+## [0.3.13] - 2026-04-03
+
+### Fixed
+* Fix `confirm_optin()` returning `False` on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes #23)
 
 ## [0.3.12] - 2026-04-03
 
@@ -66,7 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.12...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.13...HEAD
+[0.3.13]: https://github.com/mikeckennedy/listmonk/compare/v0.3.12...v0.3.13
 [0.3.12]: https://github.com/mikeckennedy/listmonk/compare/v0.3.11...v0.3.12
 [0.3.11]: https://github.com/mikeckennedy/listmonk/compare/v0.3.10...v0.3.11
 [0.3.10]: https://github.com/mikeckennedy/listmonk/compare/v0.3.9...v0.3.10
