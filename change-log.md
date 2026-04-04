@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
-* Make subscriber `name` field optional in `Subscriber`, `CreateSubscriberModel`, and `create_subscriber()` to match the Listmonk API/UI behavior (fixes #15)
 
 ### Deprecated
 
@@ -19,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+
+## [0.3.12] - 2026-04-03
+
+### Changed
+* Make subscriber `name` field optional in `Subscriber`, `CreateSubscriberModel`, and `create_subscriber()` to match the Listmonk API/UI behavior (fixes #15)
 
 ## [0.3.11] - 2026-04-03
 
@@ -61,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.11...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.12...HEAD
+[0.3.12]: https://github.com/mikeckennedy/listmonk/compare/v0.3.11...v0.3.12
 [0.3.11]: https://github.com/mikeckennedy/listmonk/compare/v0.3.10...v0.3.11
 [0.3.10]: https://github.com/mikeckennedy/listmonk/compare/v0.3.9...v0.3.10
 [0.3.9]: https://github.com/mikeckennedy/listmonk/compare/v0.3.8...v0.3.9
