@@ -411,7 +411,7 @@ def subscriber_by_uuid(
 def create_subscriber(
     email: str,
     name: Optional[str] = None,
-    list_ids: set[int] = None, # type: ignore - can't set it to set() because of mutable default argument gotcha
+    list_ids: set[int] = None,  # type: ignore - can't set it to set() because of mutable default argument gotcha
     pre_confirm: bool = False,
     attribs: Optional[dict[str, Any]] = None,
     timeout_config: Optional[httpx.Timeout] = None,
@@ -832,6 +832,65 @@ def send_transactional_email(
 
 # endregion
 
+# region def upload_media(file: Path | bytes, filename: str | None = None) -> models.Media
+
+
+def upload_media(
+    file: Path | bytes,
+    filename: str | None = None,
+    timeout_config: Optional[httpx.Timeout] = None,
+) -> models.Media:
+    """
+    Upload a media file to Listmonk. Media can be attached to campaigns via their IDs.
+
+    Parameters:
+        file: A Path to a file on disk, or raw bytes of the file content.
+        filename: Required when file is bytes. Optional when file is a Path (derived from the path).
+        timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+
+    Returns:
+        Media: A model representing the uploaded media with its ID.
+
+    Raises:
+        ListmonkFileNotFoundError: If file is a Path and does not exist.
+        ValueError: If file is bytes and filename is not provided.
+    """
+    global core_headers
+    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    validate_state(url=True)
+
+    if isinstance(file, Path):
+        if not file.exists() or not file.is_file():
+            raise ListmonkFileNotFoundError(f'File {file} does not exist')
+        filename = filename or file.name
+        file_bytes = file.read_bytes()
+    elif isinstance(file, bytes):
+        if not filename:
+            raise ValueError('filename is required when file is bytes')
+        file_bytes = file
+    else:
+        raise TypeError(f'file must be a Path or bytes, got {type(file).__name__}')
+
+    url = f'{url_base}{urls.media}'
+    headers = core_headers.copy()
+    headers.pop('Content-Type')
+
+    resp = httpx.post(
+        url,
+        auth=httpx.BasicAuth(username or '', password or ''),
+        files=[('file', (filename, file_bytes))],
+        headers=headers,
+        follow_redirects=True,
+        timeout=timeout_config,
+    )
+
+    raw_data = _validate_and_parse_json_response(resp)
+    media_data = raw_data['data']
+    return models.Media(**media_data)
+
+
+# endregion
+
 # region def is_healthy() -> bool
 
 
@@ -1059,6 +1118,7 @@ def create_campaign(
     template_id: Optional[int] = None,
     tags: Optional[list[str]] = None,  # noqa
     headers: Optional[dict[str, Optional[str]]] = None,  # noqa
+    media_ids: Optional[list[int]] = None,
     timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
@@ -1078,6 +1138,7 @@ def create_campaign(
         template_id (int): The template ID to be used for the campaign. Defaults to 1.
         tags (list[str]): A list of tags for the campaign.
         headers (list[dict]): A list of headers for the campaign.
+        media_ids (list[int]): A list of media IDs to attach to the campaign (from upload_media).
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
 
     Returns:
@@ -1116,6 +1177,7 @@ def create_campaign(
         template_id=template_id,
         tags=tags,
         headers=headers,
+        media=media_ids or [],
     )
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.campaigns}'
@@ -1177,6 +1239,7 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
 
 def update_campaign(
     campaign: models.Campaign,
+    media_ids: Optional[list[int]] = None,
     timeout_config: Optional[httpx.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
@@ -1184,6 +1247,7 @@ def update_campaign(
 
     Parameters:
         campaign: models.Campaign - The campaign object containing the updated information.
+        media_ids: Optional list of media IDs to attach to the campaign (from upload_media).
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
 
     Returns:
@@ -1214,6 +1278,7 @@ def update_campaign(
         template_id=campaign.template_id,
         tags=campaign.tags,
         headers=campaign.headers,  # type: ignore
+        media=media_ids or [],
     )
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}'

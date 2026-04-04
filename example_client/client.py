@@ -103,6 +103,34 @@ if disabled_subscriber is not None:
 if subscriber:
     listmonk.delete_subscriber(subscriber.email)
 
+# --- Media upload and campaign attachments ---
+# Upload a file to Listmonk's media library, then attach it to a campaign.
+# Media can be uploaded from a file path or raw bytes.
+#
+# from listmonk.models import Campaign
+#
+# # Upload from a file path
+# media = listmonk.upload_media(Path('/path/to/report.pdf'))
+# print(f'Uploaded media: id={media.id}, filename={media.filename}')
+#
+# # Or upload from bytes (filename required)
+# pdf_bytes = Path('/path/to/report.pdf').read_bytes()
+# media = listmonk.upload_media(pdf_bytes, filename='report.pdf')
+#
+# # Create a campaign with the uploaded media attached
+# campaign = listmonk.create_campaign(
+#     name='Campaign With Attachment',
+#     subject='Check out the attached report',
+#     body='<p>Please see the attached file.</p>',
+#     list_ids={1},
+#     media_ids=[media.id],
+# )
+# print(f'Created campaign with attachment: {campaign.id}')
+#
+# # Update an existing campaign to add/change attachments
+# campaign = listmonk.campaign_by_id(campaign.id)
+# listmonk.update_campaign(campaign, media_ids=[media.id])
+
 to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
 from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'  # Optional
 template_id = 3  # *Transactional* template ID from your listmonk instance.

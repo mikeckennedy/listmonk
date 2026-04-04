@@ -100,6 +100,7 @@ class CreateCampaignModel(BaseModel):
     template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
     headers: list[dict[str, Optional[str]]] = pydantic.Field(default_factory=list)
+    media: list[int] = pydantic.Field(default_factory=list)
 
     @field_serializer('send_at')
     def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> Optional[str]:
@@ -157,3 +158,11 @@ class CreateTemplateModel(BaseModel):
 
 class TemplatePreview(BaseModel):
     preview: Optional[str] = None
+
+
+class Media(BaseModel):
+    id: int
+    uuid: str
+    filename: Optional[str] = None
+    content_type: Optional[str] = None
+    created_at: Optional[datetime.datetime] = None

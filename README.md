@@ -113,7 +113,10 @@ from datetime import datetime, timedelta
 campaigns: list[Campaign] = listmonk.campaigns()
 campaign: Campaign = listmonk.campaign_by_id(15)
 
-# Create a new Campaign
+# Upload media and create a campaign with attachments
+media = listmonk.upload_media(pathlib.Path("/path/to/report.pdf"))
+# Or upload from bytes: media = listmonk.upload_media(pdf_bytes, filename="report.pdf")
+
 listmonk.create_campaign(name='This is my Great Campaign!',
                          subject="You won't believe this!",
                          body='<p>Some Insane HTML!</p>',  # Optional
@@ -121,7 +124,8 @@ listmonk.create_campaign(name='This is my Great Campaign!',
                          send_at=datetime.now() + timedelta(hours=1),  # Optional
                          template_id=5,  # Optional Defaults to 1
                          list_ids={1, 2},  # Optional Defaults to 1
-                         tags=['good', 'better', 'best']  # Optional
+                         tags=['good', 'better', 'best'],  # Optional
+                         media_ids=[media.id],  # Optional, attach uploaded media
                          )
 
 # Update A Campaign
@@ -132,7 +136,7 @@ campaign_to_update.body = "<p>There's a lot more we need to say so we're updatin
 campaign_to_update.altbody = "There's a lot more we need to say so we're updating this programmatically!"
 campaign_to_update.lists = [3, 4]
 
-listmonk.update_campaign(campaign_to_update)
+listmonk.update_campaign(campaign_to_update, media_ids=[media.id])
 
 # Delete a Campaign
 campaign_to_delete: Optional[Campaign] = listmonk.campaign_by_id(15)
