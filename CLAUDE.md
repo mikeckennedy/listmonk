@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python client library for the Listmonk email platform. The library provides a simplified interface to the Listmonk API, focusing on subscriber management, campaign operations, template handling, and transactional emails.
+This is a Python client library for the Listmonk email platform. The library provides a simplified interface to the Listmonk API, focusing on subscriber management, campaign operations, template handling, media uploads, and transactional emails.
 
 ### Architecture
 
@@ -33,17 +33,19 @@ python example_client/client.py
 
 - **Line length**: 120 characters (configured in ruff.toml)
 - **Quote style**: Single quotes
-- **Python version**: Supports 3.10+, targets 3.13
+- **Python version**: Supports 3.10+ (classifiers through 3.15), ruff targets 3.13
 - **Dependencies**: httpx, pydantic, strenum
-- **Import organization**: Group imports by stdlib, third-party, local with proper spacing
+- **Import organization**: Group imports by stdlib, third-party, local with proper spacing (enforced by ruff `"I"` rule)
 
 ### Key Patterns
 
 1. **Global State Management**: Authentication credentials are stored in module-level variables
 2. **Pydantic Models**: All API data structures use Pydantic BaseModel for validation
-3. **Error Handling**: Custom exceptions in `listmonk.errors` for validation and operation errors
+3. **Error Handling**: Custom exceptions in `listmonk.errors`: `ValidationError`, `OperationNotAllowedError`, and `ListmonkFileNotFoundError`
 4. **URL Constants**: All API endpoints defined in `urls.py` with format string placeholders
 5. **Optional Timeouts**: All network operations accept optional `httpx.Timeout` configuration
+6. **Code Organization**: Functions in `impl/__init__.py` are grouped with `# region` / `# endregion` comments
+7. **Multipart Uploads**: Media and transactional email attachments use httpx multipart form-data encoding
 
 ### Function Naming Convention
 
@@ -51,6 +53,10 @@ python example_client/client.py
 - Functions that fetch single items: `{resource}_by_{identifier}` (e.g., `subscriber_by_email`)
 - Functions that fetch collections: `{resources}` (e.g., `subscribers`, `campaigns`)
 - CRUD operations: `create_{resource}`, `update_{resource}`, `delete_{resource}`
+
+## Package Reference Guides
+
+The `dev-docs/package-guides/` directory (from [python-package-guides-for-agents](https://github.com/mikeckennedy/python-package-guides-for-agents)) contains detailed API reference docs for key dependencies and the Listmonk server API. Consult these when working with httpx, Pydantic, or the Listmonk REST API rather than relying solely on training data.
 
 ## Testing and Examples
 

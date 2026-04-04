@@ -22,7 +22,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 - 📧 Send transactional email with template data (e.g. password reset emails).
 - 📨 Manage campaign (bulk) emails from the API.
 - 🎨 Edit and create templates to control the over all look and feel of campaigns.
-- 📝 Create and delete lists.
+- 📝 Create, edit and delete lists.
 
 ## Installation
 
@@ -48,11 +48,11 @@ up: bool = listmonk.is_healthy()
 new_list = listmonk.create_list(list_name="my_new_list")
 
 # Read data about your lists
-lists: list[] = listmonk.lists()
+lists: list[MailingList] = listmonk.lists()
 the_list: MailingList = listmonk.list_by_id(list_id=7)
 
 # Various ways to access existing subscribers
-subscribers: list[] = listmonk.subscribers(list_id=9)
+subscribers: list[Subscriber] = listmonk.subscribers(list_id=9)
 
 subscriber: Subscriber = listmonk.subscriber_by_email('testuser@some.domain')
 subscriber: Subscriber = listmonk.subscriber_by_id(2001)

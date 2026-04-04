@@ -2,17 +2,18 @@ import json
 from pathlib import Path
 
 import listmonk
+from listmonk.models import MailingList, Subscriber
 
-file = Path(__file__).parent / 'settings.json'
+file: Path = Path(__file__).parent / 'settings.json'
 
 settings = {}
 if file.exists():
     settings = json.loads(file.read_text())
 
-url = settings.get('base_url', '').strip('/') or input('Enter the base URL for your instance: ')
-user = settings.get('username') or input('Enter the username for Umami: ')
-password = settings.get('password') or input('Enter the password for Umami: ')
-test_list_id = settings.get('test_list_id') or input('Enter the ID for a test list with subscribers: ')
+url: str = settings.get('base_url', '').strip('/') or input('Enter the base URL for your instance: ')
+user: str = settings.get('username') or input('Enter the username for Umami: ')
+password: str = settings.get('password') or input('Enter the password for Umami: ')
+test_list_id: int = int(settings.get('test_list_id') or input('Enter the ID for a test list with subscribers: '))
 
 listmonk.set_url_base(url)
 print(f'Base url: {listmonk.get_base_url()}', flush=True)
@@ -22,7 +23,7 @@ print(f'API Healthy?: {listmonk.is_healthy()}', flush=True)
 print(f'Verify login: {listmonk.verify_login()}', flush=True)
 print()
 
-lists = listmonk.lists()
+lists: list[MailingList] = listmonk.lists()
 for lst in lists:
     print(f'{lst.name} list: {lst}', flush=True)
 
@@ -30,7 +31,7 @@ the_list = listmonk.list_by_id(test_list_id)
 print(f'List by ID: {the_list}')
 
 print()
-subscribers = listmonk.subscribers(list_id=test_list_id)
+subscribers: list[Subscriber] = listmonk.subscribers(list_id=test_list_id)
 print(f'{len(subscribers):,} subscribers returned', flush=True)
 
 # id=208495 created_at=datetime.datetime(2024, 1, 19, 20, 29, 8, 477242, tzinfo=TzInfo(UTC))
@@ -59,14 +60,14 @@ print(f'Created subscriber: {subscriber}', flush=True)
 subscriber = listmonk.subscriber_by_email(email)
 print(f'Subscriber by email: {subscriber}', flush=True)
 
-subscriber = listmonk.subscriber_by_id(subscriber.id)
+subscriber = listmonk.subscriber_by_id(subscriber.id)  # type: ignore
 print(f'Subscriber by id: {subscriber}', flush=True)
 
-subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)
+subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)  # type: ignore
 print(f'Subscriber by uuid: {subscriber}', flush=True)
 
-subscriber.name = 'Mr. ' + subscriber.name.upper()
-subscriber.attribs['rating'] = 7
+subscriber.name = 'Mr. ' + subscriber.name.upper()  # type: ignore
+subscriber.attribs['rating'] = 7  # type: ignore
 
 query = f"subscribers.email = '{email}'"
 print('Searching for user with query: ', query, flush=True)
@@ -76,28 +77,31 @@ print(f'Found {sub2[0].name} with email {sub2[0].email}', flush=True)
 
 
 # TODO: Choose list IDs from your instance (can be seen in the UI or from the listing above)
-to_add = {the_list.id}  # Add all the lists here: {1, 7, 11}
+to_add = {the_list.id}  # Add all the lists here: {1, 7, 11},  # type: ignore
 remove_from = set()  # Same as above
 updated_subscriber = listmonk.update_subscriber(subscriber, to_add, remove_from)
 print(f'Updated subscriber: {updated_subscriber}', flush=True)
 
-print(f'Subscriber confirmed?: {listmonk.confirm_optin(subscriber.uuid, the_list.uuid)}', flush=True)
+if subscriber is not None and the_list is not None:
+    print(f'Subscriber confirmed?: {listmonk.confirm_optin(subscriber.uuid, the_list.uuid)}', flush=True)
 
-updated_subscriber.attribs['subscription_note'] = (
-    'They asked to be unsubscribed so we disabled their account, but no block-listing yet.'
-)
+if updated_subscriber:
+    updated_subscriber.attribs['subscription_note'] = (
+        'They asked to be unsubscribed so we disabled their account, but no block-listing yet.'
+    )
 
 disabled_subscriber = listmonk.disable_subscriber(updated_subscriber)
 print('Disabled: ', disabled_subscriber, flush=True)
 
-disabled_subscriber.attribs['blocklist_note'] = 'They needed to be blocked!'
+if disabled_subscriber is not None:
+    disabled_subscriber.attribs['blocklist_note'] = 'They needed to be blocked!'
+    listmonk.block_subscriber(disabled_subscriber)
 
-listmonk.block_subscriber(disabled_subscriber)
+    re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
+    print('Re-enabled: ', re_enabled_subscriber, flush=True)
 
-re_enabled_subscriber = listmonk.enable_subscriber(disabled_subscriber)
-print('Re-enabled: ', re_enabled_subscriber, flush=True)
-
-listmonk.delete_subscriber(subscriber.email)
+if subscriber:
+    listmonk.delete_subscriber(subscriber.email)
 
 to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
 from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'  # Optional
