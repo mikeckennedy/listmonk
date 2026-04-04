@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Fixed
+* Fix `confirm_optin()` returning `False` on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes #23)
 
 ### Security
 

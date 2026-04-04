@@ -546,19 +546,12 @@ def confirm_optin(
         follow_redirects=True,
         timeout=timeout_config,
     )
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except httpx.HTTPStatusError:
+        return False
 
-    success_phrases = {
-        # New conformation was created now.
-        'Subscribed successfully.',
-        'Confirmed',
-        # They were already confirmed somehow previously.
-        'no subscriptions to confirm',
-        'No subscriptions',
-    }
-
-    text = resp.text or ''
-    return any(p in text for p in success_phrases)
+    return True
 
 
 # endregion
