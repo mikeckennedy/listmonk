@@ -21,6 +21,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 - 💥 Completely delete a subscriber from your instance.
 - 📧 Send transactional email with template data (e.g. password reset emails).
 - 📨 Manage campaign (bulk) emails from the API.
+- 📎 Upload media and attach files to campaigns.
 - 🎨 Edit and create templates to control the over all look and feel of campaigns.
 - 📝 Create, edit and delete lists.
 
