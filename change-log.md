@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-* Add `altbody` support to `send_transactional_email()` for multipart HTML transactional emails
 
 ### Changed
 
@@ -19,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+
+## [0.4.0] - 2026-04-08
+
+### Added
+* Add `altbody` support to `send_transactional_email()` for multipart HTML transactional emails
 
 ## [0.3.13] - 2026-04-03
 
@@ -71,7 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.3.13...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/mikeckennedy/listmonk/compare/v0.3.13...v0.4.0
 [0.3.13]: https://github.com/mikeckennedy/listmonk/compare/v0.3.12...v0.3.13
 [0.3.12]: https://github.com/mikeckennedy/listmonk/compare/v0.3.11...v0.3.12
 [0.3.11]: https://github.com/mikeckennedy/listmonk/compare/v0.3.10...v0.3.11
