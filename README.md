@@ -91,6 +91,16 @@ status: bool = listmonk.send_transactional_email(
     to_email, template_id, from_email=from_email,
     template_data=template_data, content_type='html')
 
+# Optional plaintext fallback for multipart HTML emails.
+status = listmonk.send_transactional_email(
+    to_email,
+    template_id,
+    from_email=from_email,
+    template_data=template_data,
+    content_type='html',
+    altbody='Plaintext order summary for mail clients that prefer text.'
+)
+
 # You can also add one or multiple attachments with transactional mails
 attachments = [
     pathlib.Path("/path/to/your/file1.pdf"),
@@ -103,7 +113,8 @@ status: bool = listmonk.send_transactional_email(
     from_email=from_email,
     template_data=template_data,
     attachments=attachments,
-    content_type='html'
+    content_type='html',
+    altbody='Plaintext fallback body'
 )
 
 # Access existing campaigns

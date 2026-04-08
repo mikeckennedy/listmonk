@@ -734,6 +734,7 @@ def send_transactional_email(
     template_data: Optional[dict[str, Any]] = None,
     messenger_channel: str = 'email',
     content_type: str = 'markdown',
+    altbody: Optional[str] = None,
     attachments: Optional[list[Path]] = None,
     email_headers: Optional[list[dict[str, Optional[str]]]] = None,
     timeout_config: Optional[httpx.Timeout] = None,
@@ -747,6 +748,7 @@ def send_transactional_email(
         template_data: A dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.* }}.
         messenger_channel: Default is "email", if you have SMS or some other channel, you can use it here.
         content_type: Email format options include html, markdown, and plain.
+        altbody: Optional alternate plaintext body for multipart HTML emails.
         attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
         email_headers: Optional array of e-mail headers to include in all messages sent from this server. eg: [{"X-Custom": "value"}, {"X-Custom2": "value"}]
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
@@ -778,6 +780,9 @@ def send_transactional_email(
 
     if from_email is not None:
         body_data['from_email'] = from_email
+
+    if altbody is not None:
+        body_data['altbody'] = altbody
 
     try:
         url = f'{url_base}{urls.send_tx}'

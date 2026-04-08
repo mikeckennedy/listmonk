@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+* Add `altbody` support to `send_transactional_email()` for multipart HTML transactional emails
 
 ### Changed
 

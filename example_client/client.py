@@ -107,9 +107,15 @@ to_email = 'SUBSCRIBER_EMAIL_ON_YOUR_LIST'
 from_email = 'APPROVED_OUTBOUND_EMAIL_ON_DOMAIN'  # Optional
 template_id = 3  # *Transactional* template ID from your listmonk instance.
 template_data = {'order_id': 1772, 'shipping_date': 'Next week'}
+altbody = 'Your order 1772 ships next week.'
 if to_email != 'SUBSCRIBER_EMAIL_ON_YOUR_LIST':
     status = listmonk.send_transactional_email(
-        to_email, template_id, from_email=from_email, template_data=template_data, content_type='html'
+        to_email,
+        template_id,
+        from_email=from_email,
+        template_data=template_data,
+        content_type='html',
+        altbody=altbody,
     )
     print(f'Result of sending a tx email: {status}.', flush=True)
 else:
