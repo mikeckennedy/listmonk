@@ -14,7 +14,7 @@ This is a Python client library for the Listmonk email platform. The library pro
 - **`listmonk/urls.py`**: API endpoint URL constants
 - **`listmonk/errors/__init__.py`**: Custom exception classes
 
-The library uses a simple global state pattern for authentication (username/password stored globally) and builds on httpx for HTTP operations and Pydantic for data validation.
+The library uses a simple global state pattern for authentication (username/password stored globally) and builds on httpx2 for HTTP operations and Pydantic for data validation.
 
 ## Development Commands
 
@@ -34,7 +34,7 @@ python example_client/client.py
 - **Line length**: 120 characters (configured in ruff.toml)
 - **Quote style**: Single quotes
 - **Python version**: Supports 3.10+ (classifiers through 3.15), ruff targets 3.13
-- **Dependencies**: httpx, pydantic, strenum
+- **Dependencies**: httpx2, pydantic, strenum
 - **Import organization**: Group imports by stdlib, third-party, local with proper spacing (enforced by ruff `"I"` rule)
 
 ### Key Patterns
@@ -43,9 +43,9 @@ python example_client/client.py
 2. **Pydantic Models**: All API data structures use Pydantic BaseModel for validation
 3. **Error Handling**: Custom exceptions in `listmonk.errors`: `ValidationError`, `OperationNotAllowedError`, and `ListmonkFileNotFoundError`
 4. **URL Constants**: All API endpoints defined in `urls.py` with format string placeholders
-5. **Optional Timeouts**: All network operations accept optional `httpx.Timeout` configuration
+5. **Optional Timeouts**: All network operations accept optional `httpx2.Timeout` configuration
 6. **Code Organization**: Functions in `impl/__init__.py` are grouped with `# region` / `# endregion` comments
-7. **Multipart Uploads**: Media and transactional email attachments use httpx multipart form-data encoding
+7. **Multipart Uploads**: Media and transactional email attachments use httpx2 multipart form-data encoding
 
 ### Function Naming Convention
 
@@ -56,7 +56,7 @@ python example_client/client.py
 
 ## Package Reference Guides
 
-The `dev-docs/package-guides/` directory (from [python-package-guides-for-agents](https://github.com/mikeckennedy/python-package-guides-for-agents)) contains detailed API reference docs for key dependencies and the Listmonk server API. Consult these when working with httpx, Pydantic, or the Listmonk REST API rather than relying solely on training data.
+The `dev-docs/package-guides/` directory (from [python-package-guides-for-agents](https://github.com/mikeckennedy/python-package-guides-for-agents)) contains detailed API reference docs for key dependencies and the Listmonk server API. Consult these when working with httpx2 (the `httpx_reference` guide still documents the near-identical httpx 0.28 API), Pydantic, or the Listmonk REST API rather than relying solely on training data.
 
 ## Testing and Examples
 

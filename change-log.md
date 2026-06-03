@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+* Migrate the HTTP backend from `httpx` to [`httpx2`](https://github.com/pydantic/httpx2), the Pydantic-maintained fork, after the original `httpx` project paused releases and locked down its issue tracker. `httpx2` is imported internally as `httpx`, so the public API and all call sites are unchanged.
+* TLS certificates are now validated against the operating system trust store (via `truststore`, the `httpx2` default) instead of the bundled `certifi` CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set `SSL_CERT_FILE` / `SSL_CERT_DIR`. See the new SSL entry in the README F.A.Q.
+* If you pass a custom `timeout_config`, construct it with `httpx2.Timeout(...)` (now the bundled dependency) instead of `httpx.Timeout(...)`.
 
 ### Deprecated
 

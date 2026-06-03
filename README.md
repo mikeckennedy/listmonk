@@ -1,13 +1,13 @@
 # Listmonk Email API Client for Python
 
 Client for the for open source, self-hosted [Listmonk email platform](https://listmonk.app) based on
-[httpx](https://www.python-httpx.org) and [pydantic](https://pydantic.dev).
+[httpx2](https://github.com/pydantic/httpx2) and [pydantic](https://pydantic.dev).
 
 `listmonk` is intended for integrating your Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/) but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segmentate users (into separate lists).
 
 So while it doesn't currently cover every endpoint (for example you cannot create a list programatically nor can you edit HTML templates for campaigns over APIs) it will likely work for you. That said, PRs are weclome.
 
-🔀 Async is currently planned but not yet implemented. With the httpx-base, it should be trivial if needed.
+🔀 Async is currently planned but not yet implemented. With the httpx2-base, it should be trivial if needed.
 
 ## Core Features
 
@@ -187,17 +187,31 @@ new_tx_template = listmonk.create_template(
 
 ## F.A.Q.
 
-### I got httpx.HTTPStatusError: Client error '403 Forbidden'
+### I got httpx2.HTTPStatusError: Client error '403 Forbidden'
 
 If you encounter an error like this in your console:
 
 ```text
-httpx.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''
+httpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''
 ```
 
 It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.
 
 **Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)]
+
+### I got an SSL certificate verification error against my self-hosted Listmonk
+
+As of the move to [httpx2](https://github.com/pydantic/httpx2), TLS certificates are validated against your **operating system's trust store** (via the `truststore` package) instead of the bundled `certifi` CA list. If you self-host Listmonk behind a custom or corporate Certificate Authority you may see an error like:
+
+```text
+ssl.SSLCertVerificationError: certificate verify failed: unable to get local issuer certificate
+```
+
+**Solution:** Install your CA certificate into your operating system's trust store, or point the client at your CA bundle via the standard environment variable before using the library:
+
+```bash
+export SSL_CERT_FILE=/path/to/your-ca-bundle.pem   # or SSL_CERT_DIR=/path/to/ca-dir
+```
 
 ## Want to contribute?
 

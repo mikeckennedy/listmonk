@@ -46,7 +46,7 @@ The example client serves as both documentation and integration testing. Copy `e
    - Collections: `{resources}` (e.g., `subscribers`, `campaigns`) 
    - CRUD: `create_{resource}`, `update_{resource}`, `delete_{resource}`
 
-3. **HTTP & Validation**: All API calls use httpx with BasicAuth. Responses are validated and parsed through `_validate_and_parse_json_response()`. All network operations accept optional `httpx.Timeout` configuration.
+3. **HTTP & Validation**: All API calls use httpx2 with BasicAuth. Responses are validated and parsed through `_validate_and_parse_json_response()`. All network operations accept optional `httpx2.Timeout` configuration.
 
 4. **Pydantic Models**: All data structures use Pydantic BaseModel for validation. Models handle serialization of datetime fields and list conversions.
 
@@ -55,7 +55,7 @@ The example client serves as both documentation and integration testing. Copy `e
 ## Configuration
 
 - **Python Version**: Minimum 3.10, targets 3.13
-- **Dependencies**: httpx, pydantic, strenum
+- **Dependencies**: httpx2, pydantic, strenum
 - **Code Style**: 120 character lines, single quotes, ruff formatting
 - **Ruff Rules**: E (pycodestyle errors), F (pyflakes), I (import sorting)
 

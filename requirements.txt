@@ -3,21 +3,21 @@
 annotated-types==0.7.0
     # via pydantic
 anyio==4.13.0
-    # via httpx
+    # via httpx2
 certifi==2026.2.25
     # via
-    #   httpcore
-    #   httpx
+    #   httpcore2
+    #   httpx2
 h11==0.16.0
-    # via httpcore
-httpcore==1.0.9
-    # via httpx
-httpx==0.28.1
+    # via httpcore2
+httpcore2==2.2.0
+    # via httpx2
+httpx2==2.2.0
     # via -r requirements.piptools
 idna==3.11
     # via
     #   anyio
-    #   httpx
+    #   httpx2
 pydantic==2.12.5
     # via -r requirements.piptools
 pydantic-core==2.41.5

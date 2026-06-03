@@ -1,7 +1,7 @@
 # listmonk — Comprehensive API Reference
 
 > Python client library for the open-source, self-hosted [Listmonk](https://listmonk.app) email platform.
-> Built on [httpx](https://www.python-httpx.org) and [Pydantic](https://pydantic.dev). Supports Python 3.10+.
+> Built on [httpx2](https://github.com/pydantic/httpx2) and [Pydantic](https://pydantic.dev). Supports Python 3.10+.
 
 ---
 
@@ -31,7 +31,7 @@
 pip install listmonk
 ```
 
-Dependencies: `httpx`, `pydantic`, `strenum`
+Dependencies: `httpx2`, `pydantic`, `strenum`
 
 ---
 
@@ -84,7 +84,7 @@ url = listmonk.get_base_url()
 
 The library uses HTTP Basic Auth. Credentials are stored globally for the lifetime of your application.
 
-### `login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = None) -> bool`
+### `login(user_name: str, pw: str, timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Authenticate with your Listmonk instance. Must call `set_url_base()` first.
 
@@ -97,7 +97,7 @@ success = listmonk.login('admin', 'secretpassword')
 - Raises `OperationNotAllowedError` if `set_url_base()` has not been called
 - Raises `ValidationError` if username or password is empty
 
-### `verify_login(timeout_config: Optional[httpx.Timeout] = None) -> bool`
+### `verify_login(timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Verify that stored credentials are still valid.
 
@@ -109,7 +109,7 @@ still_valid = listmonk.verify_login()
 
 ## Health Check
 
-### `is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool`
+### `is_healthy(timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Check if the Listmonk instance is alive and accessible with current credentials.
 
@@ -126,7 +126,7 @@ Returns `False` on any error (network, auth, etc.) rather than raising.
 
 ### Retrieving Subscribers
 
-#### `subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> list[Subscriber]`
+#### `subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> list[Subscriber]`
 
 Get subscribers matching criteria. Returns all subscribers if no filters provided. Handles pagination automatically (500 per page).
 
@@ -144,7 +144,7 @@ results = listmonk.subscribers(query_text="subscribers.attribs->>'city' = 'Portl
 
 See [Listmonk querying docs](https://listmonk.app/docs/querying-and-segmentation/) for full query syntax.
 
-#### `subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Look up a single subscriber by email address.
 
@@ -156,7 +156,7 @@ if sub:
 
 Returns `None` if not found.
 
-#### `subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Look up a single subscriber by their numeric ID.
 
@@ -166,7 +166,7 @@ sub = listmonk.subscriber_by_id(2001)
 
 Returns `None` if not found.
 
-#### `subscriber_by_uuid(subscriber_uuid: str, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `subscriber_by_uuid(subscriber_uuid: str, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Look up a single subscriber by their UUID.
 
@@ -178,7 +178,7 @@ Returns `None` if not found.
 
 ### Creating Subscribers
 
-#### `create_subscriber(email: str, name: str, list_ids: set[int], pre_confirm: bool, attribs: dict[str, Any], timeout_config: Optional[httpx.Timeout] = None) -> Subscriber`
+#### `create_subscriber(email: str, name: str, list_ids: set[int], pre_confirm: bool, attribs: dict[str, Any], timeout_config: Optional[httpx2.Timeout] = None) -> Subscriber`
 
 Create a new subscriber.
 
@@ -207,7 +207,7 @@ Raises `ValueError` if email or name is empty.
 
 ### Updating Subscribers
 
-#### `update_subscriber(subscriber: Optional[Subscriber], add_to_lists: Optional[set[int]] = None, remove_from_lists: Optional[set[int]] = None, status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `update_subscriber(subscriber: Optional[Subscriber], add_to_lists: Optional[set[int]] = None, remove_from_lists: Optional[set[int]] = None, status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Update a subscriber's details, list memberships, and status.
 
@@ -231,7 +231,7 @@ The function:
 
 ### Subscriber Status Management
 
-#### `disable_subscriber(subscriber: Optional[Subscriber], timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `disable_subscriber(subscriber: Optional[Subscriber], timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Set a subscriber's status to "disabled".
 
@@ -239,7 +239,7 @@ Set a subscriber's status to "disabled".
 disabled = listmonk.disable_subscriber(subscriber)
 ```
 
-#### `enable_subscriber(subscriber: Subscriber, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `enable_subscriber(subscriber: Subscriber, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Re-enable a disabled subscriber.
 
@@ -247,7 +247,7 @@ Re-enable a disabled subscriber.
 enabled = listmonk.enable_subscriber(subscriber)
 ```
 
-#### `block_subscriber(subscriber: Subscriber, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Subscriber]`
+#### `block_subscriber(subscriber: Subscriber, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Subscriber]`
 
 Blocklist (unsubscribe) a subscriber. This is the equivalent of "unsubscribe" — they remain in the system but won't receive emails.
 
@@ -257,7 +257,7 @@ listmonk.block_subscriber(subscriber)
 
 ### Deleting Subscribers
 
-#### `delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool`
+#### `delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Permanently delete a subscriber. If you want to unsubscribe instead, use `block_subscriber`.
 
@@ -273,7 +273,7 @@ Returns `True` on success, `False` if subscriber not found.
 
 ### Opt-in Confirmation
 
-#### `confirm_optin(subscriber_uuid: Optional[str], list_uuid: Optional[str], timeout_config: Optional[httpx.Timeout] = None) -> bool`
+#### `confirm_optin(subscriber_uuid: Optional[str], list_uuid: Optional[str], timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Confirm a subscriber's opt-in for a specific list via the API (for double opt-in lists).
 
@@ -285,7 +285,7 @@ Use this when you manage opt-in confirmation on your own platform rather than th
 
 ### Bulk List Management
 
-#### `add_subscribers_to_lists(subscriber_ids: Iterable[int], list_ids: Iterable[int], timeout_config: Optional[httpx.Timeout] = None, status: str = 'confirmed') -> bool`
+#### `add_subscribers_to_lists(subscriber_ids: Iterable[int], list_ids: Iterable[int], timeout_config: Optional[httpx2.Timeout] = None, status: str = 'confirmed') -> bool`
 
 Add multiple subscribers to multiple lists in a single operation.
 
@@ -303,7 +303,7 @@ Returns `True` on success, `False` on failure.
 
 ## Lists
 
-### `lists(timeout_config: Optional[httpx.Timeout] = None) -> list[MailingList]`
+### `lists(timeout_config: Optional[httpx2.Timeout] = None) -> list[MailingList]`
 
 Get all mailing lists.
 
@@ -313,7 +313,7 @@ for lst in all_lists:
     print(f'{lst.name}: {lst.subscriber_count} subscribers')
 ```
 
-### `list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[MailingList]`
+### `list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[MailingList]`
 
 Get a single list by ID.
 
@@ -374,7 +374,7 @@ Returns `True` on success, `False` if list not found.
 
 ### Retrieving Campaigns
 
-#### `campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[Campaign]`
+#### `campaigns(timeout_config: Optional[httpx2.Timeout] = None) -> list[Campaign]`
 
 Get all campaigns.
 
@@ -384,7 +384,7 @@ for c in all_campaigns:
     print(f'{c.name}: {c.status} ({c.sent}/{c.to_send} sent)')
 ```
 
-#### `campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Campaign]`
+#### `campaign_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Campaign]`
 
 Get a single campaign by ID.
 
@@ -392,7 +392,7 @@ Get a single campaign by ID.
 campaign = listmonk.campaign_by_id(15)
 ```
 
-#### `campaign_preview_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[CampaignPreview]`
+#### `campaign_preview_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[CampaignPreview]`
 
 Get the rendered HTML preview of a campaign.
 
@@ -445,7 +445,7 @@ campaign = listmonk.create_campaign(
 
 ### Updating Campaigns
 
-#### `update_campaign(campaign: Campaign, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Campaign]`
+#### `update_campaign(campaign: Campaign, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Campaign]`
 
 Update an existing campaign. Modify fields on the Campaign object, then pass it back.
 
@@ -463,7 +463,7 @@ updated = listmonk.update_campaign(campaign)
 
 ### Deleting Campaigns
 
-#### `delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool`
+#### `delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Delete a campaign by ID.
 
@@ -477,7 +477,7 @@ deleted = listmonk.delete_campaign(15)
 
 ### Retrieving Templates
 
-#### `templates(timeout_config: Optional[httpx.Timeout] = None) -> list[Template]`
+#### `templates(timeout_config: Optional[httpx2.Timeout] = None) -> list[Template]`
 
 Get all templates.
 
@@ -487,7 +487,7 @@ for t in all_templates:
     print(f'{t.name} (type: {t.type}, default: {t.is_default})')
 ```
 
-#### `template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Template]`
+#### `template_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Template]`
 
 Get a single template by ID.
 
@@ -495,7 +495,7 @@ Get a single template by ID.
 template = listmonk.template_by_id(2)
 ```
 
-#### `template_preview_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[TemplatePreview]`
+#### `template_preview_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[TemplatePreview]`
 
 Get a rendered preview of a template (with lorem ipsum content).
 
@@ -506,7 +506,7 @@ print(preview.preview)
 
 ### Creating Templates
 
-#### `create_template(name: Optional[str], body: Optional[str], type: Optional[str], is_default: Optional[bool], subject: Optional[str], timeout_config: Optional[httpx.Timeout] = None) -> Optional[Template]`
+#### `create_template(name: Optional[str], body: Optional[str], type: Optional[str], is_default: Optional[bool], subject: Optional[str], timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Template]`
 
 Create a new template.
 
@@ -533,7 +533,7 @@ tx_tpl = listmonk.create_template(
 
 ### Updating Templates
 
-#### `update_template(template: Template, timeout_config: Optional[httpx.Timeout] = None) -> Optional[Template]`
+#### `update_template(template: Template, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[Template]`
 
 Update an existing template.
 
@@ -547,7 +547,7 @@ updated = listmonk.update_template(template)
 
 ### Deleting Templates
 
-#### `delete_template(template_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool`
+#### `delete_template(template_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Delete a template by ID.
 
@@ -557,7 +557,7 @@ deleted = listmonk.delete_template(3)
 
 ### Setting Default Template
 
-#### `set_default_template(template_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool`
+#### `set_default_template(template_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool`
 
 Set a template as the default for its type.
 
@@ -746,7 +746,7 @@ from listmonk.errors import ValidationError, OperationNotAllowedError, ListmonkF
 | `OperationNotAllowedError` | `ValidationError` | Calling API before `set_url_base()` or `login()` |
 | `ListmonkFileNotFoundError` | `FileNotFoundError` | Attachment file doesn't exist |
 
-Additionally, `httpx.HTTPStatusError` may be raised on HTTP 4xx/5xx responses.
+Additionally, `httpx2.HTTPStatusError` may be raised on HTTP 4xx/5xx responses.
 
 ---
 
@@ -776,10 +776,10 @@ The library targets these Listmonk API endpoints (defined in `listmonk.urls`):
 
 ## FAQ / Troubleshooting
 
-### `httpx.HTTPStatusError: Client error '403 Forbidden'`
+### `httpx2.HTTPStatusError: Client error '403 Forbidden'`
 
 ```text
-httpx.HTTPStatusError: Client error '403 Forbidden' for url '...?query=subscribers.email=...'
+httpx2.HTTPStatusError: Client error '403 Forbidden' for url '...?query=subscribers.email=...'
 ```
 
 The authenticated user lacks the `subscribers:sql_query` permission. Update the user's role in the Listmonk admin panel to include this permission. See [Listmonk roles docs](https://listmonk.app/docs/roles-and-permissions/#user-roles).
@@ -799,10 +799,10 @@ Calling API functions before setup raises `OperationNotAllowedError`.
 All functions accept an optional `timeout_config` parameter (default: 10 seconds):
 
 ```python
-import httpx
+import httpx2
 
 # Custom timeout for slow connections
-timeout = httpx.Timeout(timeout=30.0)
+timeout = httpx2.Timeout(timeout=30.0)
 subs = listmonk.subscribers(timeout_config=timeout)
 ```
 

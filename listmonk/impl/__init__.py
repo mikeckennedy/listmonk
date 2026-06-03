@@ -7,7 +7,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
-import httpx
+import httpx2 as httpx
 
 from listmonk import models, urls
 
@@ -41,7 +41,7 @@ def _validate_and_parse_json_response(resp: httpx.Response) -> dict[str, Any]:
     """
     Internal helper to validate HTTP response and parse JSON with proper error handling.
     Args:
-        resp: The httpx Response object
+        resp: The httpx2 Response object
     Returns:
         Parsed JSON data as dictionary
     Raises:
@@ -790,7 +790,7 @@ def send_transactional_email(
         # Depending on existence of attachments, we need to send data in different ways
         if attachments:
             # Multiple files can be uploaded in one go as per the advanced httpx docs
-            # https://www.python-httpx.org/advanced/#multipart-file-encoding
+            # https://www.python-httpx.org/advanced/clients/#multipart-file-encoding
             files = [('file', (attachment.name, open(attachment, 'rb'))) for attachment in attachments]
             # Data has to be sent as form field named data as per the listmonk API docs
             # https://listmonk.app/docs/apis/transactional/#file-attachments
@@ -798,7 +798,7 @@ def send_transactional_email(
                 'data': json.dumps(body_data, ensure_ascii=False).encode('utf-8'),
             }
             # Need to remove content type header as it should not be JSON and is set
-            # automatically by httpx including the correct boundary parameter
+            # automatically by httpx2 including the correct boundary parameter
             headers = core_headers.copy()
             headers.pop('Content-Type')
 
