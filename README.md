@@ -9,6 +9,10 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 
 🔀 Async is currently planned but not yet implemented. With the httpx2-base, it should be trivial if needed.
 
+## Documentation
+
+📚 Full documentation lives at **[mkennedy.codes/docs/listmonk](https://mkennedy.codes/docs/listmonk/)**, including the complete [API Reference](https://mkennedy.codes/docs/listmonk/reference/) for every function, model, and exception in the library.
+
 ## Core Features
 
 - ➕**Add a subscriber** to your subscribed users.
