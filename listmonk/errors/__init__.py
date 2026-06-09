@@ -1,10 +1,13 @@
 class ValidationError(Exception):
-    pass
+    """Raised when an argument fails client-side validation before a request is sent."""
 
 
 class OperationNotAllowedError(ValidationError):
-    pass
+    """Raised when an operation is not permitted in the client's current state.
+
+    For example, calling an API before the base URL has been set, or before a successful login.
+    """
 
 
 class ListmonkFileNotFoundError(FileNotFoundError):
-    pass
+    """Raised when a local file referenced for upload (e.g. a transactional email attachment) cannot be found."""

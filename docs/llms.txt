@@ -1,0 +1,90 @@
+# listmonk
+
+> Listmonk Email API Client for Python
+
+## Docs
+
+### API Reference
+
+#### Configuration & Authentication
+> Point the client at your Listmonk instance and authenticate.
+
+- [set_url_base](https://mkennedy.codes/docs/listmonk/reference/set_url_base.html): Each Listmonk instance lives somewhere. This is where yours lives
+- [get_base_url](https://mkennedy.codes/docs/listmonk/reference/get_base_url.html): Each Listmonk instance lives somewhere. This is where yours lives
+- [login](https://mkennedy.codes/docs/listmonk/reference/login.html): Logs into Listmonk and stores that authentication for the life of your app
+- [verify_login](https://mkennedy.codes/docs/listmonk/reference/verify_login.html): Call to verify that the stored auth token is still valid
+- [is_healthy](https://mkennedy.codes/docs/listmonk/reference/is_healthy.html): Checks that the token retrieved during login is still valid at your server
+
+#### Mailing Lists
+> Read and manage mailing lists.
+
+- [lists](https://mkennedy.codes/docs/listmonk/reference/lists.html): Get mailing lists on the server
+- [list_by_id](https://mkennedy.codes/docs/listmonk/reference/list_by_id.html): Get the full details of a list with the given ID
+- [create_list](https://mkennedy.codes/docs/listmonk/reference/create_list.html): Create a new mailing list on the server
+- [update_list](https://mkennedy.codes/docs/listmonk/reference/update_list.html): Updates an existing mailing list on the server
+- [delete_list](https://mkennedy.codes/docs/listmonk/reference/delete_list.html): Delete a specific list by its ID
+
+#### Subscribers
+> Create, query, update, and manage the status of subscribers.
+
+- [subscribers](https://mkennedy.codes/docs/listmonk/reference/subscribers.html): Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned
+- [subscriber_by_email](https://mkennedy.codes/docs/listmonk/reference/subscriber_by_email.html): Retrieves the subscribe by email (e.g. "some_user@talkpython.fm")
+- [subscriber_by_id](https://mkennedy.codes/docs/listmonk/reference/subscriber_by_id.html): Retrieves the subscribe by id (e.g. 201)
+- [subscriber_by_uuid](https://mkennedy.codes/docs/listmonk/reference/subscriber_by_uuid.html): Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
+- [create_subscriber](https://mkennedy.codes/docs/listmonk/reference/create_subscriber.html): Create a new subscriber on the Listmonk server
+- [update_subscriber](https://mkennedy.codes/docs/listmonk/reference/update_subscriber.html): Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
+- [add_subscribers_to_lists](https://mkennedy.codes/docs/listmonk/reference/add_subscribers_to_lists.html): Add a number of subscribers to a number of lists
+- [enable_subscriber](https://mkennedy.codes/docs/listmonk/reference/enable_subscriber.html): Set a subscriber's status to enable
+- [disable_subscriber](https://mkennedy.codes/docs/listmonk/reference/disable_subscriber.html): Set a subscriber's status to disable
+- [block_subscriber](https://mkennedy.codes/docs/listmonk/reference/block_subscriber.html): Add a subscriber to the blocklist, AKA unsubscribe them
+- [confirm_optin](https://mkennedy.codes/docs/listmonk/reference/confirm_optin.html): For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in
+- [delete_subscriber](https://mkennedy.codes/docs/listmonk/reference/delete_subscriber.html): Completely delete a subscriber from your system (it's as if they were never there)
+
+#### Campaigns
+> Create, preview, update, and delete email campaigns.
+
+- [campaigns](https://mkennedy.codes/docs/listmonk/reference/campaigns.html): Get campaigns on the server
+- [campaign_by_id](https://mkennedy.codes/docs/listmonk/reference/campaign_by_id.html): Get the full details of a campaign with the given ID
+- [campaign_preview_by_id](https://mkennedy.codes/docs/listmonk/reference/campaign_preview_by_id.html): Get the preview of a campaign with the given ID
+- [create_campaign](https://mkennedy.codes/docs/listmonk/reference/create_campaign.html): Create a new campaign with the given parameters
+- [update_campaign](https://mkennedy.codes/docs/listmonk/reference/update_campaign.html): Update the given campaign with the provided campaign information
+- [delete_campaign](https://mkennedy.codes/docs/listmonk/reference/delete_campaign.html): Completely delete a campaign from your system
+
+#### Templates
+> Manage email templates and set the default.
+
+- [templates](https://mkennedy.codes/docs/listmonk/reference/templates.html): This function retrieves a list of all templates available in the system
+- [template_by_id](https://mkennedy.codes/docs/listmonk/reference/template_by_id.html): Retrieve a template by its ID
+- [template_preview_by_id](https://mkennedy.codes/docs/listmonk/reference/template_preview_by_id.html): Get the preview of a template with the given ID
+- [create_template](https://mkennedy.codes/docs/listmonk/reference/create_template.html): Create a template with the specified details
+- [update_template](https://mkennedy.codes/docs/listmonk/reference/update_template.html): Update a template in the system
+- [set_default_template](https://mkennedy.codes/docs/listmonk/reference/set_default_template.html): Set the given template ID as the default template
+- [delete_template](https://mkennedy.codes/docs/listmonk/reference/delete_template.html): Completely delete a template from your system
+
+#### Transactional Email
+> Send one-off transactional messages.
+
+- [send_transactional_email](https://mkennedy.codes/docs/listmonk/reference/send_transactional_email.html): Send a transactional email through Listmonk to the recipient
+
+#### Data Models
+> Pydantic models returned by and passed to the API functions.
+
+- [models.MailingList](https://mkennedy.codes/docs/listmonk/reference/models.MailingList.html)
+- [models.SubscriberStatus](https://mkennedy.codes/docs/listmonk/reference/models.SubscriberStatus.html)
+- [models.SubscriberStatuses](https://mkennedy.codes/docs/listmonk/reference/models.SubscriberStatuses.html)
+- [models.Subscriber](https://mkennedy.codes/docs/listmonk/reference/models.Subscriber.html)
+- [models.CreateSubscriberModel](https://mkennedy.codes/docs/listmonk/reference/models.CreateSubscriberModel.html)
+- [models.Campaign](https://mkennedy.codes/docs/listmonk/reference/models.Campaign.html)
+- [models.CreateCampaignModel](https://mkennedy.codes/docs/listmonk/reference/models.CreateCampaignModel.html)
+- [models.UpdateCampaignModel](https://mkennedy.codes/docs/listmonk/reference/models.UpdateCampaignModel.html)
+- [models.CampaignPreview](https://mkennedy.codes/docs/listmonk/reference/models.CampaignPreview.html)
+- [models.Template](https://mkennedy.codes/docs/listmonk/reference/models.Template.html)
+- [models.CreateTemplateModel](https://mkennedy.codes/docs/listmonk/reference/models.CreateTemplateModel.html)
+- [models.TemplatePreview](https://mkennedy.codes/docs/listmonk/reference/models.TemplatePreview.html)
+
+#### Exceptions
+> Errors raised by the client.
+
+- [errors.ValidationError](https://mkennedy.codes/docs/listmonk/reference/errors.ValidationError.html)
+- [errors.OperationNotAllowedError](https://mkennedy.codes/docs/listmonk/reference/errors.OperationNotAllowedError.html)
+- [errors.ListmonkFileNotFoundError](https://mkennedy.codes/docs/listmonk/reference/errors.ListmonkFileNotFoundError.html)

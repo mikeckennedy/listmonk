@@ -1,0 +1,841 @@
+[
+  {
+    "objectID": "reference/lists.html",
+    "href": "reference/lists.html",
+    "title": "lists()",
+    "section": "",
+    "text": "Get mailing lists on the server.\n\n\nUsage\nSource\n\n\nlists(timeout_config=None)\n\n\nParameters\n\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n list[models.MailingList]\n\nList of MailingList objects with the full details of that list.",
+    "crumbs": [
+      "API Reference",
+      "Mailing Lists",
+      "[lists()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/enable_subscriber.html",
+    "href": "reference/enable_subscriber.html",
+    "title": "enable_subscriber()",
+    "section": "",
+    "text": "Set a subscriber’s status to enable.\n\n\nUsage\nSource\n\n\nenable_subscriber(subscriber, timeout_config=None)\n\n\nParameters\n\n\nsubscriber: models.Subscriber\n\nThe subscriber to enable.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe updated subscriber object from the server.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[enable_subscriber()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/subscriber_by_uuid.html",
+    "href": "reference/subscriber_by_uuid.html",
+    "title": "subscriber_by_uuid()",
+    "section": "",
+    "text": "Retrieves the subscriber by uuid (e.g. “c37786af-e6ab-4260-9b49-740adpcm6ed”)\n\n\nUsage\nSource\n\n\nsubscriber_by_uuid(subscriber_uuid, timeout_config=None)\n\n\nParameters\n\n\nsubscriber_uuid: str\n\nUUID of the subscriber (e.g. “c37786af-e6ab-4260-9b49-740aaaa6ed”)\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe subscribe if found, None otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[subscriber_by_uuid()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.UpdateCampaignModel.html",
+    "href": "reference/models.UpdateCampaignModel.html",
+    "title": "models.UpdateCampaignModel",
+    "section": "",
+    "text": "The payload used to update an existing campaign.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.UpdateCampaignModel]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.UpdateCampaignModel.html#serialize_send_at",
+    "href": "reference/models.UpdateCampaignModel.html#serialize_send_at",
+    "title": "models.UpdateCampaignModel",
+    "section": "serialize_send_at()",
+    "text": "serialize_send_at()\n\nSerialize the provided datetime field to prepare for sending, considering the specified send_at time.\n\n\nUsage\nSource\n\n\nserialize_send_at(fld)\n\n\nIf send_at is in the past then the update will fail, so we check if it is in the past and if it is we turn off the campaign scheduled send time.\n\n\nParameters\n\n\nfld: datetime.datetime\n\nThe datetime field to be serialized.\n\n\n\n\n\nReturns\n\n\n Optional[datetime.datetime]\n\nThe serialized datetime field, or None if the provided field is in the past.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.UpdateCampaignModel]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/verify_login.html",
+    "href": "reference/verify_login.html",
+    "title": "verify_login()",
+    "section": "",
+    "text": "Call to verify that the stored auth token is still valid.\n\n\nUsage\nSource\n\n\nverify_login(timeout_config=None)\n\n\nParameters\n\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if the stored auth token is still value, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Configuration & Authentication",
+      "[verify_login()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/update_template.html",
+    "href": "reference/update_template.html",
+    "title": "update_template()",
+    "section": "",
+    "text": "Update a template in the system.\n\n\nUsage\nSource\n\n\nupdate_template(template, timeout_config=None)\n\n\nParameters\n\n\ntemplate: models.Template\n\nmodels.Template - the template object to be updated\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Template]\n\nmodels.Template - the updated template object after the update operation",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[update_template()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/subscribers.html",
+    "href": "reference/subscribers.html",
+    "title": "subscribers()",
+    "section": "",
+    "text": "Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.\n\n\nUsage\nSource\n\n\nsubscribers(query_text=None, list_id=None, timeout_config=None)\n\n\nParameters\n\n\nquery_text: Optional[str] = None\n\nCustom query text such as “subscribers.attribs-&gt;&gt;‘city’ = ‘Portland’”. See the full documentation at https://listmonk.app/docs/querying-and-segmentation/\n\nlist_id: Optional[int] = None\n\nPass a list ID and get the subscribers, matching the query, from that list.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n list[models.Subscriber]\n\nA list of subscribers matching the criteria provided. If none, then all subscribers are returned.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[subscribers()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/errors.ValidationError.html",
+    "href": "reference/errors.ValidationError.html",
+    "title": "errors.ValidationError",
+    "section": "",
+    "text": "Raised when an argument fails client-side validation before a request is sent.\n\n\nUsage\nSource\n\n\nerrors.ValidationError()",
+    "crumbs": [
+      "API Reference",
+      "Exceptions",
+      "[errors.ValidationError]{.doc-object-name .doc-class .doc-label .doc-label-exception}"
+    ]
+  },
+  {
+    "objectID": "reference/create_subscriber.html",
+    "href": "reference/create_subscriber.html",
+    "title": "create_subscriber()",
+    "section": "",
+    "text": "Create a new subscriber on the Listmonk server.\n\n\nUsage\nSource\n\n\ncreate_subscriber(\n    email,\n    name=None,\n    list_ids=None,\n    pre_confirm=False,\n    attribs=None,\n    timeout_config=None\n)\n\n\nParameters\n\n\nemail: str\n\nEmail of the subscriber.\n\nname: Optional[str] = None\n\nFull name (first[SPACE]last) of the subscriber\n\nlist_ids: set[int] = None\n\nList of list IDs for the lists to add them to (say that 3 times fast!)\n\npre_confirm: bool = False\n\nWhether to preconfirm the subscriber for double opt-in lists (no email to them)\n\nattribs: Optional[dict[str, Any]] = None\n\nCustom dictionary for the attribs data on the user record (queryable in the subscriber UI).\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n models.Subscriber\n\nThe Subscribe object that was created on the server with ID, UUID, and much more.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[create_subscriber()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.CreateCampaignModel.html",
+    "href": "reference/models.CreateCampaignModel.html",
+    "title": "models.CreateCampaignModel",
+    "section": "",
+    "text": "The payload used to create a new campaign.\n\n\nUsage\nSource\n\n\nmodels.CreateCampaignModel()\n\n\nAttributes\n\n\nname: Optional[str]\n\nThe internal campaign name.\n\nsubject: Optional[str]\n\nThe email subject line.\n\nlists: list[int]\n\nThe IDs of the lists to send the campaign to.\n\nfrom_email: Optional[str]\n\nThe sender (From) address. Omit to use the instance default.\n\ntype: Optional[str]\n\nThe campaign type, e.g. regular or optin.\n\ncontent_type: Optional[str]\n\nThe body format, e.g. richtext, html, markdown, or plain.\n\nbody: Optional[str]\n\nThe campaign body in the configured content type.\n\naltbody: Optional[str]\n\nThe optional plain-text alternative body for multipart HTML emails.\n\nsend_at: Optional[datetime.datetime]\n\nThe scheduled send time, if the campaign should be scheduled.\n\nmessenger: Optional[str]\n\nThe delivery channel, typically email.\n\ntemplate_id: Optional[int]\n\nThe ID of the template used to render the campaign.\n\ntags: list[str]\n\nArbitrary labels to attach to the campaign.\n\nheaders: list[dict[str, Optional[str]]]\n\nCustom email headers to include, each as a single-entry dict.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.CreateCampaignModel]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.Subscriber.html",
+    "href": "reference/models.Subscriber.html",
+    "title": "models.Subscriber",
+    "section": "",
+    "text": "A subscriber (contact) on the Listmonk instance.\n\n\nUsage\nSource\n\n\nmodels.Subscriber()\n\n\nAttributes\n\n\nid: int\n\nThe numeric subscriber ID assigned by Listmonk.\n\nemail: str\n\nThe subscriber’s email address (their primary identifier).\n\nname: Optional[str]\n\nThe subscriber’s display name, if provided.\n\ncreated_at: datetime.datetime\n\nWhen the subscriber was created.\n\nupdated_at: Optional[datetime.datetime]\n\nWhen the subscriber was last modified, if ever.\n\nuuid: Optional[str]\n\nThe globally unique identifier for the subscriber.\n\nlists: list[dict[str, Any]]\n\nThe lists this subscriber belongs to, each as a dict describing the membership (list id, subscription status, and so on).\n\nattribs: dict[str, Any]\n\nArbitrary custom attributes stored against the subscriber.\n\nstatus: Optional[str]\n\nThe subscriber’s global status, e.g. enabled, disabled, or blocklisted.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.Subscriber]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/create_template.html",
+    "href": "reference/create_template.html",
+    "title": "create_template()",
+    "section": "",
+    "text": "Create a template with the specified details.\n\n\nUsage\nSource\n\n\ncreate_template(\n    name=None,\n    body=None,\n    type=None,\n    is_default=None,\n    subject=None,\n    timeout_config=None\n)\n\n\nParameters\n\n\nname: Optional[str] = None\n\nThe name of the template.\n\nbody: Optional[str] = None\n\nThe body content of the template.\n\ntype: Optional[str] = None\n\nThe type of the template.\n\nis_default: Optional[bool] = None\n\nIndicates if the template is the default one.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Template]\n\nOptional[models.Template]: An instance of models.Template representing the created template.",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[create_template()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/templates.html",
+    "href": "reference/templates.html",
+    "title": "templates()",
+    "section": "",
+    "text": "This function retrieves a list of all templates available in the system.\n\n\nUsage\nSource\n\n\ntemplates(timeout_config=None)\n\n\nParameters\n\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n list[models.Template]\n\nlist of models.Template objects representing the templates available in the system.",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[templates()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/delete_list.html",
+    "href": "reference/delete_list.html",
+    "title": "delete_list()",
+    "section": "",
+    "text": "Delete a specific list by its ID.\n\n\nUsage\nSource\n\n\ndelete_list(list_id)\n\n\nParameters\n\n\nlist_id: int\n\nThe ID of the list to delete.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if the list was successfully deleted, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Mailing Lists",
+      "[delete_list()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/create_campaign.html",
+    "href": "reference/create_campaign.html",
+    "title": "create_campaign()",
+    "section": "",
+    "text": "Create a new campaign with the given parameters.\n\n\nUsage\nSource\n\n\ncreate_campaign(\n    name=None,\n    subject=None,\n    list_ids=None,\n    from_email=None,\n    campaign_type=None,\n    content_type=None,\n    body=None,\n    alt_body=None,\n    send_at=None,\n    messenger=None,\n    template_id=None,\n    tags=None,\n    headers=None,\n    timeout_config=None\n)\n\n\nParameters\n\n\nname: Optional[str] = None\n\nThe name of the campaign.\n\nsubject: Optional[str] = None\n\nThe subject of the campaign.\n\nlist_ids: set[int] = None\n\nA set of list IDs to send the campaign to. Defaults to 1.\n\nfrom_email: Optional[str] = None\n\n‘From’ email in campaign emails. Defaults to value from settings if not provided.\n\ncampaign_type: Optional[str] = None\n\nThe type of the campaign: ‘regular’ or ‘optin’.\n\ncontent_type: Optional[str] = None\n\nThe content type of the campaign: ‘richtext’, ‘html’, ‘markdown’, ‘plain’.\n\nbody: Optional[str] = None\n\nThe body of the campaign.\n\nalt_body: Optional[str] = None\n\nThe alternative text body of the campaign.\n\nsend_at: Optional[datetime.datetime] = None\n\nTimestamp to schedule campaign.\n\nmessenger: Optional[str] = None\n\nThe messenger for the campaign. Usually ‘email’\n\ntemplate_id: int = None\n\nThe template ID to be used for the campaign. Defaults to 1.\n\ntags: list[str] = None\n\nA list of tags for the campaign.\n\nheaders: list[dict] = None\n\nA list of headers for the campaign.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\nCreateCampaignModel: Optional[models.Campaign]\n\nA model representing the created campaign.\n\n\n\n\n\nRaises\n\n\n ValueError\n\nIf required parameters (name, subject, from_email) are not provided.",
+    "crumbs": [
+      "API Reference",
+      "Campaigns",
+      "[create_campaign()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.MailingList.html",
+    "href": "reference/models.MailingList.html",
+    "title": "models.MailingList",
+    "section": "",
+    "text": "A mailing list on the Listmonk instance.\n\n\nUsage\nSource\n\n\nmodels.MailingList()\n\n\nAttributes\n\n\nid: int\n\nThe numeric list ID assigned by Listmonk.\n\ncreated_at: datetime.datetime\n\nWhen the list was created.\n\nupdated_at: Optional[datetime.datetime]\n\nWhen the list was last modified, if ever.\n\nuuid: str\n\nThe globally unique identifier for the list.\n\nname: Optional[str]\n\nThe human-readable list name.\n\ntype: Optional[str]\n\nThe list visibility, typically public or private.\n\noptin: Optional[str]\n\nThe opt-in mode, either single or double.\n\ntags: list[str]\n\nArbitrary labels attached to the list.\n\ndescription: Optional[str]\n\nA free-text description of the list.\n\nsubscriber_count: Optional[int]\n\nThe total number of subscribers on the list.\n\nsubscriber_statuses: Optional[SubscriberStatus]\n\nA breakdown of subscriber counts by subscription status.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.MailingList]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.SubscriberStatus.html",
+    "href": "reference/models.SubscriberStatus.html",
+    "title": "models.SubscriberStatus",
+    "section": "",
+    "text": "A breakdown of subscriber counts by subscription status for a mailing list.\n\n\nUsage\nSource\n\n\nmodels.SubscriberStatus()\n\n\nAttributes\n\n\nunconfirmed_count: Optional[int]\n\nThe number of subscriptions still awaiting double opt-in confirmation (read from the API’s unconfirmed field).",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.SubscriberStatus]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/update_subscriber.html",
+    "href": "reference/update_subscriber.html",
+    "title": "update_subscriber()",
+    "section": "",
+    "text": "Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and\n\n\nUsage\nSource\n\n\nupdate_subscriber(\n    subscriber,\n    add_to_lists=None,\n    remove_from_lists=None,\n    status=SubscriberStatuses.enabled,\n    timeout_config=None\n)\n\n\nfrom adding them to and removing them from lists. You can enable, disable, and block them here. But if that is all you want tod o there are functions dedicated to that which are simpler.\n\n\nParameters\n\n\nsubscriber: Optional[models.Subscriber]\n\nThe full subscriber object to update (with changed fields and values)\n\nadd_to_lists: Optional[set[int]] = None\n\nAny list to add to this subscriber to.\n\nremove_from_lists: Optional[set[int]] = None\n\nAny list to remove from this subscriber.\n\nstatus: SubscriberStatuses = SubscriberStatuses.enabled\n\nThe status of the subscriber: enabled, disabled, blacklisted from SubscriberStatuses.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe updated view of the subscriber object from the server.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[update_subscriber()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/template_preview_by_id.html",
+    "href": "reference/template_preview_by_id.html",
+    "title": "template_preview_by_id()",
+    "section": "",
+    "text": "Get the preview of a template with the given ID.\n\n\nUsage\nSource\n\n\ntemplate_preview_by_id(template_id, timeout_config=None)\n\n\nParameters\n\n\ntemplate_id: int\n\nA campaign to get the details about, e.g. 7.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.TemplatePreview]\n\nString preview of the template with lorem ipsum.",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[template_preview_by_id()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/update_campaign.html",
+    "href": "reference/update_campaign.html",
+    "title": "update_campaign()",
+    "section": "",
+    "text": "Update the given campaign with the provided campaign information.\n\n\nUsage\nSource\n\n\nupdate_campaign(campaign, timeout_config=None)\n\n\nParameters\n\n\ncampaign: models.Campaign\n\nmodels.Campaign - The campaign object containing the updated information.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Campaign]\n\nmodels.Campaign - The updated campaign object from api.\n\n\n\n\n\nRaises\n\n\n ValueError\n\nIf the campaign parameter is None or if the campaign id is not present.",
+    "crumbs": [
+      "API Reference",
+      "Campaigns",
+      "[update_campaign()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/campaigns.html",
+    "href": "reference/campaigns.html",
+    "title": "campaigns()",
+    "section": "",
+    "text": "Get campaigns on the server.\n\n\nUsage\nSource\n\n\ncampaigns(timeout_config=None)\n\n\nParameters\n\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n list[models.Campaign]\n\nList of Campaign objects with the full details of that campaign.",
+    "crumbs": [
+      "API Reference",
+      "Campaigns",
+      "[campaigns()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/login.html",
+    "href": "reference/login.html",
+    "title": "login()",
+    "section": "",
+    "text": "Logs into Listmonk and stores that authentication for the life of your app.\n\n\nUsage\nSource\n\n\nlogin(user_name, pw, timeout_config=None)\n\n\nParameters\n\n\nuser_name: str\n\nYour Listmonk username\n\npw: str\n\nYour Listmonk password\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nReturns a boolean indicating whether the login was successful.",
+    "crumbs": [
+      "API Reference",
+      "Configuration & Authentication",
+      "[login()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/campaign_by_id.html",
+    "href": "reference/campaign_by_id.html",
+    "title": "campaign_by_id()",
+    "section": "",
+    "text": "Get the full details of a campaign with the given ID.\n\n\nUsage\nSource\n\n\ncampaign_by_id(campaign_id, timeout_config=None)\n\n\nParameters\n\n\ncampaign_id: int\n\nA campaign to get the details about, e.g. 7.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Campaign]\n\nCampaign object with the full details of a campaign.",
+    "crumbs": [
+      "API Reference",
+      "Campaigns",
+      "[campaign_by_id()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/errors.ListmonkFileNotFoundError.html",
+    "href": "reference/errors.ListmonkFileNotFoundError.html",
+    "title": "errors.ListmonkFileNotFoundError",
+    "section": "",
+    "text": "Raised when a local file referenced for upload (e.g. a transactional email attachment) cannot be found.\n\n\nUsage\nSource\n\n\nerrors.ListmonkFileNotFoundError()",
+    "crumbs": [
+      "API Reference",
+      "Exceptions",
+      "[errors.ListmonkFileNotFoundError]{.doc-object-name .doc-class .doc-label .doc-label-exception}"
+    ]
+  },
+  {
+    "objectID": "reference/models.Campaign.html",
+    "href": "reference/models.Campaign.html",
+    "title": "models.Campaign",
+    "section": "",
+    "text": "An email campaign on the Listmonk instance.\n\n\nUsage\nSource\n\n\nmodels.Campaign()\n\n\nAttributes\n\n\nid: int\n\nThe numeric campaign ID assigned by Listmonk.\n\ncreated_at: datetime.datetime\n\nWhen the campaign was created.\n\nupdated_at: Optional[datetime.datetime]\n\nWhen the campaign was last modified, if ever.\n\nviews: int\n\nThe number of times the campaign has been opened/viewed.\n\nclicks: int\n\nThe number of link clicks recorded for the campaign.\n\nlists: list[dict[str, Any]]\n\nThe target lists for the campaign, each as a dict describing the list.\n\nstarted_at: Optional[datetime.datetime]\n\nWhen sending began, if the campaign has started.\n\nto_send: int\n\nThe total number of recipients the campaign will be sent to.\n\nsent: int\n\nThe number of messages sent so far.\n\nuuid: str\n\nThe globally unique identifier for the campaign.\n\nname: Optional[str]\n\nThe internal campaign name.\n\ntype: Optional[str]\n\nThe campaign type, e.g. regular or optin.\n\nsubject: Optional[str]\n\nThe email subject line.\n\nfrom_email: Optional[str]\n\nThe sender (From) address.\n\nbody: Optional[str]\n\nThe campaign body in the configured content type.\n\naltbody: Optional[str]\n\nThe optional plain-text alternative body for multipart HTML emails.\n\nsend_at: Optional[datetime.datetime]\n\nThe scheduled send time, if the campaign is scheduled.\n\nstatus: Optional[str]\n\nThe campaign status, e.g. draft, scheduled, running, paused, cancelled, or finished.\n\ncontent_type: Optional[str]\n\nThe body format, e.g. richtext, html, markdown, or plain.\n\ntags: list[str]\n\nArbitrary labels attached to the campaign.\n\ntemplate_id: int\n\nThe ID of the template used to render the campaign.\n\nmessenger: Optional[str]\n\nThe delivery channel, typically email.\n\nheaders: list[dict[str, Optional[str]]]\n\nCustom email headers to include, each as a single-entry dict.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.Campaign]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/campaign_preview_by_id.html",
+    "href": "reference/campaign_preview_by_id.html",
+    "title": "campaign_preview_by_id()",
+    "section": "",
+    "text": "Get the preview of a campaign with the given ID.\n\n\nUsage\nSource\n\n\ncampaign_preview_by_id(campaign_id, timeout_config=None)\n\n\nParameters\n\n\ncampaign_id: int\n\nA campaign to get the details about, e.g. 7.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.CampaignPreview]\n\nString preview of the campaign.",
+    "crumbs": [
+      "API Reference",
+      "Campaigns",
+      "[campaign_preview_by_id()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "license.html",
+    "href": "license.html",
+    "title": "License",
+    "section": "",
+    "text": "▶\n    License features — MIT License\n\n\n\n\n\nPermissions\n\nCommercial use\nModification\nDistribution\nPrivate use\n\n\nConditions\n\nLicense and copyright notice\n\n\nLimitations\n\nLiability\nWarranty\n\n\n\n\nThe MIT License (MIT)\n\nCopyright (c) 2024 Michael Kennedy\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+  },
+  {
+    "objectID": "skill.html",
+    "href": "skill.html",
+    "title": "Listmonk",
+    "section": "",
+    "text": "Listmonk Email API Client for Python"
+  },
+  {
+    "objectID": "skill.html#configuration-authentication",
+    "href": "skill.html#configuration-authentication",
+    "title": "Listmonk",
+    "section": "Configuration & Authentication",
+    "text": "Configuration & Authentication\nPoint the client at your Listmonk instance and authenticate.\n\nset_url_base: Each Listmonk instance lives somewhere. This is where yours lives\nget_base_url: Each Listmonk instance lives somewhere. This is where yours lives\nlogin: Logs into Listmonk and stores that authentication for the life of your app\nverify_login: Call to verify that the stored auth token is still valid\nis_healthy: Checks that the token retrieved during login is still valid at your server"
+  },
+  {
+    "objectID": "skill.html#mailing-lists",
+    "href": "skill.html#mailing-lists",
+    "title": "Listmonk",
+    "section": "Mailing Lists",
+    "text": "Mailing Lists\nRead and manage mailing lists.\n\nlists: Get mailing lists on the server\nlist_by_id: Get the full details of a list with the given ID\ncreate_list: Create a new mailing list on the server\nupdate_list: Updates an existing mailing list on the server\ndelete_list: Delete a specific list by its ID"
+  },
+  {
+    "objectID": "skill.html#subscribers",
+    "href": "skill.html#subscribers",
+    "title": "Listmonk",
+    "section": "Subscribers",
+    "text": "Subscribers\nCreate, query, update, and manage the status of subscribers.\n\nsubscribers: Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned\nsubscriber_by_email: Retrieves the subscribe by email (e.g. “some_user@talkpython.fm”)\nsubscriber_by_id: Retrieves the subscribe by id (e.g. 201)\nsubscriber_by_uuid: Retrieves the subscriber by uuid (e.g. “c37786af-e6ab-4260-9b49-740adpcm6ed”)\ncreate_subscriber: Create a new subscriber on the Listmonk server\nupdate_subscriber: Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and\nadd_subscribers_to_lists: Add a number of subscribers to a number of lists\nenable_subscriber: Set a subscriber’s status to enable\ndisable_subscriber: Set a subscriber’s status to disable\nblock_subscriber: Add a subscriber to the blocklist, AKA unsubscribe them\nconfirm_optin: For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in\ndelete_subscriber: Completely delete a subscriber from your system (it’s as if they were never there)"
+  },
+  {
+    "objectID": "skill.html#campaigns",
+    "href": "skill.html#campaigns",
+    "title": "Listmonk",
+    "section": "Campaigns",
+    "text": "Campaigns\nCreate, preview, update, and delete email campaigns.\n\ncampaigns: Get campaigns on the server\ncampaign_by_id: Get the full details of a campaign with the given ID\ncampaign_preview_by_id: Get the preview of a campaign with the given ID\ncreate_campaign: Create a new campaign with the given parameters\nupdate_campaign: Update the given campaign with the provided campaign information\ndelete_campaign: Completely delete a campaign from your system"
+  },
+  {
+    "objectID": "skill.html#templates",
+    "href": "skill.html#templates",
+    "title": "Listmonk",
+    "section": "Templates",
+    "text": "Templates\nManage email templates and set the default.\n\ntemplates: This function retrieves a list of all templates available in the system\ntemplate_by_id: Retrieve a template by its ID\ntemplate_preview_by_id: Get the preview of a template with the given ID\ncreate_template: Create a template with the specified details\nupdate_template: Update a template in the system\nset_default_template: Set the given template ID as the default template\ndelete_template: Completely delete a template from your system"
+  },
+  {
+    "objectID": "skill.html#transactional-email",
+    "href": "skill.html#transactional-email",
+    "title": "Listmonk",
+    "section": "Transactional Email",
+    "text": "Transactional Email\nSend one-off transactional messages.\n\nsend_transactional_email: Send a transactional email through Listmonk to the recipient"
+  },
+  {
+    "objectID": "skill.html#data-models",
+    "href": "skill.html#data-models",
+    "title": "Listmonk",
+    "section": "Data Models",
+    "text": "Data Models\nPydantic models returned by and passed to the API functions.\n\nmodels.MailingList\nmodels.SubscriberStatus\nmodels.SubscriberStatuses\nmodels.Subscriber\nmodels.CreateSubscriberModel\nmodels.Campaign\nmodels.CreateCampaignModel\nmodels.UpdateCampaignModel\nmodels.CampaignPreview\nmodels.Template\nmodels.CreateTemplateModel\nmodels.TemplatePreview"
+  },
+  {
+    "objectID": "skill.html#exceptions",
+    "href": "skill.html#exceptions",
+    "title": "Listmonk",
+    "section": "Exceptions",
+    "text": "Exceptions\nErrors raised by the client.\n\nerrors.ValidationError\nerrors.OperationNotAllowedError\nerrors.ListmonkFileNotFoundError"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Listmonk Email API Client for Python",
+    "section": "",
+    "text": "View on PyPI Tracker Source\n\n\n\nSkills llms.txt llms-full.txt\n\n\n\n\n\n\nMichael Kennedy\n\n\n\nAuthor\n\n\n\n\n\n\nFull license MIT\n\n\n\nRequires: Python &gt;=3.10 Provides-Extra: dev"
+  },
+  {
+    "objectID": "index.html#core-features",
+    "href": "index.html#core-features",
+    "title": "Listmonk Email API Client for Python",
+    "section": "Core Features",
+    "text": "Core Features\n\n➕Add a subscriber to your subscribed users.\n🙎 Get subscriber details by email, ID, UUID, and more.\n📝 Modify subscriber details (including custom attribute collection).\n🔍 Search your users based on app and custom attributes.\n🏥 Check the health and connectivity of your instance.\n👥 Retrieve your segmentation lists, list details, and subscribers.\n🙅 Unsubscribe and block users who don’t want to be contacted further.\n💥 Completely delete a subscriber from your instance.\n📧 Send transactional email with template data (e.g. password reset emails).\n📨 Manage campaign (bulk) emails from the API.\n🎨 Edit and create templates to control the overall look and feel of campaigns.\n📝 Create, edit and delete lists."
+  },
+  {
+    "objectID": "index.html#installation",
+    "href": "index.html#installation",
+    "title": "Listmonk Email API Client for Python",
+    "section": "Installation",
+    "text": "Installation\nJust pip install listmonk"
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "Listmonk Email API Client for Python",
+    "section": "Usage",
+    "text": "Usage\n\nimport pathlib\nimport listmonk\nfrom typing import Optional\n\nlistmonk.set_url_base('https://yourlistmonkurl.com')\n\nlistmonk.login('sammy_z', '1234')\nvalid: bool = listmonk.verify_login()\n\n## Is it alive and working?\nup: bool = listmonk.is_healthy()\n\n## Create a new list\nnew_list = listmonk.create_list(list_name=\"my_new_list\")\n\n## Read data about your lists\nlists: list[MailingList] = listmonk.lists()\nthe_list: MailingList = listmonk.list_by_id(list_id=7)\n\n## Various ways to access existing subscribers\nsubscribers: list[Subscriber] = listmonk.subscribers(list_id=9)\n\nsubscriber: Subscriber = listmonk.subscriber_by_email('testuser@some.domain')\nsubscriber: Subscriber = listmonk.subscriber_by_id(2001)\nsubscriber: Subscriber = listmonk.subscriber_by_uuid('f6668cf0-1c...')\n\n## Create a new subscriber\nnew_subscriber = listmonk.create_subscriber(\n    'testuser@some.domain', 'Jane Doe',\n    {1, 7, 9}, pre_confirm=True, attribs={...})\n\n## Change the email, custom rating, and add to lists 4 & 6, remove from 5.\nsubscriber.email = 'newemail@some.domain'\nsubscriber.attribs['rating'] = 7\nsubscriber = listmonk.update_subscriber(subscriber, {4, 6}, {5})\n\n## Confirm single-opt-ins via the API (e.g. for when you manage that on your platform)\nlistmonk.confirm_optin(subscriber.uuid, the_list.uuid)\n\n## Disable then re-enable a subscriber\nsubscriber = listmonk.disable_subscriber(subscriber)\nsubscriber = listmonk.enable_subscriber(subscriber)\n\n## Block (unsubscribe) them\nlistmonk.block_subscriber(subscriber)\n\n## Fully delete them from your system\nlistmonk.delete_subscriber(subscriber.email)\n\n## Send an individual, transactional email (e.g. password reset)\nto_email = 'testuser@some.domain'\nfrom_email = 'app@your.domain'\ntemplate_id = 3  # *TX* template ID from listmonk\ntemplate_data = {'full_name': 'Test User', 'reset_code': 'abc123'}\n\nstatus: bool = listmonk.send_transactional_email(\n    to_email, template_id, from_email=from_email,\n    template_data=template_data, content_type='html')\n\n## Optional plaintext fallback for multipart HTML emails.\nstatus = listmonk.send_transactional_email(\n    to_email,\n    template_id,\n    from_email=from_email,\n    template_data=template_data,\n    content_type='html',\n    altbody='Plaintext order summary for mail clients that prefer text.'\n)\n\n## You can also add one or multiple attachments with transactional mails\nattachments = [\n    pathlib.Path(\"/path/to/your/file1.pdf\"),\n    pathlib.Path(\"/path/to/your/file2.png\")\n]\n\nstatus: bool = listmonk.send_transactional_email(\n    to_email,\n    template_id,\n    from_email=from_email,\n    template_data=template_data,\n    attachments=attachments,\n    content_type='html',\n    altbody='Plaintext fallback body'\n)\n\n## Access existing campaigns\nfrom listmonk.models import Campaign\nfrom datetime import datetime, timedelta\n\ncampaigns: list[Campaign] = listmonk.campaigns()\ncampaign: Campaign = listmonk.campaign_by_id(15)\n\n## Create a new Campaign\nlistmonk.create_campaign(name='This is my Great Campaign!',\n                         subject=\"You won't believe this!\",\n                         body='&lt;p&gt;Some Insane HTML!&lt;/p&gt;',  # Optional\n                         alt_body='Some Insane TXT!',  # Optional\n                         send_at=datetime.now() + timedelta(hours=1),  # Optional\n                         template_id=5,  # Optional Defaults to 1\n                         list_ids={1, 2},  # Optional Defaults to 1\n                         tags=['good', 'better', 'best']  # Optional\n                         )\n\n## Update A Campaign\ncampaign_to_update: Optional[Campaign] = listmonk.campaign_by_id(15)\ncampaign_to_update.name = \"More Elegant Name\"\ncampaign_to_update.subject = \"Even More Clickbait!!\"\ncampaign_to_update.body = \"&lt;p&gt;There's a lot more we need to say so we're updating this programmatically!\"\ncampaign_to_update.altbody = \"There's a lot more we need to say so we're updating this programmatically!\"\ncampaign_to_update.lists = [3, 4]\n\nlistmonk.update_campaign(campaign_to_update)\n\n## Delete a Campaign\ncampaign_to_delete: Optional[Campaign] = listmonk.campaign_by_id(15)\nlistmonk.delete_campaign(campaign_to_delete)\n\n## Preview Campaign\npreview_html = listmonk.campaign_preview_by_id(15)\nprint(preview_html)\n\n## Access existing Templates\nfrom listmonk.models import Template\ntemplates: list[Template] = listmonk.templates()\ntemplate: Template = listmonk.template_by_id(2)\n\n## Create a new Template for Campaigns\nnew_template = listmonk.create_template(\n    name='NEW TEMPLATE',\n    body='&lt;p&gt;Some Insane HTML! {{ template \"content\" . }} &lt;/p&gt;',\n    type='campaign',\n)\n\n## Update A Template\nnew_template.name = \"Bob's Great Template\"\nlistmonk.update_template(new_template)\n\n## Delete a Template\nlistmonk.delete_template(3)\n\n## Preview Template\npreview_html = listmonk.template_preview_by_id(3)\nprint(preview_html)\n\n## Create a new template for Transactional Emails\nnew_tx_template = listmonk.create_template(\n    name='NEW TX TEMPLATE',\n    subject='Your Transactional Email Subject',\n    body='&lt;p&gt;Some Insane HTML! {{ .Subscriber.FirstName }}&lt;/p&gt;',\n    type='tx',\n)"
+  },
+  {
+    "objectID": "index.html#f.a.q.",
+    "href": "index.html#f.a.q.",
+    "title": "Listmonk Email API Client for Python",
+    "section": "F.A.Q.",
+    "text": "F.A.Q.\n\nI got httpx2.HTTPStatusError: Client error ‘403 Forbidden’\nIf you encounter an error like this in your console:\nhttpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''\nIt means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.\nSolution: Check the role assigned to your user. It must include the subscribers:sql_query permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [Reference]\n\n\nI got an SSL certificate verification error against my self-hosted Listmonk\nAs of the move to httpx2, TLS certificates are validated against your operating system’s trust store (via the truststore package) instead of the bundled certifi CA list. If you self-host Listmonk behind a custom or corporate Certificate Authority you may see an error like:\nssl.SSLCertVerificationError: certificate verify failed: unable to get local issuer certificate\nSolution: Install your CA certificate into your operating system’s trust store, or point the client at your CA bundle via the standard environment variable before using the library:\nexport SSL_CERT_FILE=/path/to/your-ca-bundle.pem   # or SSL_CERT_DIR=/path/to/ca-dir"
+  },
+  {
+    "objectID": "index.html#want-to-contribute",
+    "href": "index.html#want-to-contribute",
+    "title": "Listmonk Email API Client for Python",
+    "section": "Want to contribute?",
+    "text": "Want to contribute?\nPRs are welcome. But please open an issue first to see if the proposed feature fits with the direction of this library.\nEnjoy."
+  },
+  {
+    "objectID": "changelog.html",
+    "href": "changelog.html",
+    "title": "Changelog",
+    "section": "",
+    "text": "This changelog is generated automatically from GitHub Releases."
+  },
+  {
+    "objectID": "changelog.html#section",
+    "href": "changelog.html#section",
+    "title": "Changelog",
+    "section": "[0.4.1] - 2026-06-03",
+    "text": "[0.4.1] - 2026-06-03\n\nChanged\n\nMigrate the HTTP backend from httpx to httpx2, the Pydantic-maintained fork, after the original httpx project paused releases and locked down its issue tracker. httpx2 is imported internally as httpx, so the public API and all call sites are unchanged.\nTLS certificates are now validated against the operating system trust store (via truststore, the httpx2 default) instead of the bundled certifi CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set SSL_CERT_FILE / SSL_CERT_DIR. See the new SSL entry in the README F.A.Q.\nIf you pass a custom timeout_config, construct it with httpx2.Timeout(...) (now the bundled dependency) instead of httpx.Timeout(...)."
+  },
+  {
+    "objectID": "changelog.html#section-1",
+    "href": "changelog.html#section-1",
+    "title": "Changelog",
+    "section": "[0.4.0] - 2026-04-08",
+    "text": "[0.4.0] - 2026-04-08\n\nAdded\n\nAdd altbody support to send_transactional_email() for multipart HTML transactional emails. Thank you @neilime"
+  },
+  {
+    "objectID": "changelog.html#section-2",
+    "href": "changelog.html#section-2",
+    "title": "Changelog",
+    "section": "[0.3.13] - 2026-04-03",
+    "text": "[0.3.13] - 2026-04-03\n\nFixed\n\nFix confirm_optin() returning False on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes #23)"
+  },
+  {
+    "objectID": "changelog.html#section-3",
+    "href": "changelog.html#section-3",
+    "title": "Changelog",
+    "section": "[0.3.11] - 2026-04-03",
+    "text": "[0.3.11] - 2026-04-03\n\nFixed\n\nFix campaign creation failing with listmonk server 6.0.0 - headers field now correctly uses a list of dictionaries instead of a plain dictionary (PR #28)"
+  },
+  {
+    "objectID": "changelog.html#section-4",
+    "href": "changelog.html#section-4",
+    "title": "Changelog",
+    "section": "[0.3.10] - 2026-01-28",
+    "text": "[0.3.10] - 2026-01-28\n\nAdded\n\nAdd update_list function (thanks @ChrisH861, PR #27)"
+  },
+  {
+    "objectID": "changelog.html#section-5",
+    "href": "changelog.html#section-5",
+    "title": "Changelog",
+    "section": "[0.3.9] - 2026-01-05",
+    "text": "[0.3.9] - 2026-01-05\n\nAdded\n\nAdd add_subscribers_to_lists function (thanks @MochaSteve256)\n\n\n\nChanged\n\nLoosen some of the types to allow more flexible usage (avoid type errors when DTOs/ViewModels/etc have VALUE|None typing but are known to be in a good state)\nRefactor client implementation to improve organization and maintainability"
+  },
+  {
+    "objectID": "skills.html",
+    "href": "skills.html",
+    "title": "Skills",
+    "section": "",
+    "text": "A skill is a package of structured files that teaches an AI coding agent how to work with a specific tool or framework. The skill below was generated by Great Docs from this project’s documentation. Install it in your agent and it will be able to run commands, edit configuration, write content, and troubleshoot problems without step-by-step guidance from you.\n\n  \n    ▶    Install this skill\n  \n  \n    \n      \nAny agent — install with npx:\nnpx skills add https://mkennedy.codes/docs/listmonk/\nCodex / OpenCode\nTell the agent:Fetch the skill file at https://mkennedy.codes/docs/listmonk/skill.md and follow the instructions.\nManual — download the skill file:\ncurl -O https://mkennedy.codes/docs/listmonk/skill.md\nOr browse the SKILL.md file.\n      \n    \n  \n\n\nSKILL.md\n---\nname: listmonk\ndescription: &gt;\n  Listmonk Email API Client for Python. Use when writing Python code that uses the listmonk package.\nlicense: MIT\ncompatibility: Requires Python &gt;=3.10.\n---\n\n# Listmonk\n\nListmonk Email API Client for Python\n\n## Installation\n\n```bash\npip install listmonk\n```\n\n## API overview\n\n### Configuration & Authentication\n\nPoint the client at your Listmonk instance and authenticate.\n\n- `set_url_base`: Each Listmonk instance lives somewhere. This is where yours lives\n- `get_base_url`: Each Listmonk instance lives somewhere. This is where yours lives\n- `login`: Logs into Listmonk and stores that authentication for the life of your app\n- `verify_login`: Call to verify that the stored auth token is still valid\n- `is_healthy`: Checks that the token retrieved during login is still valid at your server\n\n### Mailing Lists\n\nRead and manage mailing lists.\n\n- `lists`: Get mailing lists on the server\n- `list_by_id`: Get the full details of a list with the given ID\n- `create_list`: Create a new mailing list on the server\n- `update_list`: Updates an existing mailing list on the server\n- `delete_list`: Delete a specific list by its ID\n\n### Subscribers\n\nCreate, query, update, and manage the status of subscribers.\n\n- `subscribers`: Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned\n- `subscriber_by_email`: Retrieves the subscribe by email (e.g. \"some_user@talkpython.fm\")\n- `subscriber_by_id`: Retrieves the subscribe by id (e.g. 201)\n- `subscriber_by_uuid`: Retrieves the subscriber by uuid (e.g. \"c37786af-e6ab-4260-9b49-740adpcm6ed\")\n- `create_subscriber`: Create a new subscriber on the Listmonk server\n- `update_subscriber`: Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and\n- `add_subscribers_to_lists`: Add a number of subscribers to a number of lists\n- `enable_subscriber`: Set a subscriber's status to enable\n- `disable_subscriber`: Set a subscriber's status to disable\n- `block_subscriber`: Add a subscriber to the blocklist, AKA unsubscribe them\n- `confirm_optin`: For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in\n- `delete_subscriber`: Completely delete a subscriber from your system (it's as if they were never there)\n\n### Campaigns\n\nCreate, preview, update, and delete email campaigns.\n\n- `campaigns`: Get campaigns on the server\n- `campaign_by_id`: Get the full details of a campaign with the given ID\n- `campaign_preview_by_id`: Get the preview of a campaign with the given ID\n- `create_campaign`: Create a new campaign with the given parameters\n- `update_campaign`: Update the given campaign with the provided campaign information\n- `delete_campaign`: Completely delete a campaign from your system\n\n### Templates\n\nManage email templates and set the default.\n\n- `templates`: This function retrieves a list of all templates available in the system\n- `template_by_id`: Retrieve a template by its ID\n- `template_preview_by_id`: Get the preview of a template with the given ID\n- `create_template`: Create a template with the specified details\n- `update_template`: Update a template in the system\n- `set_default_template`: Set the given template ID as the default template\n- `delete_template`: Completely delete a template from your system\n\n### Transactional Email\n\nSend one-off transactional messages.\n\n- `send_transactional_email`: Send a transactional email through Listmonk to the recipient\n\n### Data Models\n\nPydantic models returned by and passed to the API functions.\n\n- `models.MailingList`\n- `models.SubscriberStatus`\n- `models.SubscriberStatuses`\n- `models.Subscriber`\n- `models.CreateSubscriberModel`\n- `models.Campaign`\n- `models.CreateCampaignModel`\n- `models.UpdateCampaignModel`\n- `models.CampaignPreview`\n- `models.Template`\n- `models.CreateTemplateModel`\n- `models.TemplatePreview`\n\n### Exceptions\n\nErrors raised by the client.\n\n- `errors.ValidationError`\n- `errors.OperationNotAllowedError`\n- `errors.ListmonkFileNotFoundError`\n\n## Resources\n\n- [Full documentation](https://mkennedy.codes/docs/listmonk/)\n- [llms.txt](llms.txt) — Indexed API reference for LLMs\n- [llms-full.txt](llms-full.txt) — Comprehensive documentation for LLMs\n- [Source code](https://github.com/mikeckennedy/listmonk)"
+  },
+  {
+    "objectID": "reference/subscriber_by_email.html",
+    "href": "reference/subscriber_by_email.html",
+    "title": "subscriber_by_email()",
+    "section": "",
+    "text": "Retrieves the subscribe by email (e.g. “some_user@talkpython.fm”)\n\n\nUsage\nSource\n\n\nsubscriber_by_email(email, timeout_config=None)\n\n\nParameters\n\n\nemail: str\n\nEmail of the subscriber (e.g. “some_user@talkpython.fm”)\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe subscribe if found, None otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[subscriber_by_email()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/delete_template.html",
+    "href": "reference/delete_template.html",
+    "title": "delete_template()",
+    "section": "",
+    "text": "Completely delete a template from your system.\n\n\nUsage\nSource\n\n\ndelete_template(template_id=None, timeout_config=None)\n\n\nParameters\n\n\ntemplate_id: Optional[int] = None\n\nname of the template to delete.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if the template was successfully deleted, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[delete_template()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/add_subscribers_to_lists.html",
+    "href": "reference/add_subscribers_to_lists.html",
+    "title": "add_subscribers_to_lists()",
+    "section": "",
+    "text": "Add a number of subscribers to a number of lists.\n\n\nUsage\nSource\n\n\nadd_subscribers_to_lists(\n    subscriber_ids, list_ids, timeout_config=None, status=\"confirmed\"\n)\n\n\nParameters\n\n\nsubscriber_ids: typing.Iterable[int]\n\nList of subscriber IDs.\n\nlist_ids: typing.Iterable[int]\n\nList of lists to subscribe to.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue on success, False on fail.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[add_subscribers_to_lists()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/update_list.html",
+    "href": "reference/update_list.html",
+    "title": "update_list()",
+    "section": "",
+    "text": "Updates an existing mailing list on the server.\n\n\nUsage\nSource\n\n\nupdate_list(\n    list_id,\n    list_name=None,\n    list_type=None,\n    status=None,\n    optin=None,\n    tags=None,\n    description=None\n)\n\n\nParameters\n\n\nlist_id: int\n\nList ID\n\nlist_name: Optional[str] = None\n\nOptional update name of the list.\n\nlist_type: Optional[str] = None\n\nOptional update type of list. Options: “private”, “public”.\n\noptin: Optional[str] = None\n\nOptianal update opt-in type. Options: “single”, “double”.\n\ntags: Optional[list[str]] = None\n\nOptional update list of tags associated with the list.\n\ndescription: Optional[str] = None\n\nOptional update description for the list.\n\n\n\n\n\nReturns\n\n\n Optional[models.MailingList]\n\nThe MailingList object that was created on the server.",
+    "crumbs": [
+      "API Reference",
+      "Mailing Lists",
+      "[update_list()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/disable_subscriber.html",
+    "href": "reference/disable_subscriber.html",
+    "title": "disable_subscriber()",
+    "section": "",
+    "text": "Set a subscriber’s status to disable.\n\n\nUsage\nSource\n\n\ndisable_subscriber(subscriber, timeout_config=None)\n\n\nParameters\n\n\nsubscriber: Optional[models.Subscriber]\n\nThe subscriber to disable.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe updated subscriber object from the server.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[disable_subscriber()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/create_list.html",
+    "href": "reference/create_list.html",
+    "title": "create_list()",
+    "section": "",
+    "text": "Create a new mailing list on the server.\n\n\nUsage\nSource\n\n\ncreate_list(\n    list_name, list_type=\"public\", optin=\"single\", tags=None, description=None\n)\n\n\nParameters\n\n\nlist_name: str\n\nName of the new list.\n\nlist_type: str = \"public\"\n\nType of list. Options: “private”, “public”. Defaults to “public”.\n\noptin: str = \"single\"\n\nOpt-in type. Options: “single”, “double”. Defaults to “single”.\n\ntags: Optional[list[str]] = None\n\nOptional list of tags associated with the list.\n\ndescription: Optional[str] = None\n\nOptional description for the new list.\n\n\n\n\n\nReturns\n\n\n Optional[models.MailingList]\n\nThe MailingList object that was created on the server.",
+    "crumbs": [
+      "API Reference",
+      "Mailing Lists",
+      "[create_list()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/get_base_url.html",
+    "href": "reference/get_base_url.html",
+    "title": "get_base_url()",
+    "section": "",
+    "text": "Each Listmonk instance lives somewhere. This is where yours lives.\n\n\nUsage\nSource\n\n\nget_base_url()\n\n\nFor example, https://listmonk.somedomain.tech.\n\n\nReturns\n\n\n Optional[str]\n\nThe base URL of your instance.",
+    "crumbs": [
+      "API Reference",
+      "Configuration & Authentication",
+      "[get_base_url()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/is_healthy.html",
+    "href": "reference/is_healthy.html",
+    "title": "is_healthy()",
+    "section": "",
+    "text": "Checks that the token retrieved during login is still valid at your server.\n\n\nUsage\nSource\n\n\nis_healthy(timeout_config=None)\n\n\nParameters\n\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if the token is still valid, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Configuration & Authentication",
+      "[is_healthy()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/confirm_optin.html",
+    "href": "reference/confirm_optin.html",
+    "title": "confirm_optin()",
+    "section": "",
+    "text": "For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in\n\n\nUsage\nSource\n\n\nconfirm_optin(subscriber_uuid, list_uuid, timeout_config=None)\n\n\nvia the API. You should only do this when they are actually opting in. If you have your own opt-in form, but it’s via your code, then this makes sense.\n\n\nParameters\n\n\nsubscriber_uuid: Optional[str]\n\nThe Subscriber.uuid value for the subscriber.\n\nlist_uuid: Optional[str]\n\nThe MailingList.uuid value for the list.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if they were successfully opted in.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[confirm_optin()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/subscriber_by_id.html",
+    "href": "reference/subscriber_by_id.html",
+    "title": "subscriber_by_id()",
+    "section": "",
+    "text": "Retrieves the subscribe by id (e.g. 201)\n\n\nUsage\nSource\n\n\nsubscriber_by_id(subscriber_id, timeout_config=None)\n\n\nParameters\n\n\nsubscriber_id: int\n\nID of the subscriber (e.g. 201)\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe subscribe if found, None otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[subscriber_by_id()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.TemplatePreview.html",
+    "href": "reference/models.TemplatePreview.html",
+    "title": "models.TemplatePreview",
+    "section": "",
+    "text": "A rendered preview of a template.\n\n\nUsage\nSource\n\n\nmodels.TemplatePreview()\n\n\nAttributes\n\n\npreview: Optional[str]\n\nThe rendered HTML preview of the template, using lorem-ipsum sample content.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.TemplatePreview]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/delete_subscriber.html",
+    "href": "reference/delete_subscriber.html",
+    "title": "delete_subscriber()",
+    "section": "",
+    "text": "Completely delete a subscriber from your system (it’s as if they were never there).\n\n\nUsage\nSource\n\n\ndelete_subscriber(\n    email=None, overriding_subscriber_id=None, timeout_config=None\n)\n\n\nIf your goal is to unsubscribe them, then use the block_subscriber method.\n\n\nParameters\n\n\nemail: Optional[str] = None\n\nEmail of the account to delete.\n\noverriding_subscriber_id: Optional[int] = None\n\nOptional ID of the account to delete (takes precedence).\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if they were successfully deleted, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[delete_subscriber()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/send_transactional_email.html",
+    "href": "reference/send_transactional_email.html",
+    "title": "send_transactional_email()",
+    "section": "",
+    "text": "Send a transactional email through Listmonk to the recipient.\n\n\nUsage\nSource\n\n\nsend_transactional_email(\n    subscriber_email,\n    template_id,\n    from_email=None,\n    template_data=None,\n    messenger_channel=\"email\",\n    content_type=\"markdown\",\n    altbody=None,\n    attachments=None,\n    email_headers=None,\n    timeout_config=None\n)\n\n\nErrors may show up in the logs section of your Listmonk dashboard.\n\n\nParameters\n\n\nsubscriber_email: str\n\nThe email address to send the email to (they must be a subscriber of some list on your server).\n\ntemplate_id: int\n\nThe template ID to use for the email. It must be a “transactional” not campaign template.\n\nfrom_email: Optional[str] = None\n\nThe from address for the email. Can be omitted to use default email at your output provider.\n\ntemplate_data: Optional[dict[str, Any]] = None\n\nA dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.* }}.\n\nmessenger_channel: str = \"email\"\n\nDefault is “email”, if you have SMS or some other channel, you can use it here.\n\ncontent_type: str = \"markdown\"\n\nEmail format options include html, markdown, and plain.\n\naltbody: Optional[str] = None\n\nOptional alternate plaintext body for multipart HTML emails.\n\nattachments: Optional[list[Path]] = None\n\nOptional list of pathlib.Path objects pointing to file that will be sent as attachment.\n\nemail_headers: Optional[list[dict[str, Optional[str]]]] = None\n\nOptional array of e-mail headers to include in all messages sent from this server. eg: [{“X-Custom”: “value”}, {“X-Custom2”: “value”}]\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if the email send was successful, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Transactional Email",
+      "[send_transactional_email()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/index.html",
+    "href": "reference/index.html",
+    "title": "API Reference",
+    "section": "",
+    "text": "The full listmonk client API: configuration, list/subscriber/campaign/template management, and transactional email.\n\n\nConfiguration & Authentication\n\nPoint the client at your Listmonk instance and authenticate.\n\n\nset_url_base()\n\nEach Listmonk instance lives somewhere. This is where yours lives.\n\nget_base_url()\n\nEach Listmonk instance lives somewhere. This is where yours lives.\n\nlogin()\n\nLogs into Listmonk and stores that authentication for the life of your app.\n\nverify_login()\n\nCall to verify that the stored auth token is still valid.\n\nis_healthy()\n\nChecks that the token retrieved during login is still valid at your server.\n\n\n\n\nMailing Lists\n\nRead and manage mailing lists.\n\n\nlists()\n\nGet mailing lists on the server.\n\nlist_by_id()\n\nGet the full details of a list with the given ID.\n\ncreate_list()\n\nCreate a new mailing list on the server.\n\nupdate_list()\n\nUpdates an existing mailing list on the server.\n\ndelete_list()\n\nDelete a specific list by its ID.\n\n\n\n\nSubscribers\n\nCreate, query, update, and manage the status of subscribers.\n\n\nsubscribers()\n\nGet a list of subscribers matching the criteria provided. If none, then all subscribers are returned.\n\nsubscriber_by_email()\n\nRetrieves the subscribe by email (e.g. “some_user@talkpython.fm”)\n\nsubscriber_by_id()\n\nRetrieves the subscribe by id (e.g. 201)\n\nsubscriber_by_uuid()\n\nRetrieves the subscriber by uuid (e.g. “c37786af-e6ab-4260-9b49-740adpcm6ed”)\n\ncreate_subscriber()\n\nCreate a new subscriber on the Listmonk server.\n\nupdate_subscriber()\n\nUpdate many aspects of a subscriber, from their email addresses and names, to custom attribute data, and\n\nadd_subscribers_to_lists()\n\nAdd a number of subscribers to a number of lists.\n\nenable_subscriber()\n\nSet a subscriber’s status to enable.\n\ndisable_subscriber()\n\nSet a subscriber’s status to disable.\n\nblock_subscriber()\n\nAdd a subscriber to the blocklist, AKA unsubscribe them.\n\nconfirm_optin()\n\nFor opt-in situations, subscribers are added as unconfirmed first. This method will opt them in\n\ndelete_subscriber()\n\nCompletely delete a subscriber from your system (it’s as if they were never there).\n\n\n\n\nCampaigns\n\nCreate, preview, update, and delete email campaigns.\n\n\ncampaigns()\n\nGet campaigns on the server.\n\ncampaign_by_id()\n\nGet the full details of a campaign with the given ID.\n\ncampaign_preview_by_id()\n\nGet the preview of a campaign with the given ID.\n\ncreate_campaign()\n\nCreate a new campaign with the given parameters.\n\nupdate_campaign()\n\nUpdate the given campaign with the provided campaign information.\n\ndelete_campaign()\n\nCompletely delete a campaign from your system.\n\n\n\n\nTemplates\n\nManage email templates and set the default.\n\n\ntemplates()\n\nThis function retrieves a list of all templates available in the system.\n\ntemplate_by_id()\n\nRetrieve a template by its ID.\n\ntemplate_preview_by_id()\n\nGet the preview of a template with the given ID.\n\ncreate_template()\n\nCreate a template with the specified details.\n\nupdate_template()\n\nUpdate a template in the system.\n\nset_default_template()\n\nSet the given template ID as the default template.\n\ndelete_template()\n\nCompletely delete a template from your system.\n\n\n\n\nTransactional Email\n\nSend one-off transactional messages.\n\n\nsend_transactional_email()\n\nSend a transactional email through Listmonk to the recipient.\n\n\n\n\nData Models\n\nPydantic models returned by and passed to the API functions.\n\n\nmodels.MailingList\n\nA mailing list on the Listmonk instance.\n\nmodels.SubscriberStatus\n\nA breakdown of subscriber counts by subscription status for a mailing list.\n\nmodels.SubscriberStatuses\n\nThe subscription status of a subscriber within a given mailing list.\n\nmodels.Subscriber\n\nA subscriber (contact) on the Listmonk instance.\n\nmodels.CreateSubscriberModel\n\nThe payload used to create a new subscriber.\n\nmodels.Campaign\n\nAn email campaign on the Listmonk instance.\n\nmodels.CreateCampaignModel\n\nThe payload used to create a new campaign.\n\nmodels.UpdateCampaignModel\n\nThe payload used to update an existing campaign.\n\nmodels.CampaignPreview\n\nA rendered preview of a campaign.\n\nmodels.Template\n\nAn email template on the Listmonk instance.\n\nmodels.CreateTemplateModel\n\nThe payload used to create a new template.\n\nmodels.TemplatePreview\n\nA rendered preview of a template.\n\n\n\n\nExceptions\n\nErrors raised by the client.\n\n\nerrors.ValidationError\n\nRaised when an argument fails client-side validation before a request is sent.\n\nerrors.OperationNotAllowedError\n\nRaised when an operation is not permitted in the client’s current state.\n\nerrors.ListmonkFileNotFoundError\n\nRaised when a local file referenced for upload (e.g. a transactional email attachment) cannot be found.",
+    "crumbs": [
+      "API Reference",
+      "API Index"
+    ]
+  },
+  {
+    "objectID": "reference/models.SubscriberStatuses.html",
+    "href": "reference/models.SubscriberStatuses.html",
+    "title": "models.SubscriberStatuses",
+    "section": "",
+    "text": "The subscription status of a subscriber within a given mailing list.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.SubscriberStatuses]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.SubscriberStatuses.html#blocklisted",
+    "href": "reference/models.SubscriberStatuses.html#blocklisted",
+    "title": "models.SubscriberStatuses",
+    "section": "blocklisted",
+    "text": "blocklisted\n\nThe subscription status of a subscriber within a given mailing list.\n\n\nblocklisted=\"blocklisted\"\n\n\nAttributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.SubscriberStatuses]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.SubscriberStatuses.html#disabled",
+    "href": "reference/models.SubscriberStatuses.html#disabled",
+    "title": "models.SubscriberStatuses",
+    "section": "disabled",
+    "text": "disabled\n\nThe subscription status of a subscriber within a given mailing list.\n\n\ndisabled=\"disabled\"\n\n\nAttributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.SubscriberStatuses]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.SubscriberStatuses.html#enabled",
+    "href": "reference/models.SubscriberStatuses.html#enabled",
+    "title": "models.SubscriberStatuses",
+    "section": "enabled",
+    "text": "enabled\n\nThe subscription status of a subscriber within a given mailing list.\n\n\nenabled=\"enabled\"\n\n\nAttributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.SubscriberStatuses]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/template_by_id.html",
+    "href": "reference/template_by_id.html",
+    "title": "template_by_id()",
+    "section": "",
+    "text": "Retrieve a template by its ID.\n\n\nUsage\nSource\n\n\ntemplate_by_id(template_id, timeout_config=None)\n\n\nParameters\n\n\ntemplate_id: int\n\nThe ID of the template to retrieve.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Template]\n\nOptional[models.Template]: The template object retrieved based on the ID provided.",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[template_by_id()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/set_default_template.html",
+    "href": "reference/set_default_template.html",
+    "title": "set_default_template()",
+    "section": "",
+    "text": "Set the given template ID as the default template.\n\n\nUsage\nSource\n\n\nset_default_template(template_id=None, timeout_config=None)\n\n\nParameters\n\n\ntemplate_id: Optional[int] = None\n\nThe ID of the template to set as default. If not provided, a ValueError is raised.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\nbool: bool\n\nTrue if the default template was set successfully, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Templates",
+      "[set_default_template()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.CreateSubscriberModel.html",
+    "href": "reference/models.CreateSubscriberModel.html",
+    "title": "models.CreateSubscriberModel",
+    "section": "",
+    "text": "The payload used to create a new subscriber.\n\n\nUsage\nSource\n\n\nmodels.CreateSubscriberModel()\n\n\nAttributes\n\n\nemail: str\n\nThe email address for the new subscriber.\n\nname: Optional[str]\n\nThe subscriber’s display name, if any.\n\nstatus: str\n\nThe initial global status, e.g. enabled.\n\nlists: list[int]\n\nThe IDs of the lists to subscribe this person to.\n\npreconfirm_subscriptions: bool\n\nWhen True, mark the new subscriptions as confirmed immediately (skipping double opt-in confirmation emails).\n\nattribs: dict[str, Any]\n\nArbitrary custom attributes to store against the subscriber.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.CreateSubscriberModel]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/block_subscriber.html",
+    "href": "reference/block_subscriber.html",
+    "title": "block_subscriber()",
+    "section": "",
+    "text": "Add a subscriber to the blocklist, AKA unsubscribe them.\n\n\nUsage\nSource\n\n\nblock_subscriber(subscriber, timeout_config=None)\n\n\nParameters\n\n\nsubscriber: models.Subscriber\n\nThe subscriber to block/unsubscribe.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.Subscriber]\n\nThe updated subscriber object from the server.",
+    "crumbs": [
+      "API Reference",
+      "Subscribers",
+      "[block_subscriber()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.CreateTemplateModel.html",
+    "href": "reference/models.CreateTemplateModel.html",
+    "title": "models.CreateTemplateModel",
+    "section": "",
+    "text": "The payload used to create a new template.\n\n\nUsage\nSource\n\n\nmodels.CreateTemplateModel()\n\n\nAttributes\n\n\nname: Optional[str]\n\nThe template name.\n\nsubject: Optional[str]\n\nThe default subject line for the template, if any.\n\nbody: Optional[str]\n\nThe template body markup.\n\ntype: Optional[str]\n\nThe template type, e.g. campaign or tx (transactional).\n\nis_default: Optional[bool]\n\nWhether the new template should become the default for its type.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.CreateTemplateModel]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/models.CampaignPreview.html",
+    "href": "reference/models.CampaignPreview.html",
+    "title": "models.CampaignPreview",
+    "section": "",
+    "text": "A rendered preview of a campaign.\n\n\nUsage\nSource\n\n\nmodels.CampaignPreview()\n\n\nAttributes\n\n\npreview: Optional[str]\n\nThe rendered HTML preview of the campaign body.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.CampaignPreview]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/set_url_base.html",
+    "href": "reference/set_url_base.html",
+    "title": "set_url_base()",
+    "section": "",
+    "text": "Each Listmonk instance lives somewhere. This is where yours lives.\n\n\nUsage\nSource\n\n\nset_url_base(url)\n\n\nFor example, https://listmonk.somedomain.tech.\n\n\nParameters\n\n\nurl: str\n\nThe base URL of your instance without /api.",
+    "crumbs": [
+      "API Reference",
+      "Configuration & Authentication",
+      "[set_url_base()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/list_by_id.html",
+    "href": "reference/list_by_id.html",
+    "title": "list_by_id()",
+    "section": "",
+    "text": "Get the full details of a list with the given ID.\n\n\nUsage\nSource\n\n\nlist_by_id(list_id, timeout_config=None)\n\n\nParameters\n\n\nlist_id: int\n\nA list to get the details about, e.g. 7.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n Optional[models.MailingList]\n\nMailingList object with the full details of a list.",
+    "crumbs": [
+      "API Reference",
+      "Mailing Lists",
+      "[list_by_id()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  },
+  {
+    "objectID": "reference/models.Template.html",
+    "href": "reference/models.Template.html",
+    "title": "models.Template",
+    "section": "",
+    "text": "An email template on the Listmonk instance.\n\n\nUsage\nSource\n\n\nmodels.Template()\n\n\nAttributes\n\n\nid: int\n\nThe numeric template ID assigned by Listmonk.\n\ncreated_at: datetime.datetime\n\nWhen the template was created.\n\nupdated_at: Optional[datetime.datetime]\n\nWhen the template was last modified, if ever.\n\nname: Optional[str]\n\nThe template name.\n\nsubject: Optional[str]\n\nThe default subject line for the template, if any.\n\nbody: Optional[str]\n\nThe template body markup.\n\ntype: Optional[str]\n\nThe template type, e.g. campaign or tx (transactional).\n\nis_default: Optional[bool]\n\nWhether this is the default template for its type.",
+    "crumbs": [
+      "API Reference",
+      "Data Models",
+      "[models.Template]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/errors.OperationNotAllowedError.html",
+    "href": "reference/errors.OperationNotAllowedError.html",
+    "title": "errors.OperationNotAllowedError",
+    "section": "",
+    "text": "Raised when an operation is not permitted in the client’s current state.\n\n\nUsage\nSource\n\n\nerrors.OperationNotAllowedError()\n\n\nFor example, calling an API before the base URL has been set, or before a successful login.",
+    "crumbs": [
+      "API Reference",
+      "Exceptions",
+      "[errors.OperationNotAllowedError]{.doc-object-name .doc-class .doc-label .doc-label-class}"
+    ]
+  },
+  {
+    "objectID": "reference/delete_campaign.html",
+    "href": "reference/delete_campaign.html",
+    "title": "delete_campaign()",
+    "section": "",
+    "text": "Completely delete a campaign from your system.\n\n\nUsage\nSource\n\n\ndelete_campaign(campaign_id=None, timeout_config=None)\n\n\nParameters\n\n\ncampaign_id: Optional[int] = None\n\nname of the campaign to delete.\n\ntimeout_config: Optional[httpx.Timeout] = None\n\nOptional timeout configuration for the request. Default is 10 seconds.\n\n\n\n\n\nReturns\n\n\n bool\n\nTrue if the campaign was successfully deleted, False otherwise.",
+    "crumbs": [
+      "API Reference",
+      "Campaigns",
+      "[delete_campaign()]{.doc-object-name .doc-function .doc-label .doc-label-function}"
+    ]
+  }
+]

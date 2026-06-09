@@ -1,0 +1,139 @@
+# Great Docs Configuration
+# See https://posit-dev.github.io/great-docs/user-guide/configuration.html
+
+# Friendly name shown in the navbar / page titles.
+display_name: Listmonk
+
+# Docstring style is Google ("Args:" / "Returns:" sections). Pin it; don't rely on
+# auto-detect (init detected google=38).
+parser: google
+
+# Dynamic introspection imports the package at build time for accurate signatures.
+# Requires great-docs to run in a venv where `import listmonk` succeeds.
+dynamic: true
+
+# Subpath hosting: drives Quarto's base path so CSS/JS/nav resolve under /docs/listmonk/.
+# Keep the trailing slash.
+site_url: "https://mkennedy.codes/docs/listmonk/"
+
+# GOTCHA G7: sitemap/robots/canonical/og:url use a SEPARATE base URL that Great Docs
+# auto-detects from the GitHub repo (-> owner.github.io/repo) and does NOT fall back to
+# site_url. Set it explicitly, or the sitemap points at the wrong domain.
+seo:
+  canonical:
+    base_url: "https://mkennedy.codes/docs/listmonk/"
+
+# Source repository + "view source" links and install/version badges.
+repo: https://github.com/mikeckennedy/listmonk
+github_style: widget
+source:
+  enabled: true
+  branch: main
+  placement: usage
+pypi: true
+
+# GOTCHA G5: Great Docs defaults mcp.enabled to TRUE, rendering an empty "MCP" tab even
+# with no MCP server. Disable it — this project ships no MCP server.
+mcp:
+  enabled: false
+
+# Author metadata for the landing-page sidebar.
+authors:
+  - name: Michael Kennedy
+    role: Author
+    email: michael@talkpython.fm
+
+# Jupyter kernel for any executable code cells in generated pages.
+jupyter: python3
+
+# API Reference Structure
+# -----------------------
+# Grouped by task. listmonk is a flat module: top-level functions are bare names
+# (resolve to listmonk.<name>); models live under models.<Name>; exceptions under
+# errors.<Name>.
+reference:
+  title: "API Reference"
+  desc: "The full listmonk client API: configuration, list/subscriber/campaign/template management, and transactional email."
+  sections:
+    - title: Configuration & Authentication
+      desc: "Point the client at your Listmonk instance and authenticate."
+      contents:
+        - set_url_base
+        - get_base_url
+        - login
+        - verify_login
+        - is_healthy
+
+    - title: Mailing Lists
+      desc: "Read and manage mailing lists."
+      contents:
+        - lists
+        - list_by_id
+        - create_list
+        - update_list
+        - delete_list
+
+    - title: Subscribers
+      desc: "Create, query, update, and manage the status of subscribers."
+      contents:
+        - subscribers
+        - subscriber_by_email
+        - subscriber_by_id
+        - subscriber_by_uuid
+        - create_subscriber
+        - update_subscriber
+        - add_subscribers_to_lists
+        - enable_subscriber
+        - disable_subscriber
+        - block_subscriber
+        - confirm_optin
+        - delete_subscriber
+
+    - title: Campaigns
+      desc: "Create, preview, update, and delete email campaigns."
+      contents:
+        - campaigns
+        - campaign_by_id
+        - campaign_preview_by_id
+        - create_campaign
+        - update_campaign
+        - delete_campaign
+
+    - title: Templates
+      desc: "Manage email templates and set the default."
+      contents:
+        - templates
+        - template_by_id
+        - template_preview_by_id
+        - create_template
+        - update_template
+        - set_default_template
+        - delete_template
+
+    - title: Transactional Email
+      desc: "Send one-off transactional messages."
+      contents:
+        - send_transactional_email
+
+    - title: Data Models
+      desc: "Pydantic models returned by and passed to the API functions."
+      contents:
+        - models.MailingList
+        - models.SubscriberStatus
+        - models.SubscriberStatuses
+        - models.Subscriber
+        - models.CreateSubscriberModel
+        - models.Campaign
+        - models.CreateCampaignModel
+        - models.UpdateCampaignModel
+        - models.CampaignPreview
+        - models.Template
+        - models.CreateTemplateModel
+        - models.TemplatePreview
+
+    - title: Exceptions
+      desc: "Errors raised by the client."
+      contents:
+        - errors.ValidationError
+        - errors.OperationNotAllowedError
+        - errors.ListmonkFileNotFoundError

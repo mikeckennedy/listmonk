@@ -1,0 +1,11 @@
+{
+  "skills": [
+    {
+      "name": "listmonk",
+      "description": "Listmonk Email API Client for Python. Use when writing Python code that uses the listmonk package.",
+      "files": [
+        "SKILL.md"
+      ]
+    }
+  ]
+}

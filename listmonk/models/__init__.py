@@ -7,16 +7,47 @@ from strenum import LowercaseStrEnum
 
 
 class SubscriberStatuses(LowercaseStrEnum):
+    """The subscription status of a subscriber within a given mailing list.
+
+    Attributes:
+        enabled: The subscriber is actively subscribed and will receive campaigns.
+        disabled: The subscription exists but is paused; the subscriber will not receive campaigns.
+        blocklisted: The subscriber has been blocked and will not receive any mail.
+    """
+
     enabled = 'enabled'
     disabled = 'disabled'
     blocklisted = 'blocklisted'
 
 
 class SubscriberStatus(BaseModel):
+    """A breakdown of subscriber counts by subscription status for a mailing list.
+
+    Attributes:
+        unconfirmed_count: The number of subscriptions still awaiting double opt-in
+            confirmation (read from the API's ``unconfirmed`` field).
+    """
+
     unconfirmed_count: Optional[int] = pydantic.Field(alias='unconfirmed', default=None)
 
 
 class MailingList(BaseModel):
+    """A mailing list on the Listmonk instance.
+
+    Attributes:
+        id: The numeric list ID assigned by Listmonk.
+        created_at: When the list was created.
+        updated_at: When the list was last modified, if ever.
+        uuid: The globally unique identifier for the list.
+        name: The human-readable list name.
+        type: The list visibility, typically ``public`` or ``private``.
+        optin: The opt-in mode, either ``single`` or ``double``.
+        tags: Arbitrary labels attached to the list.
+        description: A free-text description of the list.
+        subscriber_count: The total number of subscribers on the list.
+        subscriber_statuses: A breakdown of subscriber counts by subscription status.
+    """
+
     id: int
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
@@ -31,6 +62,21 @@ class MailingList(BaseModel):
 
 
 class Subscriber(BaseModel):
+    """A subscriber (contact) on the Listmonk instance.
+
+    Attributes:
+        id: The numeric subscriber ID assigned by Listmonk.
+        email: The subscriber's email address (their primary identifier).
+        name: The subscriber's display name, if provided.
+        created_at: When the subscriber was created.
+        updated_at: When the subscriber was last modified, if ever.
+        uuid: The globally unique identifier for the subscriber.
+        lists: The lists this subscriber belongs to, each as a dict describing the
+            membership (list id, subscription status, and so on).
+        attribs: Arbitrary custom attributes stored against the subscriber.
+        status: The subscriber's global status, e.g. ``enabled``, ``disabled``, or ``blocklisted``.
+    """
+
     id: int
     email: str
     name: Optional[str] = None
@@ -52,6 +98,18 @@ class Subscriber(BaseModel):
 
 
 class CreateSubscriberModel(BaseModel):
+    """The payload used to create a new subscriber.
+
+    Attributes:
+        email: The email address for the new subscriber.
+        name: The subscriber's display name, if any.
+        status: The initial global status, e.g. ``enabled``.
+        lists: The IDs of the lists to subscribe this person to.
+        preconfirm_subscriptions: When ``True``, mark the new subscriptions as confirmed
+            immediately (skipping double opt-in confirmation emails).
+        attribs: Arbitrary custom attributes to store against the subscriber.
+    """
+
     email: str
     name: Optional[str] = None
     status: str
@@ -61,6 +119,35 @@ class CreateSubscriberModel(BaseModel):
 
 
 class Campaign(BaseModel):
+    """An email campaign on the Listmonk instance.
+
+    Attributes:
+        id: The numeric campaign ID assigned by Listmonk.
+        created_at: When the campaign was created.
+        updated_at: When the campaign was last modified, if ever.
+        views: The number of times the campaign has been opened/viewed.
+        clicks: The number of link clicks recorded for the campaign.
+        lists: The target lists for the campaign, each as a dict describing the list.
+        started_at: When sending began, if the campaign has started.
+        to_send: The total number of recipients the campaign will be sent to.
+        sent: The number of messages sent so far.
+        uuid: The globally unique identifier for the campaign.
+        name: The internal campaign name.
+        type: The campaign type, e.g. ``regular`` or ``optin``.
+        subject: The email subject line.
+        from_email: The sender (From) address.
+        body: The campaign body in the configured content type.
+        altbody: The optional plain-text alternative body for multipart HTML emails.
+        send_at: The scheduled send time, if the campaign is scheduled.
+        status: The campaign status, e.g. ``draft``, ``scheduled``, ``running``,
+            ``paused``, ``cancelled``, or ``finished``.
+        content_type: The body format, e.g. ``richtext``, ``html``, ``markdown``, or ``plain``.
+        tags: Arbitrary labels attached to the campaign.
+        template_id: The ID of the template used to render the campaign.
+        messenger: The delivery channel, typically ``email``.
+        headers: Custom email headers to include, each as a single-entry dict.
+    """
+
     id: int
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
@@ -87,6 +174,24 @@ class Campaign(BaseModel):
 
 
 class CreateCampaignModel(BaseModel):
+    """The payload used to create a new campaign.
+
+    Attributes:
+        name: The internal campaign name.
+        subject: The email subject line.
+        lists: The IDs of the lists to send the campaign to.
+        from_email: The sender (From) address. Omit to use the instance default.
+        type: The campaign type, e.g. ``regular`` or ``optin``.
+        content_type: The body format, e.g. ``richtext``, ``html``, ``markdown``, or ``plain``.
+        body: The campaign body in the configured content type.
+        altbody: The optional plain-text alternative body for multipart HTML emails.
+        send_at: The scheduled send time, if the campaign should be scheduled.
+        messenger: The delivery channel, typically ``email``.
+        template_id: The ID of the template used to render the campaign.
+        tags: Arbitrary labels to attach to the campaign.
+        headers: Custom email headers to include, each as a single-entry dict.
+    """
+
     name: Optional[str] = None
     subject: Optional[str] = None
     lists: list[int] = pydantic.Field(default_factory=list)
@@ -110,20 +215,26 @@ class CreateCampaignModel(BaseModel):
 
 
 class UpdateCampaignModel(CreateCampaignModel):
+    """The payload used to update an existing campaign.
+
+    Shares all fields with [CreateCampaignModel][listmonk.models.CreateCampaignModel]. As a
+    safeguard, a ``send_at`` value that is already in the past is dropped (set to ``None``)
+    before sending, so that updating a campaign does not fail on a stale scheduled time.
+    """
+
     # noinspection PyMethodParameters
     @field_validator('send_at', mode='before')
     def serialize_send_at(cls, fld: datetime.datetime) -> Optional[datetime.datetime]:
         """
-
         Serialize the provided datetime field to prepare for sending, considering the specified send_at time.
         If send_at is in the past then the update will fail, so we check if it is in the past and if it is we turn off
         the campaign scheduled send time.
-        Parameters:
-            fld (datetime.datetime): The datetime field to be serialized.
+
+        Args:
+            fld: The datetime field to be serialized.
 
         Returns:
-            datetime.datetime: Returns the serialized datetime field or None if the provided field is in the past.
-
+            The serialized datetime field, or None if the provided field is in the past.
         """
         if isinstance(fld, datetime.datetime):  # type: ignore
             now = datetime.datetime.now(datetime.timezone.utc)
@@ -133,10 +244,29 @@ class UpdateCampaignModel(CreateCampaignModel):
 
 
 class CampaignPreview(BaseModel):
+    """A rendered preview of a campaign.
+
+    Attributes:
+        preview: The rendered HTML preview of the campaign body.
+    """
+
     preview: Optional[str] = None
 
 
 class Template(BaseModel):
+    """An email template on the Listmonk instance.
+
+    Attributes:
+        id: The numeric template ID assigned by Listmonk.
+        created_at: When the template was created.
+        updated_at: When the template was last modified, if ever.
+        name: The template name.
+        subject: The default subject line for the template, if any.
+        body: The template body markup.
+        type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
+        is_default: Whether this is the default template for its type.
+    """
+
     id: int
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
@@ -148,6 +278,16 @@ class Template(BaseModel):
 
 
 class CreateTemplateModel(BaseModel):
+    """The payload used to create a new template.
+
+    Attributes:
+        name: The template name.
+        subject: The default subject line for the template, if any.
+        body: The template body markup.
+        type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
+        is_default: Whether the new template should become the default for its type.
+    """
+
     name: Optional[str] = None
     subject: Optional[str] = None
     body: Optional[str] = None
@@ -156,4 +296,10 @@ class CreateTemplateModel(BaseModel):
 
 
 class TemplatePreview(BaseModel):
+    """A rendered preview of a template.
+
+    Attributes:
+        preview: The rendered HTML preview of the template, using lorem-ipsum sample content.
+    """
+
     preview: Optional[str] = None

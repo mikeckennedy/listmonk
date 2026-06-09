@@ -1,11 +1,11 @@
 # Listmonk Email API Client for Python
 
-Client for the for open source, self-hosted [Listmonk email platform](https://listmonk.app) based on
+Client for the open source, self-hosted [Listmonk email platform](https://listmonk.app) based on
 [httpx2](https://github.com/pydantic/httpx2) and [pydantic](https://pydantic.dev).
 
-`listmonk` is intended for integrating your Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/) but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segmentate users (into separate lists).
+`listmonk` is intended for integrating your Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/) but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segment users (into separate lists).
 
-So while it doesn't currently cover every endpoint (for example you cannot create a list programatically nor can you edit HTML templates for campaigns over APIs) it will likely work for you. That said, PRs are weclome.
+So while it doesn't currently cover every endpoint (for example you cannot create a list programmatically nor can you edit HTML templates for campaigns over APIs) it will likely work for you. That said, PRs are welcome.
 
 🔀 Async is currently planned but not yet implemented. With the httpx2-base, it should be trivial if needed.
 
@@ -21,7 +21,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 - 💥 Completely delete a subscriber from your instance.
 - 📧 Send transactional email with template data (e.g. password reset emails).
 - 📨 Manage campaign (bulk) emails from the API.
-- 🎨 Edit and create templates to control the over all look and feel of campaigns.
+- 🎨 Edit and create templates to control the overall look and feel of campaigns.
 - 📝 Create, edit and delete lists.
 
 ## Installation

@@ -1,0 +1,16 @@
+{
+  // Build the documentation site and mirror it into the committed docs/ folder.
+  // Run via: Terminal > Run Build Task  (Cmd/Ctrl+Shift+B)
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Docs",
+      "type": "process",
+      "command": "${workspaceFolder}/venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/build_docs.py"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+    }
+  ]
+}

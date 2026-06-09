@@ -138,6 +138,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# Great Docs ephemeral build directory (the published site is mirrored to /docs, which IS committed)
+/great-docs/
+
 # mypy
 .mypy_cache/
 .dmypy.json

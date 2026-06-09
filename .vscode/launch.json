@@ -1,0 +1,40 @@
+{
+  // Debug/run the docs tooling with the project venv.
+  //  - Build Docs            : build + mirror to docs/
+  //  - Preview Docs          : great-docs live preview (served at site root)
+  //  - Preview Docs (subpath): serve the committed docs/ under /docs/listmonk, matching production
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Build Docs",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_docs.py",
+      "python": "${workspaceFolder}/venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+    },
+    {
+      "name": "Preview Docs",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/venv/bin/great-docs",
+      "args": ["preview"],
+      "python": "${workspaceFolder}/venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+    },
+    {
+      "name": "Preview Docs (subpath)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/serve_docs.py",
+      "python": "${workspaceFolder}/venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+    }
+  ]
+}

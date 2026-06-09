@@ -40,10 +40,13 @@ core_headers: dict[str, str] = {
 def _validate_and_parse_json_response(resp: httpx.Response) -> dict[str, Any]:
     """
     Internal helper to validate HTTP response and parse JSON with proper error handling.
+
     Args:
         resp: The httpx2 Response object
+
     Returns:
         Parsed JSON data as dictionary
+
     Raises:
         ValidationError: If response is empty or contains invalid JSON
     """
@@ -66,7 +69,8 @@ def get_base_url() -> Optional[str]:
     Each Listmonk instance lives somewhere. This is where yours lives.
     For example, https://listmonk.somedomain.tech.
 
-    Returns: The base URL of your instance.
+    Returns:
+        The base URL of your instance.
     """
     return url_base
 
@@ -81,6 +85,7 @@ def set_url_base(url: str):
     """
     Each Listmonk instance lives somewhere. This is where yours lives.
     For example, https://listmonk.somedomain.tech.
+
     Args:
         url: The base URL of your instance without /api.
     """
@@ -108,12 +113,14 @@ def set_url_base(url: str):
 def login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = None) -> bool:
     """
     Logs into Listmonk and stores that authentication for the life of your app.
+
     Args:
         user_name: Your Listmonk username
         pw: Your Listmonk password
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
 
-    Returns: Returns a boolean indicating whether the login was successful.
+    Returns:
+        Returns a boolean indicating whether the login was successful.
     """
 
     global has_logged_in, username, password
@@ -138,9 +145,12 @@ def login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = Non
 def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.MailingList]:
     """
     Get mailing lists on the server.
+
     Args:
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: List of MailingList objects with the full details of that list.
+
+    Returns:
+        List of MailingList objects with the full details of that list.
     """
     # noinspection DuplicatedCode
     validate_state(url=True)
@@ -168,10 +178,13 @@ def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Mailing
 def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.MailingList]:
     """
     Get the full details of a list with the given ID.
+
     Args:
         list_id: A list to get the details about, e.g. 7.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: MailingList object with the full details of a list.
+
+    Returns:
+        MailingList object with the full details of a list.
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -219,11 +232,14 @@ def subscribers(
 ) -> list[models.Subscriber]:
     """
     Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.
+
     Args:
         query_text: Custom query text such as "subscribers.attribs->>'city' = 'Portland'". See the full documentation at https://listmonk.app/docs/querying-and-segmentation/
         list_id: Pass a list ID and get the subscribers, matching the query, from that list.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
+
+    Returns:
+        A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
     """  # noqa
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -255,6 +271,7 @@ def _fragment_of_subscribers(
 ) -> Tuple[list[dict[str, Any]], bool]:
     """
     Internal use only.
+
     Returns:
         Tuple of partial_results, more_to_retrieve
     """
@@ -297,10 +314,13 @@ def _fragment_of_subscribers(
 def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Subscriber]:
     """
     Retrieves the subscribe by email (e.g. "some_user@talkpython.fm")
+
     Args:
         email: Email of the subscriber (e.g. "some_user@talkpython.fm")
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The subscribe if found, None otherwise.
+
+    Returns:
+        The subscribe if found, None otherwise.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -334,10 +354,13 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
 def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Subscriber]:
     """
     Retrieves the subscribe by id (e.g. 201)
+
     Args:
         subscriber_id: ID of the subscriber (e.g. 201)
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The subscribe if found, None otherwise.
+
+    Returns:
+        The subscribe if found, None otherwise.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -372,10 +395,13 @@ def subscriber_by_uuid(
 ) -> Optional[models.Subscriber]:
     """
     Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
+
     Args:
         subscriber_uuid: UUID of the subscriber (e.g. "c37786af-e6ab-4260-9b49-740aaaa6ed")
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The subscribe if found, None otherwise.
+
+    Returns:
+        The subscribe if found, None otherwise.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -418,6 +444,7 @@ def create_subscriber(
 ) -> models.Subscriber:
     """
     Create a new subscriber on the Listmonk server.
+
     Args:
         email: Email of the subscriber.
         name: Full name (first[SPACE]last) of the subscriber
@@ -425,7 +452,9 @@ def create_subscriber(
         pre_confirm: Whether to preconfirm the subscriber for double opt-in lists (no email to them)
         attribs: Custom dictionary for the attribs data on the user record (queryable in the subscriber UI).
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The Subscribe object that was created on the server with ID, UUID, and much more.
+
+    Returns:
+        The Subscribe object that was created on the server with ID, UUID, and much more.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -471,11 +500,14 @@ def delete_subscriber(
     """
     Completely delete a subscriber from your system (it's as if they were never there).
     If your goal is to unsubscribe them, then use the block_subscriber method.
+
     Args:
         email: Email of the account to delete.
         overriding_subscriber_id: Optional ID of the account to delete (takes precedence).
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if they were successfully deleted, False otherwise.
+
+    Returns:
+        True if they were successfully deleted, False otherwise.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -516,11 +548,14 @@ def confirm_optin(
     For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in
     via the API. You should only do this when they are actually opting in. If you have your own opt-in
     form, but it's via your code, then this makes sense.
+
     Args:
         subscriber_uuid: The Subscriber.uuid value for the subscriber.
         list_uuid: The MailingList.uuid value for the list.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if they were successfully opted in.
+
+    Returns:
+        True if they were successfully opted in.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -565,11 +600,14 @@ def add_subscribers_to_lists(
 ) -> bool:
     """
     Add a number of subscribers to a number of lists.
+
     Args:
         subscriber_ids: List of subscriber IDs.
         list_ids: List of lists to subscribe to.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True on success, False on fail.
+
+    Returns:
+        True on success, False on fail.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -624,13 +662,16 @@ def update_subscriber(
     Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
     from adding them to and removing them from lists. You can enable, disable, and block them here. But if that
     is all you want tod o there are functions dedicated to that which are simpler.
+
     Args:
         subscriber: The full subscriber object to update (with changed fields and values)
         add_to_lists: Any list to add to this subscriber to.
         remove_from_lists: Any list to remove from this subscriber.
         status: The status of the subscriber: enabled, disabled, blacklisted from SubscriberStatuses.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The updated view of the subscriber object from the server.
+
+    Returns:
+        The updated view of the subscriber object from the server.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -678,10 +719,13 @@ def disable_subscriber(
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to disable.
+
     Args:
         subscriber: The subscriber to disable.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The updated subscriber object from the server.
+
+    Returns:
+        The updated subscriber object from the server.
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.disabled, timeout_config=timeout_config)
 
@@ -696,10 +740,13 @@ def enable_subscriber(
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to enable.
+
     Args:
         subscriber: The subscriber to enable.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The updated subscriber object from the server.
+
+    Returns:
+        The updated subscriber object from the server.
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.enabled, timeout_config=timeout_config)
 
@@ -714,10 +761,13 @@ def block_subscriber(
 ) -> Optional[models.Subscriber]:
     """
     Add a subscriber to the blocklist, AKA unsubscribe them.
+
     Args:
         subscriber: The subscriber to block/unsubscribe.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: The updated subscriber object from the server.
+
+    Returns:
+        The updated subscriber object from the server.
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.blocklisted, timeout_config=timeout_config)
 
@@ -741,6 +791,9 @@ def send_transactional_email(
 ) -> bool:
     """
     Send a transactional email through Listmonk to the recipient.
+
+    Errors may show up in the logs section of your Listmonk dashboard.
+
     Args:
         subscriber_email: The email address to send the email to (they must be a subscriber of *some* list on your server).
         template_id: The template ID to use for the email. It must be a "transactional" not campaign template.
@@ -753,8 +806,8 @@ def send_transactional_email(
         email_headers: Optional array of e-mail headers to include in all messages sent from this server. eg: [{"X-Custom": "value"}, {"X-Custom2": "value"}]
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
 
-    Returns: True if the email send was successful, False otherwise.
-    Errors may show up in the logs section of your Listmonk dashboard.
+    Returns:
+        True if the email send was successful, False otherwise.
     """  # noqa: E501
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -836,9 +889,12 @@ def send_transactional_email(
 def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
     """
     Checks that the token retrieved during login is still valid at your server.
+
     Args:
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if the token is still valid, False otherwise.
+
+    Returns:
+        True if the token is still valid, False otherwise.
     """
     # noinspection PyBroadException
     try:
@@ -866,9 +922,12 @@ def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
 def verify_login(timeout_config: Optional[httpx.Timeout] = None) -> bool:
     """
     Call to verify that the stored auth token is still valid.
+
     Args:
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if the stored auth token is still value, False otherwise.
+
+    Returns:
+        True if the stored auth token is still value, False otherwise.
     """
     return is_healthy(timeout_config=timeout_config)
 
@@ -945,9 +1004,12 @@ def test_user_pw_on_server(timeout_config: Optional[httpx.Timeout] = None) -> bo
 def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Campaign]:
     """
     Get campaigns on the server.
+
     Args:
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: List of Campaign objects with the full details of that campaign.
+
+    Returns:
+        List of Campaign objects with the full details of that campaign.
     """
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
     validate_state(url=True)
@@ -973,10 +1035,13 @@ def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Cam
 def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Campaign]:
     """
     Get the full details of a campaign with the given ID.
+
     Args:
         campaign_id: A campaign to get the details about, e.g. 7.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: Campaign object with the full details of a campaign.
+
+    Returns:
+        Campaign object with the full details of a campaign.
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -1012,10 +1077,13 @@ def campaign_preview_by_id(
 ) -> Optional[models.CampaignPreview]:
     """
     Get the preview of a campaign with the given ID.
+
     Args:
         campaign_id: A campaign to get the details about, e.g. 7.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: String preview of the campaign.
+
+    Returns:
+        String preview of the campaign.
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -1142,7 +1210,9 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
     Args:
         campaign_id: name of the campaign to delete.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if the campaign was successfully deleted, False otherwise.
+
+    Returns:
+        True if the campaign was successfully deleted, False otherwise.
     """
     global core_headers
     timeout_config = timeout_config or httpx.Timeout(timeout=10)
@@ -1240,6 +1310,7 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 
     Args:
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+
     Returns:
         list of models.Template objects representing the templates available in the system.
     """
@@ -1369,10 +1440,13 @@ def template_preview_by_id(
 ) -> Optional[models.TemplatePreview]:
     """
     Get the preview of a template with the given ID.
+
     Args:
         template_id: A campaign to get the details about, e.g. 7.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: String preview of the template with lorem ipsum.
+
+    Returns:
+        String preview of the template with lorem ipsum.
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -1408,7 +1482,9 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
     Args:
         template_id: name of the template to delete.
         timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
-    Returns: True if the template was successfully deleted, False otherwise.
+
+    Returns:
+        True if the template was successfully deleted, False otherwise.
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -1537,12 +1613,14 @@ def create_list(
 ) -> Optional[models.MailingList]:
     """
     Create a new mailing list on the server.
+
     Args:
         list_name: Name of the new list.
         list_type: Type of list. Options: "private", "public". Defaults to "public".
         optin: Opt-in type. Options: "single", "double". Defaults to "single".
         tags: Optional list of tags associated with the list.
         description: Optional description for the new list.
+
     Returns:
         The MailingList object that was created on the server.
     """
@@ -1596,8 +1674,10 @@ def create_list(
 def delete_list(list_id: int) -> bool:
     """
     Delete a specific list by its ID.
+
     Args:
         list_id: The ID of the list to delete.
+
     Returns:
         True if the list was successfully deleted, False otherwise.
     """
@@ -1651,6 +1731,7 @@ def update_list(
 ) -> Optional[models.MailingList]:
     """
     Updates an existing mailing list on the server.
+
     Args:
         list_id: List ID
         list_name: Optional update name of the list.
@@ -1658,6 +1739,7 @@ def update_list(
         optin: Optianal update opt-in type. Options: "single", "double".
         tags: Optional update list of tags associated with the list.
         description: Optional update description for the list.
+
     Returns:
         The MailingList object that was created on the server.
     """
