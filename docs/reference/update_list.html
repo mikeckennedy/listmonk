@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Updates an existing mailing list on the server.">
+  <meta name="description" content="Update an existing mailing list on the server.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="update_list() – Listmonk | Listmonk">
-  <meta property="og:description" content="Updates an existing mailing list on the server.">
+  <meta property="og:description" content="Update an existing mailing list on the server.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/update_list.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="update_list() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Updates an existing mailing list on the server.">
+  <meta name="twitter:description" content="Update an existing mailing list on the server.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -591,6 +591,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   </ul>
 </nav>
     </div>
@@ -617,11 +618,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Updates an existing mailing list on the server.</p>
+<p>Update an existing mailing list on the server.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1723-L1796" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L2105-L2189" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">update_list</span>(</span>
@@ -634,33 +635,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">description</span><span class="op">=</span><span class="cn-none">None</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
+<div class="doc-text">
+<p>Only the parameters you pass (that are not None) are included in the update payload, so omitted fields are left unchanged.</p>
+</div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
 <dt><code><span class="doc-parameter-name">list_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">int</span></code></dt>
 <dd>
-<p>List ID</p>
+<p>The numeric ID of the list to update. Required.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional update name of the list.</p>
+<p>Optional new name for the list (stripped of surrounding whitespace).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_type</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional update type of list. Options: “private”, “public”.</p>
+<p>Optional new visibility. One of ‘public’ or ‘private’.</p>
+</dd>
+<dt><code><span class="doc-parameter-name">status</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dd>
+<p>Optional new status. One of ‘active’ or ‘archived’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">optin</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optianal update opt-in type. Options: “single”, “double”.</p>
+<p>Optional new opt-in mode. One of ‘single’ or ‘double’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">tags</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[str]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional update list of tags associated with the list.</p>
+<p>Optional new list of tag strings for the list.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">description</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional update description for the list.
+Optional new description for the list.
 </dd>
 </dl>
 </div>
@@ -671,7 +679,30 @@ Optional update description for the list.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">Optional[models.MailingList]</span></code></dt>
 <dd>
-The MailingList object that was created on the server.
+The updated MailingList object as returned by the server.
+</dd>
+</dl>
+</div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL is not set or you are not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
+<dd>
+<p>If list_id is missing, or if list_type, status, or optin is not one of its accepted values.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+<p>If the server returns an empty or invalid JSON response.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+If the server responds with a 4xx or 5xx status.
 </dd>
 </dl>
 </div>

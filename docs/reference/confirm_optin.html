@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in">
+  <meta name="description" content="Confirm a subscriber’s opt-in to a list via the API.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="confirm_optin() – Listmonk | Listmonk">
-  <meta property="og:description" content="For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in">
+  <meta property="og:description" content="Confirm a subscriber’s opt-in to a list via the API.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/confirm_optin.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="confirm_optin() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in">
+  <meta name="twitter:description" content="Confirm a subscriber’s opt-in to a list via the API.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -591,6 +591,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   </ul>
 </nav>
     </div>
@@ -617,11 +618,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in</p>
+<p>Confirm a subscriber’s opt-in to a list via the API.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L544-L589" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L660-L712" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">confirm_optin</span>(
@@ -631,7 +632,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 )</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>via the API. You should only do this when they are actually opting in. If you have your own opt-in form, but it’s via your code, then this makes sense.</p>
+<p>For opt-in lists, subscribers are added as unconfirmed first. Call this to opt them in, but only when they are genuinely opting in (for example, from your own opt-in form handled in your code). This submits the public opt-in form on the subscription endpoint rather than calling a JSON API, so HTTP errors are reported as a False return value rather than raised.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -639,15 +640,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">subscriber_uuid</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
 <dd>
-<p>The Subscriber.uuid value for the subscriber.</p>
+<p>The Subscriber.uuid value for the subscriber. Must be non-empty.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_uuid</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
 <dd>
-<p>The MailingList.uuid value for the list.</p>
+<p>The MailingList.uuid value for the list. Must be non-empty.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -658,7 +659,22 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-True if they were successfully opted in.
+True if the opt-in succeeded, False if the server responded with a non-success status.
+</dd>
+</dl>
+</div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
+<dd>
+<p>If subscriber_uuid or list_uuid is empty.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+If the base URL is not set or you are not logged in.
 </dd>
 </dl>
 </div>

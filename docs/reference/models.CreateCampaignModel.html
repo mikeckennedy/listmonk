@@ -620,10 +620,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L176-L214" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L181-L226" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.CLASS">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-class">models</span><span class="op">.</span><span class="sig-name">CreateCampaignModel</span>()</span></code></pre></div>
+</div>
+<div class="doc-text">
+<p>This is the raw request body sent to Listmonk; the higher-level <a href="create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign</a> helper validates that name and subject are present and defaults the target list to <code>{1}</code> before populating this model.</p>
 </div>
 <section id="attributes" class="level2 doc-attributes">
 <h2 class="doc-attributes">Attributes</h2>
@@ -639,7 +642,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt><code><span class="doc-parameter-name">lists</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[int]</span></code></dt>
 <dd>
-<p>The IDs of the lists to send the campaign to.</p>
+<p>The IDs of the lists to send the campaign to. Defaults to an empty list.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">from_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
 <dd>
@@ -663,7 +666,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt><code><span class="doc-parameter-name">send_at</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[datetime.datetime]</span></code></dt>
 <dd>
-<p>The scheduled send time, if the campaign should be scheduled.</p>
+<p>The scheduled send time, if the campaign should be scheduled. Serialized to an ISO-8601 string (or <code>None</code>) when sent.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">messenger</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
 <dd>
@@ -671,15 +674,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[int]</span></code></dt>
 <dd>
-<p>The ID of the template used to render the campaign.</p>
+<p>The ID of the template used to render the campaign. Required field that may be <code>None</code> (it has no default and must be supplied explicitly).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">tags</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[str]</span></code></dt>
 <dd>
-<p>Arbitrary labels to attach to the campaign.</p>
+<p>Arbitrary labels to attach to the campaign. Defaults to an empty list.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[dict[str, Optional[str]]]</span></code></dt>
 <dd>
-Custom email headers to include, each as a single-entry dict.
+Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
 </dd>
 </dl>
 </div>

@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Checks that the token retrieved during login is still valid at your server.">
+  <meta name="description" content="Check whether the server is reachable and the stored credentials are valid.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="is_healthy() – Listmonk | Listmonk">
-  <meta property="og:description" content="Checks that the token retrieved during login is still valid at your server.">
+  <meta property="og:description" content="Check whether the server is reachable and the stored credentials are valid.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/is_healthy.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="is_healthy() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Checks that the token retrieved during login is still valid at your server.">
+  <meta name="twitter:description" content="Check whether the server is reachable and the stored credentials are valid.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -617,14 +617,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Checks that the token retrieved during login is still valid at your server.</p>
+<p>Check whether the server is reachable and the stored credentials are valid.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L889-L915" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1080-L1113" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">is_healthy</span>(<span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>)</span></code></pre></div>
+</div>
+<div class="doc-text">
+<p>Issues an authenticated GET to the Listmonk health endpoint using the cached username and password. This call is defensive: any failure—the URL base not being set, not being logged in, a network error, a non-2xx response, or an unparseable body—is caught and reported as False, so it never raises.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -632,7 +635,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -643,7 +646,8 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-True if the token is still valid, False otherwise.
+<p>True if the server responded healthy with valid credentials, False</p>
+otherwise.
 </dd>
 </dl>
 </div>

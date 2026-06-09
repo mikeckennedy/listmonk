@@ -620,10 +620,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L100-L118" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L100-L123" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.CLASS">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-class">models</span><span class="op">.</span><span class="sig-name">CreateSubscriberModel</span>()</span></code></pre></div>
+</div>
+<div class="doc-text">
+<p>This is the raw request body sent to Listmonk; the higher-level <a href="create_subscriber.html#listmonk.create_subscriber" class="gdls-link gdls-code">create_subscriber</a> helper populates it (always sending <code>status='enabled'</code>).</p>
 </div>
 <section id="attributes" class="level2 doc-attributes">
 <h2 class="doc-attributes">Attributes</h2>
@@ -631,7 +634,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>The email address for the new subscriber.</p>
+<p>The email address for the new subscriber (required).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
 <dd>
@@ -639,19 +642,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt><code><span class="doc-parameter-name">status</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>The initial global status, e.g.&nbsp;<a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.enabled" class="gdls-link gdls-code">enabled</a>.</p>
+<p>The initial global status (required), e.g.&nbsp;<a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.enabled" class="gdls-link gdls-code">enabled</a>, <a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.disabled" class="gdls-link gdls-code">disabled</a>, or <a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.blocklisted" class="gdls-link gdls-code">blocklisted</a>.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">lists</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[int]</span></code></dt>
 <dd>
-<p>The IDs of the lists to subscribe this person to.</p>
+<p>The IDs of the lists to subscribe this person to. Defaults to an empty list.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">preconfirm_subscriptions</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-<p>When <code>True</code>, mark the new subscriptions as confirmed immediately (skipping double opt-in confirmation emails).</p>
+<p>Required flag; when <code>True</code>, mark the new subscriptions as confirmed immediately (skipping double opt-in confirmation emails).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">attribs</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">dict[str, Any]</span></code></dt>
 <dd>
-Arbitrary custom attributes to store against the subscriber.
+Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
 </dd>
 </dl>
 </div>

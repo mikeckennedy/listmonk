@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Each Listmonk instance lives somewhere. This is where yours lives.">
+  <meta name="description" content="Return the configured base URL of your Listmonk instance.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="get_base_url() – Listmonk | Listmonk">
-  <meta property="og:description" content="Each Listmonk instance lives somewhere. This is where yours lives.">
+  <meta property="og:description" content="Return the configured base URL of your Listmonk instance.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/get_base_url.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="get_base_url() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Each Listmonk instance lives somewhere. This is where yours lives.">
+  <meta name="twitter:description" content="Return the configured base URL of your Listmonk instance.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -616,17 +616,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Each Listmonk instance lives somewhere. This is where yours lives.</p>
+<p>Return the configured base URL of your Listmonk instance.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L67-L75" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L67-L79" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">get_base_url</span>()</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>For example, https://listmonk.somedomain.tech.</p>
+<p>Each Listmonk instance lives at its own address, for example https://listmonk.somedomain.tech. This getter returns whatever value was previously stored by set_url_base().</p>
 </div>
 <section id="returns" class="level2 doc-returns">
 <h2 class="doc-returns">Returns</h2>
@@ -634,7 +634,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
 <dd>
-The base URL of your instance.
+<p>The base URL of your instance (without a trailing slash), or None if</p>
+set_url_base() has not been called yet.
 </dd>
 </dl>
 </div>

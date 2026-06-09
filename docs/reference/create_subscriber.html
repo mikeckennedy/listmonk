@@ -591,6 +591,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
 </nav>
     </div>
@@ -621,7 +623,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L437-L487" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L519-L593" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">create_subscriber</span>(</span>
@@ -633,33 +635,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
+<div class="doc-text">
+<p>The email is lowercased and stripped and the name is stripped before the request is sent. The subscriber is always created with a global status of <a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.enabled" class="gdls-link gdls-code">enabled</a>.</p>
+</div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
 <dt><code><span class="doc-parameter-name">email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>Email of the subscriber.</p>
+<p>Email address of the subscriber. Required and must be non-empty after stripping.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Full name (first[SPACE]last) of the subscriber</p>
+<p>Full name (e.g.&nbsp;“first last”) of the subscriber. Defaults to None (stored as an empty string).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_ids</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">set[int]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>List of list IDs for the lists to add them to (say that 3 times fast!)</p>
+<p>Set of list IDs to subscribe this person to. Defaults to None (no lists).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">pre_confirm</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">bool</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default"><span class="va">False</span></span></code></dt>
 <dd>
-<p>Whether to preconfirm the subscriber for double opt-in lists (no email to them)</p>
+<p>When True, mark the new subscriptions as confirmed immediately so no double opt-in confirmation email is sent. Defaults to False.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">attribs</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[dict[str, Any]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Custom dictionary for the attribs data on the user record (queryable in the subscriber UI).</p>
+<p>Custom attributes to store on the subscriber record (queryable in the subscriber UI). Defaults to None (stored as an empty dict).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -670,10 +675,46 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">models.Subscriber</span></code></dt>
 <dd>
-The Subscribe object that was created on the server with ID, UUID, and much more.
+The newly created models.Subscriber, populated by the server with its ID, UUID, and more.
 </dd>
 </dl>
 </div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
+<dd>
+<p>If email is empty.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL has not been set or you have not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+<p>If the server returns an empty body or invalid JSON.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+If the server rejects the request (e.g.&nbsp;a 4xx for a duplicate email) or returns a 5xx status.
+</dd>
+</dl>
+</div>
+</section>
+<section id="examples" class="level2 doc-examples">
+<h2 class="doc-examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> listmonk</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> sub <span class="op">=</span> listmonk.create_subscriber(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>...     email<span class="op">=</span><span class="st">'some_user@talkpython.fm'</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>...     name<span class="op">=</span><span class="st">'Some User'</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>...     list_ids<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">4</span>},</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>...     pre_confirm<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>...     attribs<span class="op">=</span>{<span class="st">'city'</span>: <span class="st">'Portland'</span>},</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>... )</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> sub.<span class="bu">id</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dv">201</span></span></code></pre></div>
 
 
 </section>

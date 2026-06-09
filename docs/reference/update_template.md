@@ -1,7 +1,7 @@
 ## update_template()
 
 
-Update a template in the system.
+Update an existing template on the Listmonk instance.
 
 
 Usage
@@ -14,18 +14,37 @@ update_template(
 ```
 
 
+The template's name, subject, body, and type are sent in the update; the is_default flag is not changed by this call (use set_default_template for that). After the update succeeds, the template is re-fetched and returned.
+
+
 ## Parameters
 
 
 `template: models.Template`  
-models.Template - the template object to be updated
+The models.Template to update. Must be non-None and have an id.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.Template]`  
-models.Template - the updated template object after the update operation
+A freshly fetched models.Template reflecting the saved changes.
+
+
+## Raises
+
+
+`ValueError`  
+If template is None or has no id.
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the re-fetch response is empty or is not valid JSON.

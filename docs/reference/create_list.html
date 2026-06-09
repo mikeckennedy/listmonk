@@ -591,6 +591,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
 </nav>
     </div>
@@ -621,12 +623,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1607-L1665" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1960-L2036" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">create_list</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">list_name</span>, <span class="va">list_type</span><span class="op">=</span><span class="st">&quot;public&quot;</span>, <span class="va">optin</span><span class="op">=</span><span class="st">&quot;single&quot;</span>, <span class="va">tags</span><span class="op">=</span><span class="cn-none">None</span>, <span class="va">description</span><span class="op">=</span><span class="cn-none">None</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div class="doc-text">
+<p>The list name is stripped of surrounding whitespace before submission.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -634,23 +639,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">list_name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>Name of the new list.</p>
+<p>Name of the new list. Required and must be non-empty after whitespace is stripped.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_type</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default"><span class="st">"public"</span></span></code></dt>
 <dd>
-<p>Type of list. Options: “private”, “public”. Defaults to “public”.</p>
+<p>Visibility of the list. One of ‘public’ or ‘private’. Defaults to ‘public’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">optin</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default"><span class="st">"single"</span></span></code></dt>
 <dd>
-<p>Opt-in type. Options: “single”, “double”. Defaults to “single”.</p>
+<p>Opt-in mode. One of ‘single’ or ‘double’. Defaults to ‘single’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">tags</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[str]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional list of tags associated with the list.</p>
+<p>Optional list of tag strings to associate with the list.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">description</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional description for the new list.
+Optional free-text description for the new list.
 </dd>
 </dl>
 </div>
@@ -661,10 +666,41 @@ Optional description for the new list.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">Optional[models.MailingList]</span></code></dt>
 <dd>
-The MailingList object that was created on the server.
+<p>The MailingList object that was created on the server, including its</p>
+assigned id and uuid.
 </dd>
 </dl>
 </div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL is not set or you are not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
+<dd>
+<p>If list_name is empty, or if list_type or optin is not one of its accepted values.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+<p>If the server returns an empty or invalid JSON response.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+If the server responds with a 4xx or 5xx status.
+</dd>
+</dl>
+</div>
+</section>
+<section id="examples" class="level2 doc-examples">
+<h2 class="doc-examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> listmonk</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> new_list <span class="op">=</span> listmonk.create_list(<span class="st">'Newsletter'</span>, list_type<span class="op">=</span><span class="st">'public'</span>, optin<span class="op">=</span><span class="st">'double'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> new_list.<span class="bu">id</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div>
 
 
 </section>

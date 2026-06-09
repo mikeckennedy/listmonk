@@ -1,7 +1,7 @@
 ## subscriber_by_id()
 
 
-Retrieves the subscribe by id (e.g. 201)
+Retrieve a single subscriber by their numeric Listmonk ID (e.g. 201).
 
 
 Usage
@@ -14,18 +14,34 @@ subscriber_by_id(
 ```
 
 
+The ID is matched against `subscribers.id` on the server and the first matching subscriber is returned.
+
+
 ## Parameters
 
 
 `subscriber_id: int`  
-ID of the subscriber (e.g. 201)
+Numeric ID of the subscriber to look up (e.g. 201).
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.Subscriber]`  
-The subscribe if found, None otherwise.
+The matching models.Subscriber, or None if no subscriber has that ID.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`ValidationError`  
+If the server returns an empty body or invalid JSON.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.

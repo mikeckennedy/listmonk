@@ -1,7 +1,7 @@
 ## enable_subscriber()
 
 
-Set a subscriber's status to enable.
+Set a subscriber's status to enabled so they will receive campaigns.
 
 
 Usage
@@ -14,18 +14,37 @@ enable_subscriber(
 ```
 
 
+This is a convenience wrapper around update_subscriber that changes only the status.
+
+
 ## Parameters
 
 
 `subscriber: models.Subscriber`  
-The subscriber to enable.
+The subscriber to enable. Must have a valid id.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.Subscriber]`  
-The updated subscriber object from the server.
+The refreshed subscriber object from the server, or None if the subscriber can no longer be found.
+
+
+## Raises
+
+
+`ValueError`  
+If subscriber is None or has no id.
+
+`OperationNotAllowedError`  
+If the base URL is not set or you are not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the follow-up fetch returns an empty or invalid JSON response.

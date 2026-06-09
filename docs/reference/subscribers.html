@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.">
+  <meta name="description" content="Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="subscribers() – Listmonk | Listmonk">
-  <meta property="og:description" content="Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.">
+  <meta property="og:description" content="Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/subscribers.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="subscribers() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.">
+  <meta name="twitter:description" content="Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -591,6 +591,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   </ul>
 </nav>
     </div>
@@ -617,11 +618,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.</p>
+<p>Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L230-L261" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L276-L319" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">subscribers</span>(
@@ -630,21 +631,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,
 )</span></code></pre></div>
 </div>
+<div class="doc-text">
+<p>Results are fetched page by page (500 per page) and combined, so a broad query may issue several HTTP requests and return a large list. Subscribers are ordered by <code>updated_at</code> descending.</p>
+</div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
 <dt><code><span class="doc-parameter-name">query_text</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Custom query text such as “subscribers.attribs-&gt;&gt;‘city’ = ‘Portland’”. See the full documentation at https://listmonk.app/docs/querying-and-segmentation/</p>
+<p>Optional SQL-like filter applied server-side, e.g. <code>"subscribers.attribs-&gt;&gt;'city' = 'Portland'"</code>. See https://listmonk.app/docs/querying-and-segmentation/ for the syntax. Defaults to None (no filter).</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[int]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Pass a list ID and get the subscribers, matching the query, from that list.</p>
+<p>Optional list ID; when given, only subscribers belonging to that list (and matching <code>query_text</code>, if any) are returned. Defaults to None.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -655,7 +659,27 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">list[models.Subscriber]</span></code></dt>
 <dd>
-A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
+<p>A list of models.Subscriber objects matching the criteria. Returns an empty list</p>
+(never None) if nothing matches.
+</dd>
+</dl>
+</div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL has not been set or you have not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+<p>If the server returns an empty body or invalid JSON.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+If the server responds with a 4xx or 5xx status.
 </dd>
 </dl>
 </div>

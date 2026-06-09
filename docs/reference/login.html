@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Logs into Listmonk and stores that authentication for the life of your app.">
+  <meta name="description" content="Log into Listmonk and cache the credentials for the life of your app.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="login() – Listmonk | Listmonk">
-  <meta property="og:description" content="Logs into Listmonk and stores that authentication for the life of your app.">
+  <meta property="og:description" content="Log into Listmonk and cache the credentials for the life of your app.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/login.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="login() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Logs into Listmonk and stores that authentication for the life of your app.">
+  <meta name="twitter:description" content="Log into Listmonk and cache the credentials for the life of your app.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -591,6 +591,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
 </nav>
     </div>
@@ -617,11 +619,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Logs into Listmonk and stores that authentication for the life of your app.</p>
+<p>Log into Listmonk and cache the credentials for the life of your app.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L113-L137" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L125-L167" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">login</span>(
@@ -630,21 +632,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,
 )</span></code></pre></div>
 </div>
+<div class="doc-text">
+<p>The username and password are validated against the server’s health endpoint using HTTP Basic auth. On success they are stored in module-level state and reused by every subsequent API call, so you only need to call this once. set_url_base() must be called first.</p>
+</div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
 <dt><code><span class="doc-parameter-name">user_name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>Your Listmonk username</p>
+<p>Your Listmonk username.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">pw</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>Your Listmonk password</p>
+<p>Your Listmonk password.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -655,10 +660,34 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-Returns a boolean indicating whether the login was successful.
+<p>True if the credentials were accepted by the server. Returns False if</p>
+<p>the server rejected them or could not be reached (no HTTP error is</p>
+raised in that case).
 </dd>
 </dl>
 </div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL has not been set via set_url_base().</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+If user_name or pw is empty.
+</dd>
+</dl>
+</div>
+</section>
+<section id="examples" class="level2 doc-examples">
+<h2 class="doc-examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> listmonk</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> listmonk.set_url_base(<span class="st">'https://listmonk.somedomain.tech'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> listmonk.login(<span class="st">'admin'</span>, <span class="st">'super-secret'</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="va">True</span></span></code></pre></div>
 
 
 </section>

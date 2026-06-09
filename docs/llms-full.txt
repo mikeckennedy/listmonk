@@ -10,51 +10,93 @@ Point the client at your Listmonk instance and authenticate.
 
 set_url_base(url: str)
 
-Each Listmonk instance lives somewhere. This is where yours lives.
-For example, https://listmonk.somedomain.tech.
+Set the base URL of your Listmonk instance for all subsequent calls.
+
+Each Listmonk instance lives at its own address, for example
+https://listmonk.somedomain.tech. This must be called before login() and
+any other API operation. A trailing slash, if present, is removed.
 
 Args:
-    url: The base URL of your instance without /api.
+    url: The base URL of your instance, including the http:// or https://
+        scheme but without the /api path segment.
+
+Raises:
+    ValidationError: If url is empty or whitespace, or if it does not
+        start with the http:// or https:// scheme.
 
 get_base_url() -> str | None
 
-Each Listmonk instance lives somewhere. This is where yours lives.
-For example, https://listmonk.somedomain.tech.
+Return the configured base URL of your Listmonk instance.
+
+Each Listmonk instance lives at its own address, for example
+https://listmonk.somedomain.tech. This getter returns whatever value was
+previously stored by set_url_base().
 
 Returns:
-    The base URL of your instance.
+    The base URL of your instance (without a trailing slash), or None if
+    set_url_base() has not been called yet.
 
 login(user_name: str, pw: str, timeout_config: httpx2.Timeout | None = None) -> bool
 
-Logs into Listmonk and stores that authentication for the life of your app.
+Log into Listmonk and cache the credentials for the life of your app.
+
+The username and password are validated against the server's health
+endpoint using HTTP Basic auth. On success they are stored in module-level
+state and reused by every subsequent API call, so you only need to call
+this once. set_url_base() must be called first.
 
 Args:
-    user_name: Your Listmonk username
-    pw: Your Listmonk password
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    user_name: Your Listmonk username.
+    pw: Your Listmonk password.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    Returns a boolean indicating whether the login was successful.
+    True if the credentials were accepted by the server. Returns False if
+    the server rejected them or could not be reached (no HTTP error is
+    raised in that case).
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set via
+        set_url_base().
+    ValidationError: If user_name or pw is empty.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.set_url_base('https://listmonk.somedomain.tech')
+    >>> listmonk.login('admin', 'super-secret')
+    True
 
 verify_login(timeout_config: httpx2.Timeout | None = None) -> bool
 
-Call to verify that the stored auth token is still valid.
+Verify that the stored login credentials are still valid at the server.
+
+This is a thin alias for is_healthy(): it issues an authenticated request
+to the server's health endpoint using the cached credentials. Any error
+(not logged in, network failure, rejected credentials) is reported as
+False rather than raised.
 
 Args:
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if the stored auth token is still value, False otherwise.
+    True if the stored credentials are still valid, False otherwise.
 
 is_healthy(timeout_config: httpx2.Timeout | None = None) -> bool
 
-Checks that the token retrieved during login is still valid at your server.
+Check whether the server is reachable and the stored credentials are valid.
+
+Issues an authenticated GET to the Listmonk health endpoint using the
+cached username and password. This call is defensive: any failure—the URL
+base not being set, not being logged in, a network error, a non-2xx
+response, or an unparseable body—is caught and reported as False, so it
+never raises.
 
 Args:
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if the token is still valid, False otherwise.
+    True if the server responded healthy with valid credentials, False
+    otherwise.
 
 
 ## Mailing Lists
@@ -64,63 +106,119 @@ Read and manage mailing lists.
 
 lists(timeout_config: httpx2.Timeout | None = None) -> list[listmonk.models.MailingList]
 
-Get mailing lists on the server.
+Get all mailing lists on the server.
+
+Retrieves every mailing list in a single request (paged at one large page),
+so no manual pagination is required.
 
 Args:
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    List of MailingList objects with the full details of that list.
+    A list of MailingList objects with the full details of each list. Returns
+    an empty list if the server has no mailing lists.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    ValidationError: If the server returns an empty or invalid JSON response.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 list_by_id(list_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList | None
 
-Get the full details of a list with the given ID.
+Get the full details of a single mailing list by its ID.
 
 Args:
-    list_id: A list to get the details about, e.g. 7.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    list_id: The numeric ID of the list to retrieve, e.g. 7.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    MailingList object with the full details of a list.
+    A MailingList object with the full details of the requested list.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    ValidationError: If the server returns an empty or invalid JSON response.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    Exception: If the server returns a result set that does not contain the
+        requested list_id (a workaround for a known Listmonk server quirk).
 
 create_list(list_name: str, list_type: str = 'public', optin: str = 'single', tags: list[str] | None = None, description: str | None = None) -> listmonk.models.MailingList | None
 
 Create a new mailing list on the server.
 
+The list name is stripped of surrounding whitespace before submission.
+
 Args:
-    list_name: Name of the new list.
-    list_type: Type of list. Options: "private", "public". Defaults to "public".
-    optin: Opt-in type. Options: "single", "double". Defaults to "single".
-    tags: Optional list of tags associated with the list.
-    description: Optional description for the new list.
+    list_name: Name of the new list. Required and must be non-empty after
+        whitespace is stripped.
+    list_type: Visibility of the list. One of 'public' or 'private'.
+        Defaults to 'public'.
+    optin: Opt-in mode. One of 'single' or 'double'. Defaults to 'single'.
+    tags: Optional list of tag strings to associate with the list.
+    description: Optional free-text description for the new list.
 
 Returns:
-    The MailingList object that was created on the server.
+    The MailingList object that was created on the server, including its
+    assigned id and uuid.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    ValueError: If list_name is empty, or if list_type or optin is not one of
+        its accepted values.
+    ValidationError: If the server returns an empty or invalid JSON response.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+Examples:
+    >>> import listmonk
+    >>> new_list = listmonk.create_list('Newsletter', list_type='public', optin='double')
+    >>> new_list.id
+    7
 
 update_list(list_id: int, list_name: str | None = None, list_type: str | None = None, status: str | None = None, optin: str | None = None, tags: list[str] | None = None, description: str | None = None) -> listmonk.models.MailingList | None
 
-Updates an existing mailing list on the server.
+Update an existing mailing list on the server.
+
+Only the parameters you pass (that are not None) are included in the update
+payload, so omitted fields are left unchanged.
 
 Args:
-    list_id: List ID
-    list_name: Optional update name of the list.
-    list_type: Optional update type of list. Options: "private", "public".
-    optin: Optianal update opt-in type. Options: "single", "double".
-    tags: Optional update list of tags associated with the list.
-    description: Optional update description for the list.
+    list_id: The numeric ID of the list to update. Required.
+    list_name: Optional new name for the list (stripped of surrounding whitespace).
+    list_type: Optional new visibility. One of 'public' or 'private'.
+    status: Optional new status. One of 'active' or 'archived'.
+    optin: Optional new opt-in mode. One of 'single' or 'double'.
+    tags: Optional new list of tag strings for the list.
+    description: Optional new description for the list.
 
 Returns:
-    The MailingList object that was created on the server.
+    The updated MailingList object as returned by the server.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    ValueError: If list_id is missing, or if list_type, status, or optin is not
+        one of its accepted values.
+    ValidationError: If the server returns an empty or invalid JSON response.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 delete_list(list_id: int) -> bool
 
-Delete a specific list by its ID.
+Delete a mailing list by its ID.
+
+The list's existence is checked first via list_by_id; if it does not exist,
+no delete request is sent and False is returned.
 
 Args:
-    list_id: The ID of the list to delete.
+    list_id: The numeric ID of the list to delete. Must be a truthy value
+        (0 or None is rejected).
 
 Returns:
-    True if the list was successfully deleted, False otherwise.
+    True if the server reports the list was deleted, False if the list does
+    not exist or the server response does not confirm deletion.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    ValueError: If list_id is missing or falsy.
+    ValidationError: If the server returns an empty or invalid JSON response.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 
 ## Subscribers
@@ -130,151 +228,270 @@ Create, query, update, and manage the status of subscribers.
 
 subscribers(query_text: str | None = None, list_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> list[listmonk.models.Subscriber]
 
-Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.
+Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.
+
+Results are fetched page by page (500 per page) and combined, so a broad query may issue
+several HTTP requests and return a large list. Subscribers are ordered by ``updated_at`` descending.
 
 Args:
-    query_text: Custom query text such as "subscribers.attribs->>'city' = 'Portland'". See the full documentation at https://listmonk.app/docs/querying-and-segmentation/
-    list_id: Pass a list ID and get the subscribers, matching the query, from that list.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    query_text: Optional SQL-like filter applied server-side, e.g.
+        ``"subscribers.attribs->>'city' = 'Portland'"``. See
+        https://listmonk.app/docs/querying-and-segmentation/ for the syntax. Defaults to None (no filter).
+    list_id: Optional list ID; when given, only subscribers belonging to that list
+        (and matching ``query_text``, if any) are returned. Defaults to None.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    A list of subscribers matching the criteria provided. If none, then all subscribers are returned.
+    A list of models.Subscriber objects matching the criteria. Returns an empty list
+    (never None) if nothing matches.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    ValidationError: If the server returns an empty body or invalid JSON.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 subscriber_by_email(email: str, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Retrieves the subscribe by email (e.g. "some_user@talkpython.fm")
+Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm").
+
+The email is matched exactly against ``subscribers.email`` on the server (a ``+`` in the
+address is URL-encoded automatically), and the first matching subscriber is returned.
 
 Args:
-    email: Email of the subscriber (e.g. "some_user@talkpython.fm")
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    email: Email address of the subscriber to look up (e.g. "some_user@talkpython.fm").
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The subscribe if found, None otherwise.
+    The matching models.Subscriber, or None if no subscriber has that email.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    ValidationError: If the server returns an empty body or invalid JSON.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 subscriber_by_id(subscriber_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Retrieves the subscribe by id (e.g. 201)
+Retrieve a single subscriber by their numeric Listmonk ID (e.g. 201).
+
+The ID is matched against ``subscribers.id`` on the server and the first matching
+subscriber is returned.
 
 Args:
-    subscriber_id: ID of the subscriber (e.g. 201)
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber_id: Numeric ID of the subscriber to look up (e.g. 201).
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The subscribe if found, None otherwise.
+    The matching models.Subscriber, or None if no subscriber has that ID.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    ValidationError: If the server returns an empty body or invalid JSON.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 subscriber_by_uuid(subscriber_uuid: str, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
+Retrieve a single subscriber by their UUID (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
+
+The UUID is matched against ``subscribers.uuid`` on the server and the first matching
+subscriber is returned.
 
 Args:
-    subscriber_uuid: UUID of the subscriber (e.g. "c37786af-e6ab-4260-9b49-740aaaa6ed")
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber_uuid: UUID of the subscriber to look up (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The subscribe if found, None otherwise.
+    The matching models.Subscriber, or None if no subscriber has that UUID.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    ValidationError: If the server returns an empty body or invalid JSON.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 create_subscriber(email: str, name: str | None = None, list_ids: set[int] = None, pre_confirm: bool = False, attribs: dict[str, Any] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber
 
 Create a new subscriber on the Listmonk server.
 
+The email is lowercased and stripped and the name is stripped before the request is sent.
+The subscriber is always created with a global status of ``enabled``.
+
 Args:
-    email: Email of the subscriber.
-    name: Full name (first[SPACE]last) of the subscriber
-    list_ids: List of list IDs for the lists to add them to (say that 3 times fast!)
-    pre_confirm: Whether to preconfirm the subscriber for double opt-in lists (no email to them)
-    attribs: Custom dictionary for the attribs data on the user record (queryable in the subscriber UI).
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    email: Email address of the subscriber. Required and must be non-empty after stripping.
+    name: Full name (e.g. "first last") of the subscriber. Defaults to None (stored as an empty string).
+    list_ids: Set of list IDs to subscribe this person to. Defaults to None (no lists).
+    pre_confirm: When True, mark the new subscriptions as confirmed immediately so no
+        double opt-in confirmation email is sent. Defaults to False.
+    attribs: Custom attributes to store on the subscriber record (queryable in the
+        subscriber UI). Defaults to None (stored as an empty dict).
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The Subscribe object that was created on the server with ID, UUID, and much more.
+    The newly created models.Subscriber, populated by the server with its ID, UUID, and more.
+
+Raises:
+    ValueError: If email is empty.
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    ValidationError: If the server returns an empty body or invalid JSON.
+    httpx.HTTPStatusError: If the server rejects the request (e.g. a 4xx for a duplicate
+        email) or returns a 5xx status.
+
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.create_subscriber(
+    ...     email='some_user@talkpython.fm',
+    ...     name='Some User',
+    ...     list_ids={1, 4},
+    ...     pre_confirm=True,
+    ...     attribs={'city': 'Portland'},
+    ... )
+    >>> sub.id
+    201
 
 update_subscriber(subscriber: listmonk.models.Subscriber | None, add_to_lists: set[int] | None = None, remove_from_lists: set[int] | None = None, status: listmonk.models.SubscriberStatuses = <SubscriberStatuses.enabled: 'enabled'>, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
-from adding them to and removing them from lists. You can enable, disable, and block them here. But if that
-is all you want tod o there are functions dedicated to that which are simpler.
+Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status.
+
+Final list membership is computed from the subscriber's existing lists minus ``remove_from_lists`` plus
+``add_to_lists``, and the affected subscriptions are preconfirmed. You can enable, disable, or block a subscriber
+here, but if that is all you want to do there are dedicated, simpler functions (enable_subscriber,
+disable_subscriber, block_subscriber).
 
 Args:
-    subscriber: The full subscriber object to update (with changed fields and values)
-    add_to_lists: Any list to add to this subscriber to.
-    remove_from_lists: Any list to remove from this subscriber.
-    status: The status of the subscriber: enabled, disabled, blacklisted from SubscriberStatuses.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber: The full subscriber object to update, with the changed fields already set. Must have a valid id.
+    add_to_lists: List IDs to add this subscriber to. Defaults to None (treated as an empty set).
+    remove_from_lists: List IDs to remove this subscriber from. Defaults to None (treated as an empty set).
+    status: The subscriber's status, one of SubscriberStatuses.enabled, .disabled, or .blocklisted.
+        Defaults to SubscriberStatuses.enabled.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The updated view of the subscriber object from the server.
+    The refreshed subscriber object fetched from the server after the update, or None if the subscriber
+    can no longer be found.
+
+Raises:
+    ValueError: If subscriber is None or has no id.
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 add_subscribers_to_lists(subscriber_ids: Iterable[int], list_ids: Iterable[int], timeout_config: httpx2.Timeout | None = None, status: str = 'confirmed') -> bool
 
-Add a number of subscribers to a number of lists.
+Add a number of subscribers to a number of lists in a single bulk operation.
 
 Args:
-    subscriber_ids: List of subscriber IDs.
-    list_ids: List of lists to subscribe to.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber_ids: An iterable of subscriber IDs to add. Duplicates are de-duplicated.
+    list_ids: An iterable of target list IDs to subscribe them to. Duplicates are de-duplicated.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+    status: The subscription status to assign on the target lists, e.g. 'confirmed' or 'unconfirmed'.
+        Defaults to 'confirmed'.
 
 Returns:
-    True on success, False on fail.
+    True on success. False if either ID set is empty or contains only 0, or if the server responds with an
+    error status.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
 
 enable_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Set a subscriber's status to enable.
+Set a subscriber's status to enabled so they will receive campaigns.
+
+This is a convenience wrapper around update_subscriber that changes only the status.
 
 Args:
-    subscriber: The subscriber to enable.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber: The subscriber to enable. Must have a valid id.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The updated subscriber object from the server.
+    The refreshed subscriber object from the server, or None if the subscriber can no longer be found.
+
+Raises:
+    ValueError: If subscriber is None or has no id.
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 disable_subscriber(subscriber: listmonk.models.Subscriber | None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Set a subscriber's status to disable.
+Set a subscriber's status to disabled, pausing their subscription so they will not receive campaigns.
+
+This is a convenience wrapper around update_subscriber that changes only the status.
 
 Args:
-    subscriber: The subscriber to disable.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber: The subscriber to disable. Must have a valid id.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The updated subscriber object from the server.
+    The refreshed subscriber object from the server, or None if the subscriber can no longer be found.
+
+Raises:
+    ValueError: If subscriber is None or has no id.
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 block_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
-Add a subscriber to the blocklist, AKA unsubscribe them.
+Add a subscriber to the blocklist, effectively unsubscribing them so they will not receive any mail.
+
+This is a convenience wrapper around update_subscriber that sets the status to SubscriberStatuses.blocklisted.
+Use delete_subscriber instead if you want to remove the subscriber record entirely.
 
 Args:
-    subscriber: The subscriber to block/unsubscribe.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber: The subscriber to block/unsubscribe. Must have a valid id.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    The updated subscriber object from the server.
+    The refreshed subscriber object from the server, or None if the subscriber can no longer be found.
+
+Raises:
+    ValueError: If subscriber is None or has no id.
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 confirm_optin(subscriber_uuid: str | None, list_uuid: str | None, timeout_config: httpx2.Timeout | None = None) -> bool
 
-For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in
-via the API. You should only do this when they are actually opting in. If you have your own opt-in
-form, but it's via your code, then this makes sense.
+Confirm a subscriber's opt-in to a list via the API.
+
+For opt-in lists, subscribers are added as unconfirmed first. Call this to opt them in, but only when they are
+genuinely opting in (for example, from your own opt-in form handled in your code). This submits the public
+opt-in form on the subscription endpoint rather than calling a JSON API, so HTTP errors are reported as a
+False return value rather than raised.
 
 Args:
-    subscriber_uuid: The Subscriber.uuid value for the subscriber.
-    list_uuid: The MailingList.uuid value for the list.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber_uuid: The Subscriber.uuid value for the subscriber. Must be non-empty.
+    list_uuid: The MailingList.uuid value for the list. Must be non-empty.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if they were successfully opted in.
+    True if the opt-in succeeded, False if the server responded with a non-success status.
+
+Raises:
+    ValueError: If subscriber_uuid or list_uuid is empty.
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
 
 delete_subscriber(email: str | None = None, overriding_subscriber_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
 
-Completely delete a subscriber from your system (it's as if they were never there).
-If your goal is to unsubscribe them, then use the block_subscriber method.
+Completely delete a subscriber from your system (as if they were never there).
+
+If your goal is to unsubscribe them rather than erase them, use block_subscriber instead. The email is
+normalized (lowercased and stripped) before lookup. When both arguments are given, overriding_subscriber_id
+takes precedence.
 
 Args:
-    email: Email of the account to delete.
-    overriding_subscriber_id: Optional ID of the account to delete (takes precedence).
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    email: Email of the subscriber to delete. Required unless overriding_subscriber_id is provided.
+    overriding_subscriber_id: Optional ID of the subscriber to delete; takes precedence over email.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if they were successfully deleted, False otherwise.
+    True if the subscriber was successfully deleted. False if no subscriber matched the given email
+    (when no overriding id was provided) or if the server reported the delete as unsuccessful.
+
+Raises:
+    ValueError: If neither email nor overriding_subscriber_id is provided.
+    OperationNotAllowedError: If the base URL is not set or you are not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty or invalid JSON response.
 
 
 ## Campaigns
@@ -284,86 +501,146 @@ Create, preview, update, and delete email campaigns.
 
 campaigns(timeout_config: httpx2.Timeout | None = None) -> list[listmonk.models.Campaign]
 
-Get campaigns on the server.
+Get all campaigns on the server.
+
+Fetches the full list of campaigns in a single request (the server is asked
+for up to one million results per page), so no pagination is required.
 
 Args:
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    List of Campaign objects with the full details of that campaign.
+    A list of Campaign objects, each with the full details of that campaign.
+    Returns an empty list if the instance has no campaigns.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty body or invalid JSON.
 
 campaign_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
 
 Get the full details of a campaign with the given ID.
 
 Args:
-    campaign_id: A campaign to get the details about, e.g. 7.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    campaign_id: The numeric ID of the campaign to fetch, e.g. 7.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    Campaign object with the full details of a campaign.
+    A Campaign object with the full details of the campaign, or None if the
+    server returns no campaign data for the given ID.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty body or invalid JSON.
 
 campaign_preview_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.CampaignPreview | None
 
-Get the preview of a campaign with the given ID.
+Get the rendered preview of a campaign with the given ID.
 
 Args:
-    campaign_id: A campaign to get the details about, e.g. 7.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    campaign_id: The numeric ID of the campaign to preview, e.g. 7.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    String preview of the campaign.
+    A CampaignPreview object whose ``preview`` attribute holds the rendered
+    HTML body returned by the server.
+
+Raises:
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 create_campaign(name: str | None = None, subject: str | None = None, list_ids: set[int] | None = None, from_email: str | None = None, campaign_type: str | None = None, content_type: str | None = None, body: str | None = None, alt_body: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None = None, tags: list[str] | None = None, headers: dict[str, str | None] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
 
 Create a new campaign with the given parameters.
 
-Parameters:
-    name (Optional[str]): The name of the campaign.
-    subject (Optional[str]): The subject of the campaign.
-    list_ids (set[int]): A set of list IDs to send the campaign to. Defaults to 1.
-    from_email (Optional[str]): 'From' email in campaign emails. Defaults to value from settings if not provided.
-    campaign_type (Optional[str]): The type of the campaign: 'regular' or 'optin'.
-    content_type (Optional[str]): The content type of the campaign: 'richtext', 'html', 'markdown', 'plain'.
-    body (Optional[str]): The body of the campaign.
-    alt_body (Optional[str]): The alternative text body of the campaign.
-    send_at (Optional[datetime.datetime]): Timestamp to schedule campaign.
-    messenger (Optional[str]): The messenger for the campaign. Usually 'email'
-    template_id (int): The template ID to be used for the campaign. Defaults to 1.
-    tags (list[str]): A list of tags for the campaign.
-    headers (list[dict]): A list of headers for the campaign.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+Name and subject are required; all other fields fall back to defaults
+(for example, ``list_ids`` defaults to the single list {1} and ``from_email``
+falls back to the instance settings when omitted).
+
+Args:
+    name: The internal name of the campaign. Required.
+    subject: The email subject line. Required.
+    list_ids: A set of list IDs to send the campaign to. Defaults to {1}.
+    from_email: The 'From' address for campaign emails. Defaults to the
+        instance setting when not provided.
+    campaign_type: The campaign type, 'regular' or 'optin'.
+    content_type: The body format: 'richtext', 'html', 'markdown', or 'plain'.
+    body: The campaign body in the configured content type.
+    alt_body: The optional plain-text alternative body for multipart HTML emails.
+    send_at: Optional timestamp at which to schedule the campaign.
+    messenger: The delivery channel, usually 'email'.
+    template_id: The ID of the template used to render the campaign.
+    tags: A list of tags to attach to the campaign.
+    headers: A list of custom email headers, each a single-entry dict.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    CreateCampaignModel: A model representing the created campaign.
+    A Campaign object with the full details of the newly created campaign.
 
 Raises:
-    ValueError: If required parameters (name, subject, from_email) are not provided.
+    ValueError: If ``name`` or ``subject`` is not provided.
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> campaign = listmonk.create_campaign(
+    ...     name='June Newsletter',
+    ...     subject='Our June Update',
+    ...     list_ids={1, 2},
+    ...     content_type='html',
+    ...     body='<h1>Hello</h1>',
+    ... )
+    >>> campaign.id
+    7
 
 update_campaign(campaign: listmonk.models.Campaign, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
 
-Update the given campaign with the provided campaign information.
+Update an existing campaign with the provided campaign information.
 
-Parameters:
-    campaign: models.Campaign - The campaign object containing the updated information.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+The campaign's target lists are normalized to their IDs before sending, and
+a ``send_at`` value already in the past is dropped so the update does not
+fail on a stale scheduled time. After the update succeeds, the campaign is
+re-fetched from the server and returned.
+
+Args:
+    campaign: The Campaign object containing the updated information. Must
+        have a valid ``id``.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    models.Campaign - The updated campaign object from api.
+    The updated Campaign object as freshly fetched from the server, or None
+    if the campaign can no longer be found after the update.
 
 Raises:
-    ValueError: If the campaign parameter is None or if the campaign id is not present.
+    ValueError: If ``campaign`` is None or has no ``id``.
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 delete_campaign(campaign_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Completely delete a campaign from your system.
 
+The campaign is first looked up by ID; if no such campaign exists the
+function returns False without issuing a delete request.
+
 Args:
-    campaign_id: name of the campaign to delete.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    campaign_id: The numeric ID of the campaign to delete.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if the campaign was successfully deleted, False otherwise.
+    True if the campaign was successfully deleted; False if no campaign with
+    the given ID was found or the server reported it was not deleted.
+
+Raises:
+    ValueError: If ``campaign_id`` is not provided.
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty body or invalid JSON.
 
 
 ## Templates
@@ -373,82 +650,152 @@ Manage email templates and set the default.
 
 templates(timeout_config: httpx2.Timeout | None = None) -> list[listmonk.models.Template]
 
-This function retrieves a list of all templates available in the system.
+Retrieve all templates defined on the Listmonk instance.
+
+This fetches both campaign and transactional templates in a single (large)
+paginated request.
 
 Args:
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    list of models.Template objects representing the templates available in the system.
+    A list of models.Template objects, one per template on the server.
+    Returns an empty list if no templates are defined.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the response is empty or is not valid JSON.
 
 template_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template | None
 
-Retrieve a template by its ID.
+Retrieve a single template by its numeric ID.
 
-Parameters:
-    template_id (int): The ID of the template to retrieve.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+Args:
+    template_id: The numeric ID of the template to retrieve, e.g. 7.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    Optional[models.Template]: The template object retrieved based on the ID provided.
+    A models.Template built from the server's response for the given ID.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+    ValidationError: If the response is empty or is not valid JSON.
 
 template_preview_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.TemplatePreview | None
 
-Get the preview of a template with the given ID.
+Render and return a preview of a template.
+
+The preview is rendered by the server using lorem-ipsum sample content, so it
+can be inspected without sending real data through the template.
 
 Args:
-    template_id: A campaign to get the details about, e.g. 7.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    template_id: The numeric ID of the template to preview, e.g. 7.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    String preview of the template with lorem ipsum.
+    A models.TemplatePreview whose 'preview' field holds the rendered HTML.
+
+Raises:
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
 
 create_template(name: str | None = None, body: str | None = None, type: str | None = None, is_default: bool | None = None, subject: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template | None
 
-Create a template with the specified details.
+Create a new template on the Listmonk instance.
 
-Parameters:
-    name (Optional[str]): The name of the template.
-    body (Optional[str]): The body content of the template.
-    type (Optional[str]): The type of the template.
-    is_default (Optional[bool]): Indicates if the template is the default one.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+The body must contain the placeholder {{ template "content" . }} exactly where
+the rendered content should be injected; a template is rejected without it.
+
+Args:
+    name: The template name. Required; a ValueError is raised if empty.
+    body: The template body markup. Required, and must contain the
+        {{ template "content" . }} placeholder.
+    type: The template type, e.g. 'campaign' or 'tx' (transactional).
+    is_default: Whether the new template should become the default for its type.
+    subject: The default subject line for the template, if any.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    Optional[models.Template]: An instance of models.Template representing the created template.
+    A models.Template representing the newly created template.
+
+Raises:
+    ValueError: If name is empty, if body is empty, or if body does not
+        contain the {{ template "content" . }} placeholder.
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the response is empty or is not valid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> body = 'Header {{ template "content" . }} Footer'
+    >>> tmpl = listmonk.create_template(name='Welcome', body=body, type='tx')
+    >>> tmpl.id
+    7
 
 update_template(template: listmonk.models.Template, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template | None
 
-Update a template in the system.
+Update an existing template on the Listmonk instance.
 
-Parameters:
-    template: models.Template - the template object to be updated
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+The template's name, subject, body, and type are sent in the update; the
+is_default flag is not changed by this call (use set_default_template for that).
+After the update succeeds, the template is re-fetched and returned.
+
+Args:
+    template: The models.Template to update. Must be non-None and have an id.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    models.Template - the updated template object after the update operation
+    A freshly fetched models.Template reflecting the saved changes.
+
+Raises:
+    ValueError: If template is None or has no id.
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the re-fetch response is empty or is not valid JSON.
 
 set_default_template(template_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
 
-Set the given template ID as the default template.
+Mark the given template as the default for its type.
 
-Parameters:
-    template_id (Optional[int]): The ID of the template to set as default. If not provided, a ValueError is raised.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+The template is first looked up by ID; if it does not exist, the default is
+not changed and False is returned.
+
+Args:
+    template_id: The numeric ID of the template to set as default. Required.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    bool: True if the default template was set successfully, False otherwise.
+    True if the default was set successfully. False if no template with the
+    given ID exists.
+
+Raises:
+    ValueError: If template_id is missing or falsy.
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the response is empty or is not valid JSON.
 
 delete_template(template_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
 
-Completely delete a template from your system.
+Permanently delete a template from the Listmonk instance.
+
+The template is first looked up by ID; if it does not exist, no delete is
+attempted and False is returned.
 
 Args:
-    template_id: name of the template to delete.
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    template_id: The numeric ID of the template to delete. Required.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if the template was successfully deleted, False otherwise.
+    True if the template was deleted successfully. False if no template with
+    the given ID exists.
+
+Raises:
+    ValueError: If template_id is missing or falsy.
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the response is empty or is not valid JSON.
 
 
 ## Transactional Email
@@ -458,24 +805,50 @@ Send one-off transactional messages.
 
 send_transactional_email(subscriber_email: str, template_id: int, from_email: str | None = None, template_data: dict[str, Any] | None = None, messenger_channel: str = 'email', content_type: str = 'markdown', altbody: str | None = None, attachments: list[pathlib.Path] | None = None, email_headers: list[dict[str, str | None]] | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
 
-Send a transactional email through Listmonk to the recipient.
+Send a transactional email through Listmonk to a single recipient.
 
-Errors may show up in the logs section of your Listmonk dashboard.
+The recipient must already be a subscriber on at least one list. Delivery
+errors may surface in the logs section of your Listmonk dashboard rather than
+as exceptions here. The subscriber_email is lowercased and stripped before sending.
 
 Args:
-    subscriber_email: The email address to send the email to (they must be a subscriber of *some* list on your server).
-    template_id: The template ID to use for the email. It must be a "transactional" not campaign template.
-    from_email: The from address for the email. Can be omitted to use default email at your output provider.
-    template_data: A dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.* }}.
-    messenger_channel: Default is "email", if you have SMS or some other channel, you can use it here.
-    content_type: Email format options include html, markdown, and plain.
-    altbody: Optional alternate plaintext body for multipart HTML emails.
-    attachments: Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
-    email_headers: Optional array of e-mail headers to include in all messages sent from this server. eg: [{"X-Custom": "value"}, {"X-Custom2": "value"}]
-    timeout_config: Optional timeout configuration for the request. Default is 10 seconds.
+    subscriber_email: The recipient's email address. Required; they must be a
+        subscriber of some list on your server.
+    template_id: The ID of the template to render. Must be a 'tx'
+        (transactional) template, not a campaign template.
+    from_email: The From address. Omit to use the default address at your
+        sending provider.
+    template_data: Merge parameters available in the template as {{ .Tx.Data.* }}.
+        Defaults to an empty dict.
+    messenger_channel: The delivery channel. Defaults to 'email'; use another
+        configured channel (e.g. SMS) if available.
+    content_type: The body format: 'html', 'markdown', or 'plain'.
+        Defaults to 'markdown'.
+    altbody: Optional alternate plain-text body for multipart HTML emails.
+    attachments: Optional list of pathlib.Path objects pointing to files to
+        attach. Each path must exist and be a file.
+    email_headers: Optional list of custom headers, each a single-entry dict,
+        e.g. [{'X-Custom': 'value'}].
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if the email send was successful, False otherwise.
+    True if the server accepted the send, False otherwise.
+
+Raises:
+    ValueError: If subscriber_email is empty.
+    ListmonkFileNotFoundError: If any attachment path does not exist or is not a file.
+    OperationNotAllowedError: If the base URL has not been set or you have not logged in.
+    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the response is empty or is not valid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.send_transactional_email(
+    ...     subscriber_email='person@example.com',
+    ...     template_id=3,
+    ...     template_data={'name': 'Sam'},
+    ... )
+    True
 
 
 ## Data Models
@@ -537,14 +910,18 @@ CreateSubscriberModel(*, email: str, name: str | None = None, status: str, lists
 
 The payload used to create a new subscriber.
 
+This is the raw request body sent to Listmonk; the higher-level
+``create_subscriber`` helper populates it (always sending ``status='enabled'``).
+
 Attributes:
-    email: The email address for the new subscriber.
+    email: The email address for the new subscriber (required).
     name: The subscriber's display name, if any.
-    status: The initial global status, e.g. ``enabled``.
-    lists: The IDs of the lists to subscribe this person to.
-    preconfirm_subscriptions: When ``True``, mark the new subscriptions as confirmed
-        immediately (skipping double opt-in confirmation emails).
-    attribs: Arbitrary custom attributes to store against the subscriber.
+    status: The initial global status (required), e.g. ``enabled``, ``disabled``,
+        or ``blocklisted``.
+    lists: The IDs of the lists to subscribe this person to. Defaults to an empty list.
+    preconfirm_subscriptions: Required flag; when ``True``, mark the new subscriptions as
+        confirmed immediately (skipping double opt-in confirmation emails).
+    attribs: Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
 
 Campaign(*, id: int, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, views: int, clicks: int, lists: list[dict[str, typing.Any]] = <factory>, started_at: datetime.datetime | None = None, to_send: int, sent: int, uuid: str, name: str | None = None, type: str | None = None, subject: str | None = None, from_email: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, status: str | None = None, content_type: str | None = None, tags: list[str] = <factory>, template_id: int, messenger: str | None = None, headers: list[dict[str, str | None]] = <factory>) -> None
 
@@ -580,20 +957,26 @@ CreateCampaignModel(*, name: str | None = None, subject: str | None = None, list
 
 The payload used to create a new campaign.
 
+This is the raw request body sent to Listmonk; the higher-level
+``create_campaign`` helper validates that name and subject are present and
+defaults the target list to ``{1}`` before populating this model.
+
 Attributes:
     name: The internal campaign name.
     subject: The email subject line.
-    lists: The IDs of the lists to send the campaign to.
+    lists: The IDs of the lists to send the campaign to. Defaults to an empty list.
     from_email: The sender (From) address. Omit to use the instance default.
     type: The campaign type, e.g. ``regular`` or ``optin``.
     content_type: The body format, e.g. ``richtext``, ``html``, ``markdown``, or ``plain``.
     body: The campaign body in the configured content type.
     altbody: The optional plain-text alternative body for multipart HTML emails.
-    send_at: The scheduled send time, if the campaign should be scheduled.
+    send_at: The scheduled send time, if the campaign should be scheduled. Serialized to
+        an ISO-8601 string (or ``None``) when sent.
     messenger: The delivery channel, typically ``email``.
-    template_id: The ID of the template used to render the campaign.
-    tags: Arbitrary labels to attach to the campaign.
-    headers: Custom email headers to include, each as a single-entry dict.
+    template_id: The ID of the template used to render the campaign. Required field that
+        may be ``None`` (it has no default and must be supplied explicitly).
+    tags: Arbitrary labels to attach to the campaign. Defaults to an empty list.
+    headers: Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
 
 UpdateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>) -> None
 
@@ -633,7 +1016,7 @@ Attributes:
     subject: The default subject line for the template, if any.
     body: The template body markup.
     type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
-    is_default: Whether the new template should become the default for its type.
+    is_default: Whether the new template should become the default for its type. Defaults to ``False``.
 
 TemplatePreview(*, preview: str | None = None) -> None
 

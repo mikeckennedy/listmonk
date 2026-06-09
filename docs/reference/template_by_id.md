@@ -1,7 +1,7 @@
 ## template_by_id()
 
 
-Retrieve a template by its ID.
+Retrieve a single template by its numeric ID.
 
 
 Usage
@@ -18,14 +18,27 @@ template_by_id(
 
 
 `template_id: int`  
-The ID of the template to retrieve.
+The numeric ID of the template to retrieve, e.g. 7.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.Template]`  
-Optional\[models.Template\]: The template object retrieved based on the ID provided.
+A models.Template built from the server's response for the given ID.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+
+`ValidationError`  
+If the response is empty or is not valid JSON.

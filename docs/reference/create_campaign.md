@@ -26,61 +26,89 @@ create_campaign(
 ```
 
 
+Name and subject are required; all other fields fall back to defaults (for example, `list_ids` defaults to the single list {1} and `from_email` falls back to the instance settings when omitted).
+
+
 ## Parameters
 
 
 `name: Optional[str] = None`  
-The name of the campaign.
+The internal name of the campaign. Required.
 
 `subject: Optional[str] = None`  
-The subject of the campaign.
+The email subject line. Required.
 
-`list_ids: set[int] = None`  
-A set of list IDs to send the campaign to. Defaults to 1.
+`list_ids: Optional[set[int]] = None`  
+A set of list IDs to send the campaign to. Defaults to {1}.
 
 `from_email: Optional[str] = None`  
-'From' email in campaign emails. Defaults to value from settings if not provided.
+The 'From' address for campaign emails. Defaults to the instance setting when not provided.
 
 `campaign_type: Optional[str] = None`  
-The type of the campaign: 'regular' or 'optin'.
+The campaign type, 'regular' or 'optin'.
 
 `content_type: Optional[str] = None`  
-The content type of the campaign: 'richtext', 'html', 'markdown', 'plain'.
+The body format: 'richtext', 'html', 'markdown', or 'plain'.
 
 `body: Optional[str] = None`  
-The body of the campaign.
+The campaign body in the configured content type.
 
 `alt_body: Optional[str] = None`  
-The alternative text body of the campaign.
+The optional plain-text alternative body for multipart HTML emails.
 
 `send_at: Optional[datetime.datetime] = None`  
-Timestamp to schedule campaign.
+Optional timestamp at which to schedule the campaign.
 
 `messenger: Optional[str] = None`  
-The messenger for the campaign. Usually 'email'
+The delivery channel, usually 'email'.
 
-`template_id: int = None`  
-The template ID to be used for the campaign. Defaults to 1.
+`template_id: Optional[int] = None`  
+The ID of the template used to render the campaign.
 
-`tags: list[str] = None`  
-A list of tags for the campaign.
+`tags: Optional[list[str]] = None`  
+A list of tags to attach to the campaign.
 
-`headers: list[dict] = None`  
-A list of headers for the campaign.
+`headers: Optional[dict[str, Optional[str]]] = None`  
+A list of custom email headers, each a single-entry dict.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
-`CreateCampaignModel: Optional[models.Campaign]`  
-A model representing the created campaign.
+`Optional[models.Campaign]`  
+A Campaign object with the full details of the newly created campaign.
 
 
 ## Raises
 
 
 `ValueError`  
-If required parameters (name, subject, from_email) are not provided.
+If `name` or `subject` is not provided.
+
+`OperationNotAllowedError`  
+If the base URL is not set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the server returns an empty body or invalid JSON.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> campaign = listmonk.create_campaign(
+...     name='June Newsletter',
+...     subject='Our June Update',
+...     list_ids={1, 2},
+...     content_type='html',
+...     body='<h1>Hello</h1>',
+... )
+>>> campaign.id
+7
+```

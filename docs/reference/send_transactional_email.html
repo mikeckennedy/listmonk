@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Send a transactional email through Listmonk to the recipient.">
+  <meta name="description" content="Send a transactional email through Listmonk to a single recipient.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="send_transactional_email() – Listmonk | Listmonk">
-  <meta property="og:description" content="Send a transactional email through Listmonk to the recipient.">
+  <meta property="og:description" content="Send a transactional email through Listmonk to a single recipient.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/send_transactional_email.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="send_transactional_email() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Send a transactional email through Listmonk to the recipient.">
+  <meta name="twitter:description" content="Send a transactional email through Listmonk to a single recipient.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -591,6 +591,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
 </nav>
     </div>
@@ -617,11 +619,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Send a transactional email through Listmonk to the recipient.</p>
+<p>Send a transactional email through Listmonk to a single recipient.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L780-L881" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L945-L1072" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">send_transactional_email</span>(</span>
@@ -638,7 +640,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>Errors may show up in the logs section of your Listmonk dashboard.</p>
+<p>The recipient must already be a subscriber on at least one list. Delivery errors may surface in the logs section of your Listmonk dashboard rather than as exceptions here. The subscriber_email is lowercased and stripped before sending.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -646,43 +648,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">subscriber_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
-<p>The email address to send the email to (they must be a subscriber of <em>some</em> list on your server).</p>
+<p>The recipient’s email address. Required; they must be a subscriber of some list on your server.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">int</span></code></dt>
 <dd>
-<p>The template ID to use for the email. It must be a “transactional” not campaign template.</p>
+<p>The ID of the template to render. Must be a ‘tx’ (transactional) template, not a campaign template.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">from_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The from address for the email. Can be omitted to use default email at your output provider.</p>
+<p>The From address. Omit to use the default address at your sending provider.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">template_data</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[dict[str, Any]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>A dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.* }}.</p>
+<p>Merge parameters available in the template as {{ .Tx.Data.* }}. Defaults to an empty dict.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">messenger_channel</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default"><span class="st">"email"</span></span></code></dt>
 <dd>
-<p>Default is “email”, if you have SMS or some other channel, you can use it here.</p>
+<p>The delivery channel. Defaults to ‘email’; use another configured channel (e.g.&nbsp;SMS) if available.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">content_type</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default"><span class="st">"markdown"</span></span></code></dt>
 <dd>
-<p>Email format options include html, markdown, and plain.</p>
+<p>The body format: ‘html’, ‘markdown’, or ‘plain’. Defaults to ‘markdown’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">altbody</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional alternate plaintext body for multipart HTML emails.</p>
+<p>Optional alternate plain-text body for multipart HTML emails.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">attachments</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[Path]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional list of <code>pathlib.Path</code> objects pointing to file that will be sent as attachment.</p>
+<p>Optional list of pathlib.Path objects pointing to files to attach. Each path must exist and be a file.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">email_headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[dict[str, Optional[str]]]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Optional array of e-mail headers to include in all messages sent from this server. eg: [{“X-Custom”: “value”}, {“X-Custom2”: “value”}]</p>
+<p>Optional list of custom headers, each a single-entry dict, e.g.&nbsp;[{‘X-Custom’: ‘value’}].</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -693,10 +695,47 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-True if the email send was successful, False otherwise.
+True if the server accepted the send, False otherwise.
 </dd>
 </dl>
 </div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
+<dd>
+<p>If subscriber_email is empty.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ListmonkFileNotFoundError</span></code></dt>
+<dd>
+<p>If any attachment path does not exist or is not a file.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL has not been set or you have not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+<p>If the server responds with a 4xx or 5xx status.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+If the response is empty or is not valid JSON.
+</dd>
+</dl>
+</div>
+</section>
+<section id="examples" class="level2 doc-examples">
+<h2 class="doc-examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> listmonk</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> listmonk.send_transactional_email(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>...     subscriber_email<span class="op">=</span><span class="st">'person@example.com'</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>...     template_id<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>...     template_data<span class="op">=</span>{<span class="st">'name'</span>: <span class="st">'Sam'</span>},</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>... )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="va">True</span></span></code></pre></div>
 
 
 </section>

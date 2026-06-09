@@ -22,67 +22,67 @@ pip install listmonk
 
 Point the client at your Listmonk instance and authenticate.
 
-- `set_url_base`: Each Listmonk instance lives somewhere. This is where yours lives
-- `get_base_url`: Each Listmonk instance lives somewhere. This is where yours lives
-- `login`: Logs into Listmonk and stores that authentication for the life of your app
-- `verify_login`: Call to verify that the stored auth token is still valid
-- `is_healthy`: Checks that the token retrieved during login is still valid at your server
+- `set_url_base`: Set the base URL of your Listmonk instance for all subsequent calls
+- `get_base_url`: Return the configured base URL of your Listmonk instance
+- `login`: Log into Listmonk and cache the credentials for the life of your app
+- `verify_login`: Verify that the stored login credentials are still valid at the server
+- `is_healthy`: Check whether the server is reachable and the stored credentials are valid
 
 ### Mailing Lists
 
 Read and manage mailing lists.
 
-- `lists`: Get mailing lists on the server
-- `list_by_id`: Get the full details of a list with the given ID
+- `lists`: Get all mailing lists on the server
+- `list_by_id`: Get the full details of a single mailing list by its ID
 - `create_list`: Create a new mailing list on the server
-- `update_list`: Updates an existing mailing list on the server
-- `delete_list`: Delete a specific list by its ID
+- `update_list`: Update an existing mailing list on the server
+- `delete_list`: Delete a mailing list by its ID
 
 ### Subscribers
 
 Create, query, update, and manage the status of subscribers.
 
-- `subscribers`: Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned
-- `subscriber_by_email`: Retrieves the subscribe by email (e.g. "some_user@talkpython.fm")
-- `subscriber_by_id`: Retrieves the subscribe by id (e.g. 201)
-- `subscriber_by_uuid`: Retrieves the subscriber by uuid (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
+- `subscribers`: Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given
+- `subscriber_by_email`: Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm")
+- `subscriber_by_id`: Retrieve a single subscriber by their numeric Listmonk ID (e.g. 201)
+- `subscriber_by_uuid`: Retrieve a single subscriber by their UUID (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed")
 - `create_subscriber`: Create a new subscriber on the Listmonk server
-- `update_subscriber`: Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and
-- `add_subscribers_to_lists`: Add a number of subscribers to a number of lists
-- `enable_subscriber`: Set a subscriber's status to enable
-- `disable_subscriber`: Set a subscriber's status to disable
-- `block_subscriber`: Add a subscriber to the blocklist, AKA unsubscribe them
-- `confirm_optin`: For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in
-- `delete_subscriber`: Completely delete a subscriber from your system (it's as if they were never there)
+- `update_subscriber`: Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status
+- `add_subscribers_to_lists`: Add a number of subscribers to a number of lists in a single bulk operation
+- `enable_subscriber`: Set a subscriber's status to enabled so they will receive campaigns
+- `disable_subscriber`: Set a subscriber's status to disabled, pausing their subscription so they will not receive campaigns
+- `block_subscriber`: Add a subscriber to the blocklist, effectively unsubscribing them so they will not receive any mail
+- `confirm_optin`: Confirm a subscriber's opt-in to a list via the API
+- `delete_subscriber`: Completely delete a subscriber from your system (as if they were never there)
 
 ### Campaigns
 
 Create, preview, update, and delete email campaigns.
 
-- `campaigns`: Get campaigns on the server
+- `campaigns`: Get all campaigns on the server
 - `campaign_by_id`: Get the full details of a campaign with the given ID
-- `campaign_preview_by_id`: Get the preview of a campaign with the given ID
+- `campaign_preview_by_id`: Get the rendered preview of a campaign with the given ID
 - `create_campaign`: Create a new campaign with the given parameters
-- `update_campaign`: Update the given campaign with the provided campaign information
+- `update_campaign`: Update an existing campaign with the provided campaign information
 - `delete_campaign`: Completely delete a campaign from your system
 
 ### Templates
 
 Manage email templates and set the default.
 
-- `templates`: This function retrieves a list of all templates available in the system
-- `template_by_id`: Retrieve a template by its ID
-- `template_preview_by_id`: Get the preview of a template with the given ID
-- `create_template`: Create a template with the specified details
-- `update_template`: Update a template in the system
-- `set_default_template`: Set the given template ID as the default template
-- `delete_template`: Completely delete a template from your system
+- `templates`: Retrieve all templates defined on the Listmonk instance
+- `template_by_id`: Retrieve a single template by its numeric ID
+- `template_preview_by_id`: Render and return a preview of a template
+- `create_template`: Create a new template on the Listmonk instance
+- `update_template`: Update an existing template on the Listmonk instance
+- `set_default_template`: Mark the given template as the default for its type
+- `delete_template`: Permanently delete a template from the Listmonk instance
 
 ### Transactional Email
 
 Send one-off transactional messages.
 
-- `send_transactional_email`: Send a transactional email through Listmonk to the recipient
+- `send_transactional_email`: Send a transactional email through Listmonk to a single recipient
 
 ### Data Models
 

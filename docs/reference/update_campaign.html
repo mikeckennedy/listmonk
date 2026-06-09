@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Update the given campaign with the provided campaign information.">
+  <meta name="description" content="Update an existing campaign with the provided campaign information.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="update_campaign() – Listmonk | Listmonk">
-  <meta property="og:description" content="Update the given campaign with the provided campaign information.">
+  <meta property="og:description" content="Update an existing campaign with the provided campaign information.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/update_campaign.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="update_campaign() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Update the given campaign with the provided campaign information.">
+  <meta name="twitter:description" content="Update an existing campaign with the provided campaign information.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -618,11 +618,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Update the given campaign with the provided campaign information.</p>
+<p>Update an existing campaign with the provided campaign information.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1246-L1298" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1519-L1581" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">update_campaign</span>(
@@ -630,17 +630,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,
 )</span></code></pre></div>
 </div>
+<div class="doc-text">
+<p>The campaign’s target lists are normalized to their IDs before sending, and a <code>send_at</code> value already in the past is dropped so the update does not fail on a stale scheduled time. After the update succeeds, the campaign is re-fetched from the server and returned.</p>
+</div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
 <dt><code><span class="doc-parameter-name">campaign</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">models.Campaign</span></code></dt>
 <dd>
-<p>models.Campaign - The campaign object containing the updated information.</p>
+<p>The Campaign object containing the updated information. Must have a valid <code>id</code>.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -651,7 +654,8 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">Optional[models.Campaign]</span></code></dt>
 <dd>
-models.Campaign - The updated campaign object from api.
+<p>The updated Campaign object as freshly fetched from the server, or None</p>
+if the campaign can no longer be found after the update.
 </dd>
 </dl>
 </div>
@@ -662,7 +666,19 @@ models.Campaign - The updated campaign object from api.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
 <dd>
-If the campaign parameter is None or if the campaign id is not present.
+<p>If <code>campaign</code> is None or has no <code>id</code>.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL is not set or you have not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+<p>If the server responds with a 4xx or 5xx status.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+If the follow-up fetch returns an empty or invalid JSON response.
 </dd>
 </dl>
 </div>

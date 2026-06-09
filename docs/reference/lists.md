@@ -1,7 +1,7 @@
 ## lists()
 
 
-Get mailing lists on the server.
+Get all mailing lists on the server.
 
 
 Usage
@@ -11,15 +11,33 @@ lists(timeout_config=None)
 ```
 
 
+Retrieves every mailing list in a single request (paged at one large page), so no manual pagination is required.
+
+
 ## Parameters
 
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `list[models.MailingList]`  
-List of MailingList objects with the full details of that list.
+A list of MailingList objects with the full details of each list. Returns
+
+an empty list if the server has no mailing lists.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL is not set or you are not logged in.
+
+`ValidationError`  
+If the server returns an empty or invalid JSON response.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.

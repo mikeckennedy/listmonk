@@ -98,16 +98,21 @@ class Subscriber(BaseModel):
 
 
 class CreateSubscriberModel(BaseModel):
-    """The payload used to create a new subscriber.
+    """
+    The payload used to create a new subscriber.
+
+    This is the raw request body sent to Listmonk; the higher-level
+    ``create_subscriber`` helper populates it (always sending ``status='enabled'``).
 
     Attributes:
-        email: The email address for the new subscriber.
+        email: The email address for the new subscriber (required).
         name: The subscriber's display name, if any.
-        status: The initial global status, e.g. ``enabled``.
-        lists: The IDs of the lists to subscribe this person to.
-        preconfirm_subscriptions: When ``True``, mark the new subscriptions as confirmed
-            immediately (skipping double opt-in confirmation emails).
-        attribs: Arbitrary custom attributes to store against the subscriber.
+        status: The initial global status (required), e.g. ``enabled``, ``disabled``,
+            or ``blocklisted``.
+        lists: The IDs of the lists to subscribe this person to. Defaults to an empty list.
+        preconfirm_subscriptions: Required flag; when ``True``, mark the new subscriptions as
+            confirmed immediately (skipping double opt-in confirmation emails).
+        attribs: Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
     """
 
     email: str
@@ -174,22 +179,29 @@ class Campaign(BaseModel):
 
 
 class CreateCampaignModel(BaseModel):
-    """The payload used to create a new campaign.
+    """
+    The payload used to create a new campaign.
+
+    This is the raw request body sent to Listmonk; the higher-level
+    ``create_campaign`` helper validates that name and subject are present and
+    defaults the target list to ``{1}`` before populating this model.
 
     Attributes:
         name: The internal campaign name.
         subject: The email subject line.
-        lists: The IDs of the lists to send the campaign to.
+        lists: The IDs of the lists to send the campaign to. Defaults to an empty list.
         from_email: The sender (From) address. Omit to use the instance default.
         type: The campaign type, e.g. ``regular`` or ``optin``.
         content_type: The body format, e.g. ``richtext``, ``html``, ``markdown``, or ``plain``.
         body: The campaign body in the configured content type.
         altbody: The optional plain-text alternative body for multipart HTML emails.
-        send_at: The scheduled send time, if the campaign should be scheduled.
+        send_at: The scheduled send time, if the campaign should be scheduled. Serialized to
+            an ISO-8601 string (or ``None``) when sent.
         messenger: The delivery channel, typically ``email``.
-        template_id: The ID of the template used to render the campaign.
-        tags: Arbitrary labels to attach to the campaign.
-        headers: Custom email headers to include, each as a single-entry dict.
+        template_id: The ID of the template used to render the campaign. Required field that
+            may be ``None`` (it has no default and must be supplied explicitly).
+        tags: Arbitrary labels to attach to the campaign. Defaults to an empty list.
+        headers: Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
     """
 
     name: Optional[str] = None
@@ -278,14 +290,15 @@ class Template(BaseModel):
 
 
 class CreateTemplateModel(BaseModel):
-    """The payload used to create a new template.
+    """
+    The payload used to create a new template.
 
     Attributes:
         name: The template name.
         subject: The default subject line for the template, if any.
         body: The template body markup.
         type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
-        is_default: Whether the new template should become the default for its type.
+        is_default: Whether the new template should become the default for its type. Defaults to ``False``.
     """
 
     name: Optional[str] = None

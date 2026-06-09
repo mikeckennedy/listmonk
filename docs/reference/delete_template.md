@@ -1,7 +1,7 @@
 ## delete_template()
 
 
-Completely delete a template from your system.
+Permanently delete a template from the Listmonk instance.
 
 
 Usage
@@ -14,18 +14,39 @@ delete_template(
 ```
 
 
+The template is first looked up by ID; if it does not exist, no delete is attempted and False is returned.
+
+
 ## Parameters
 
 
 `template_id: Optional[int] = None`  
-name of the template to delete.
+The numeric ID of the template to delete. Required.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `bool`  
-True if the template was successfully deleted, False otherwise.
+True if the template was deleted successfully. False if no template with
+
+the given ID exists.
+
+
+## Raises
+
+
+`ValueError`  
+If template_id is missing or falsy.
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the response is empty or is not valid JSON.

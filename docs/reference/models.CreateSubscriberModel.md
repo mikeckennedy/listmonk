@@ -11,23 +11,26 @@ models.CreateSubscriberModel()
 ```
 
 
+This is the raw request body sent to Listmonk; the higher-level [create_subscriber](create_subscriber.md#listmonk.create_subscriber) helper populates it (always sending `status='enabled'`).
+
+
 ## Attributes
 
 
 `email: str`  
-The email address for the new subscriber.
+The email address for the new subscriber (required).
 
 `name: Optional[str]`  
 The subscriber's display name, if any.
 
 `status: str`  
-The initial global status, e.g. [enabled](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.enabled).
+The initial global status (required), e.g. [enabled](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.enabled), [disabled](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.disabled), or [blocklisted](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.blocklisted).
 
 `lists: list[int]`  
-The IDs of the lists to subscribe this person to.
+The IDs of the lists to subscribe this person to. Defaults to an empty list.
 
 `preconfirm_subscriptions: bool`  
-When `True`, mark the new subscriptions as confirmed immediately (skipping double opt-in confirmation emails).
+Required flag; when `True`, mark the new subscriptions as confirmed immediately (skipping double opt-in confirmation emails).
 
 `attribs: dict[str, Any]`  
-Arbitrary custom attributes to store against the subscriber.
+Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.

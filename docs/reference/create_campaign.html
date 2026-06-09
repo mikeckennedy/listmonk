@@ -592,6 +592,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
   <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul>
 </nav>
     </div>
@@ -622,7 +623,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1114-L1198" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1357-L1461" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">create_campaign</span>(</span>
@@ -642,65 +643,68 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
+<div class="doc-text">
+<p>Name and subject are required; all other fields fall back to defaults (for example, <code>list_ids</code> defaults to the single list {1} and <code>from_email</code> falls back to the instance settings when omitted).</p>
+</div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
 <dt><code><span class="doc-parameter-name">name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The name of the campaign.</p>
+<p>The internal name of the campaign. Required.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">subject</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The subject of the campaign.</p>
+<p>The email subject line. Required.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">list_ids</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">set[int]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">list_ids</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[set[int]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>A set of list IDs to send the campaign to. Defaults to 1.</p>
+<p>A set of list IDs to send the campaign to. Defaults to {1}.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">from_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>‘From’ email in campaign emails. Defaults to value from settings if not provided.</p>
+<p>The ‘From’ address for campaign emails. Defaults to the instance setting when not provided.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">campaign_type</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The type of the campaign: ‘regular’ or ‘optin’.</p>
+<p>The campaign type, ‘regular’ or ‘optin’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">content_type</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The content type of the campaign: ‘richtext’, ‘html’, ‘markdown’, ‘plain’.</p>
+<p>The body format: ‘richtext’, ‘html’, ‘markdown’, or ‘plain’.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">body</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The body of the campaign.</p>
+<p>The campaign body in the configured content type.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">alt_body</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The alternative text body of the campaign.</p>
+<p>The optional plain-text alternative body for multipart HTML emails.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">send_at</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[datetime.datetime]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>Timestamp to schedule campaign.</p>
+<p>Optional timestamp at which to schedule the campaign.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">messenger</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The messenger for the campaign. Usually ‘email’</p>
+<p>The delivery channel, usually ‘email’.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">int</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[int]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The template ID to be used for the campaign. Defaults to 1.</p>
+<p>The ID of the template used to render the campaign.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">tags</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">tags</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[str]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>A list of tags for the campaign.</p>
+<p>A list of tags to attach to the campaign.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[dict]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[dict[str, Optional[str]]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>A list of headers for the campaign.</p>
+<p>A list of custom email headers, each a single-entry dict.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -709,9 +713,9 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <h2 class="doc-returns">Returns</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code><span class="doc-parameter-name">CreateCampaignModel</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[models.Campaign]</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">Optional[models.Campaign]</span></code></dt>
 <dd>
-A model representing the created campaign.
+A Campaign object with the full details of the newly created campaign.
 </dd>
 </dl>
 </div>
@@ -722,10 +726,35 @@ A model representing the created campaign.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
 <dd>
-If required parameters (name, subject, from_email) are not provided.
+<p>If <code>name</code> or <code>subject</code> is not provided.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL is not set or you have not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dd>
+<p>If the server responds with a 4xx or 5xx status.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+If the server returns an empty body or invalid JSON.
 </dd>
 </dl>
 </div>
+</section>
+<section id="examples" class="level2 doc-examples">
+<h2 class="doc-examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> listmonk</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> campaign <span class="op">=</span> listmonk.create_campaign(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>...     name<span class="op">=</span><span class="st">'June Newsletter'</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>...     subject<span class="op">=</span><span class="st">'Our June Update'</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>...     list_ids<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">2</span>},</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>...     content_type<span class="op">=</span><span class="st">'html'</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>...     body<span class="op">=</span><span class="st">'&lt;h1&gt;Hello&lt;/h1&gt;'</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>... )</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> campaign.<span class="bu">id</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div>
 
 
 </section>

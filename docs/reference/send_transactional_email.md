@@ -1,7 +1,7 @@
 ## send_transactional_email()
 
 
-Send a transactional email through Listmonk to the recipient.
+Send a transactional email through Listmonk to a single recipient.
 
 
 Usage
@@ -22,45 +22,77 @@ send_transactional_email(
 ```
 
 
-Errors may show up in the logs section of your Listmonk dashboard.
+The recipient must already be a subscriber on at least one list. Delivery errors may surface in the logs section of your Listmonk dashboard rather than as exceptions here. The subscriber_email is lowercased and stripped before sending.
 
 
 ## Parameters
 
 
 `subscriber_email: str`  
-The email address to send the email to (they must be a subscriber of *some* list on your server).
+The recipient's email address. Required; they must be a subscriber of some list on your server.
 
 `template_id: int`  
-The template ID to use for the email. It must be a "transactional" not campaign template.
+The ID of the template to render. Must be a 'tx' (transactional) template, not a campaign template.
 
 `from_email: Optional[str] = None`  
-The from address for the email. Can be omitted to use default email at your output provider.
+The From address. Omit to use the default address at your sending provider.
 
 `template_data: Optional[dict[str, Any]] = None`  
-A dictionary of merge parameters for the template, available in the template as {{ .Tx.Data.\* }}.
+Merge parameters available in the template as {{ .Tx.Data.\* }}. Defaults to an empty dict.
 
 `messenger_channel: str = ``"email"`  
-Default is "email", if you have SMS or some other channel, you can use it here.
+The delivery channel. Defaults to 'email'; use another configured channel (e.g. SMS) if available.
 
 `content_type: str = ``"markdown"`  
-Email format options include html, markdown, and plain.
+The body format: 'html', 'markdown', or 'plain'. Defaults to 'markdown'.
 
 `altbody: Optional[str] = None`  
-Optional alternate plaintext body for multipart HTML emails.
+Optional alternate plain-text body for multipart HTML emails.
 
 `attachments: Optional[list[Path]] = None`  
-Optional list of `pathlib.Path` objects pointing to file that will be sent as attachment.
+Optional list of pathlib.Path objects pointing to files to attach. Each path must exist and be a file.
 
 `email_headers: Optional[list[dict[str, Optional[str]]]] = None`  
-Optional array of e-mail headers to include in all messages sent from this server. eg: \[{"X-Custom": "value"}, {"X-Custom2": "value"}\]
+Optional list of custom headers, each a single-entry dict, e.g. \[{'X-Custom': 'value'}\].
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `bool`  
-True if the email send was successful, False otherwise.
+True if the server accepted the send, False otherwise.
+
+
+## Raises
+
+
+`ValueError`  
+If subscriber_email is empty.
+
+`ListmonkFileNotFoundError`  
+If any attachment path does not exist or is not a file.
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the response is empty or is not valid JSON.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.send_transactional_email(
+...     subscriber_email='person@example.com',
+...     template_id=3,
+...     template_data={'name': 'Sam'},
+... )
+True
+```

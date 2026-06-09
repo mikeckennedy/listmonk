@@ -1,7 +1,7 @@
 ## list_by_id()
 
 
-Get the full details of a list with the given ID.
+Get the full details of a single mailing list by its ID.
 
 
 Usage
@@ -18,14 +18,30 @@ list_by_id(
 
 
 `list_id: int`  
-A list to get the details about, e.g. 7.
+The numeric ID of the list to retrieve, e.g. 7.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.MailingList]`  
-MailingList object with the full details of a list.
+A MailingList object with the full details of the requested list.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL is not set or you are not logged in.
+
+`ValidationError`  
+If the server returns an empty or invalid JSON response.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`Exception`  
+If the server returns a result set that does not contain the requested list_id (a workaround for a known Listmonk server quirk).

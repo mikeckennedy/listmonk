@@ -11,6 +11,9 @@ models.CreateCampaignModel()
 ```
 
 
+This is the raw request body sent to Listmonk; the higher-level [create_campaign](create_campaign.md#listmonk.create_campaign) helper validates that name and subject are present and defaults the target list to `{1}` before populating this model.
+
+
 ## Attributes
 
 
@@ -21,7 +24,7 @@ The internal campaign name.
 The email subject line.
 
 `lists: list[int]`  
-The IDs of the lists to send the campaign to.
+The IDs of the lists to send the campaign to. Defaults to an empty list.
 
 `from_email: Optional[str]`  
 The sender (From) address. Omit to use the instance default.
@@ -39,16 +42,16 @@ The campaign body in the configured content type.
 The optional plain-text alternative body for multipart HTML emails.
 
 `send_at: Optional[datetime.datetime]`  
-The scheduled send time, if the campaign should be scheduled.
+The scheduled send time, if the campaign should be scheduled. Serialized to an ISO-8601 string (or `None`) when sent.
 
 `messenger: Optional[str]`  
 The delivery channel, typically `email`.
 
 `template_id: Optional[int]`  
-The ID of the template used to render the campaign.
+The ID of the template used to render the campaign. Required field that may be `None` (it has no default and must be supplied explicitly).
 
 `tags: list[str]`  
-Arbitrary labels to attach to the campaign.
+Arbitrary labels to attach to the campaign. Defaults to an empty list.
 
 `headers: list[dict[str, Optional[str]]]`  
-Custom email headers to include, each as a single-entry dict.
+Custom email headers to include, each as a single-entry dict. Defaults to an empty list.

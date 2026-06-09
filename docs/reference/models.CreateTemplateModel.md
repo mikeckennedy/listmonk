@@ -27,4 +27,4 @@ The template body markup.
 The template type, e.g. `campaign` or `tx` (transactional).
 
 `is_default: Optional[bool]`  
-Whether the new template should become the default for its type.
+Whether the new template should become the default for its type. Defaults to `False`.

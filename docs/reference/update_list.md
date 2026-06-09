@@ -1,7 +1,7 @@
 ## update_list()
 
 
-Updates an existing mailing list on the server.
+Update an existing mailing list on the server.
 
 
 Usage
@@ -19,30 +19,52 @@ update_list(
 ```
 
 
+Only the parameters you pass (that are not None) are included in the update payload, so omitted fields are left unchanged.
+
+
 ## Parameters
 
 
 `list_id: int`  
-List ID
+The numeric ID of the list to update. Required.
 
 `list_name: Optional[str] = None`  
-Optional update name of the list.
+Optional new name for the list (stripped of surrounding whitespace).
 
 `list_type: Optional[str] = None`  
-Optional update type of list. Options: "private", "public".
+Optional new visibility. One of 'public' or 'private'.
+
+`status: Optional[str] = None`  
+Optional new status. One of 'active' or 'archived'.
 
 `optin: Optional[str] = None`  
-Optianal update opt-in type. Options: "single", "double".
+Optional new opt-in mode. One of 'single' or 'double'.
 
 `tags: Optional[list[str]] = None`  
-Optional update list of tags associated with the list.
+Optional new list of tag strings for the list.
 
 `description: Optional[str] = None`  
-Optional update description for the list.
+Optional new description for the list.
 
 
 ## Returns
 
 
 `Optional[models.MailingList]`  
-The MailingList object that was created on the server.
+The updated MailingList object as returned by the server.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL is not set or you are not logged in.
+
+`ValueError`  
+If list_id is missing, or if list_type, status, or optin is not one of its accepted values.
+
+`ValidationError`  
+If the server returns an empty or invalid JSON response.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.

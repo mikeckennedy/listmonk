@@ -1,7 +1,7 @@
 ## campaign_preview_by_id()
 
 
-Get the preview of a campaign with the given ID.
+Get the rendered preview of a campaign with the given ID.
 
 
 Usage
@@ -18,14 +18,26 @@ campaign_preview_by_id(
 
 
 `campaign_id: int`  
-A campaign to get the details about, e.g. 7.
+The numeric ID of the campaign to preview, e.g. 7.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.CampaignPreview]`  
-String preview of the campaign.
+A CampaignPreview object whose `preview` attribute holds the rendered
+
+HTML body returned by the server.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL is not set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.

@@ -1,7 +1,7 @@
 ## templates()
 
 
-This function retrieves a list of all templates available in the system.
+Retrieve all templates defined on the Listmonk instance.
 
 
 Usage
@@ -11,15 +11,33 @@ templates(timeout_config=None)
 ```
 
 
+This fetches both campaign and transactional templates in a single (large) paginated request.
+
+
 ## Parameters
 
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `list[models.Template]`  
-list of models.Template objects representing the templates available in the system.
+A list of models.Template objects, one per template on the server.
+
+Returns an empty list if no templates are defined.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the response is empty or is not valid JSON.

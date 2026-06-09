@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Add a number of subscribers to a number of lists.">
+  <meta name="description" content="Add a number of subscribers to a number of lists in a single bulk operation.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="add_subscribers_to_lists() – Listmonk | Listmonk">
-  <meta property="og:description" content="Add a number of subscribers to a number of lists.">
+  <meta property="og:description" content="Add a number of subscribers to a number of lists in a single bulk operation.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/add_subscribers_to_lists.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="add_subscribers_to_lists() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Add a number of subscribers to a number of lists.">
+  <meta name="twitter:description" content="Add a number of subscribers to a number of lists in a single bulk operation.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -591,6 +591,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   </ul>
 </nav>
     </div>
@@ -617,11 +618,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Add a number of subscribers to a number of lists.</p>
+<p>Add a number of subscribers to a number of lists in a single bulk operation.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L595-L648" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L718-L777" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">add_subscribers_to_lists</span>(</span>
@@ -634,15 +635,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">subscriber_ids</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">typing.Iterable[int]</span></code></dt>
 <dd>
-<p>List of subscriber IDs.</p>
+<p>An iterable of subscriber IDs to add. Duplicates are de-duplicated.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">list_ids</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">typing.Iterable[int]</span></code></dt>
 <dd>
-<p>List of lists to subscribe to.</p>
+<p>An iterable of target list IDs to subscribe them to. Duplicates are de-duplicated.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+<p>Optional per-request timeout; defaults to 10 seconds.</p>
+</dd>
+<dt><code><span class="doc-parameter-name">status</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default"><span class="st">"confirmed"</span></span></code></dt>
+<dd>
+The subscription status to assign on the target lists, e.g.&nbsp;‘confirmed’ or ‘unconfirmed’. Defaults to ‘confirmed’.
 </dd>
 </dl>
 </div>
@@ -653,7 +658,19 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-True on success, False on fail.
+<p>True on success. False if either ID set is empty or contains only 0, or if the server responds with an</p>
+error status.
+</dd>
+</dl>
+</div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+If the base URL is not set or you are not logged in.
 </dd>
 </dl>
 </div>

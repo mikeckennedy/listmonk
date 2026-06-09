@@ -14,18 +14,39 @@ delete_campaign(
 ```
 
 
+The campaign is first looked up by ID; if no such campaign exists the function returns False without issuing a delete request.
+
+
 ## Parameters
 
 
 `campaign_id: Optional[int] = None`  
-name of the campaign to delete.
+The numeric ID of the campaign to delete.
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `bool`  
-True if the campaign was successfully deleted, False otherwise.
+True if the campaign was successfully deleted; False if no campaign with
+
+the given ID was found or the server reported it was not deleted.
+
+
+## Raises
+
+
+`ValueError`  
+If `campaign_id` is not provided.
+
+`OperationNotAllowedError`  
+If the base URL is not set or you have not logged in.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.
+
+`ValidationError`  
+If the server returns an empty body or invalid JSON.

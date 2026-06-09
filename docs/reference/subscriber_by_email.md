@@ -1,7 +1,7 @@
 ## subscriber_by_email()
 
 
-Retrieves the subscribe by email (e.g. "some_user@talkpython.fm")
+Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm").
 
 
 Usage
@@ -14,18 +14,34 @@ subscriber_by_email(
 ```
 
 
+The email is matched exactly against `subscribers.email` on the server (a `+` in the address is URL-encoded automatically), and the first matching subscriber is returned.
+
+
 ## Parameters
 
 
 `email: str`  
-Email of the subscriber (e.g. "some_user@talkpython.fm")
+Email address of the subscriber to look up (e.g. "some_user@talkpython.fm").
 
 `timeout_config: Optional[httpx.Timeout] = None`  
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
 `Optional[models.Subscriber]`  
-The subscribe if found, None otherwise.
+The matching models.Subscriber, or None if no subscriber has that email.
+
+
+## Raises
+
+
+`OperationNotAllowedError`  
+If the base URL has not been set or you have not logged in.
+
+`ValidationError`  
+If the server returns an empty body or invalid JSON.
+
+`httpx.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status.

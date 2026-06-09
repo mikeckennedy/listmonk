@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="Call to verify that the stored auth token is still valid.">
+  <meta name="description" content="Verify that the stored login credentials are still valid at the server.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="verify_login() – Listmonk | Listmonk">
-  <meta property="og:description" content="Call to verify that the stored auth token is still valid.">
+  <meta property="og:description" content="Verify that the stored login credentials are still valid at the server.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/verify_login.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="verify_login() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Call to verify that the stored auth token is still valid.">
+  <meta name="twitter:description" content="Verify that the stored login credentials are still valid at the server.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -617,14 +617,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Call to verify that the stored auth token is still valid.</p>
+<p>Verify that the stored login credentials are still valid at the server.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L922-L932" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1120-L1135" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">verify_login</span>(<span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>)</span></code></pre></div>
+</div>
+<div class="doc-text">
+<p>This is a thin alias for is_healthy(): it issues an authenticated request to the server’s health endpoint using the cached credentials. Any error (not logged in, network failure, rejected credentials) is reported as False rather than raised.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -632,7 +635,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional timeout configuration for the request. Default is 10 seconds.
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -643,7 +646,7 @@ Optional timeout configuration for the request. Default is 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-True if the stored auth token is still value, False otherwise.
+True if the stored credentials are still valid, False otherwise.
 </dd>
 </dl>
 </div>

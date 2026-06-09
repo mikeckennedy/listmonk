@@ -586,23 +586,23 @@ ul.task-list li input[type="checkbox"] {
 <dl>
 <dt><a href="../reference/set_url_base.html#listmonk.set_url_base" class="doc-function doc-label doc-label-function">set_url_base()</a></dt>
 <dd>
-<p>Each Listmonk instance lives somewhere. This is where yours lives.</p>
+<p>Set the base URL of your Listmonk instance for all subsequent calls.</p>
 </dd>
 <dt><a href="../reference/get_base_url.html#listmonk.get_base_url" class="doc-function doc-label doc-label-function">get_base_url()</a></dt>
 <dd>
-<p>Each Listmonk instance lives somewhere. This is where yours lives.</p>
+<p>Return the configured base URL of your Listmonk instance.</p>
 </dd>
 <dt><a href="../reference/login.html#listmonk.login" class="doc-function doc-label doc-label-function">login()</a></dt>
 <dd>
-<p>Logs into Listmonk and stores that authentication for the life of your app.</p>
+<p>Log into Listmonk and cache the credentials for the life of your app.</p>
 </dd>
 <dt><a href="../reference/verify_login.html#listmonk.verify_login" class="doc-function doc-label doc-label-function">verify_login()</a></dt>
 <dd>
-<p>Call to verify that the stored auth token is still valid.</p>
+<p>Verify that the stored login credentials are still valid at the server.</p>
 </dd>
 <dt><a href="../reference/is_healthy.html#listmonk.is_healthy" class="doc-function doc-label doc-label-function">is_healthy()</a></dt>
 <dd>
-<p>Checks that the token retrieved during login is still valid at your server.</p>
+<p>Check whether the server is reachable and the stored credentials are valid.</p>
 </dd>
 </dl>
 </section>
@@ -614,11 +614,11 @@ ul.task-list li input[type="checkbox"] {
 <dl>
 <dt><a href="../reference/lists.html#listmonk.lists" class="doc-function doc-label doc-label-function">lists()</a></dt>
 <dd>
-<p>Get mailing lists on the server.</p>
+<p>Get all mailing lists on the server.</p>
 </dd>
 <dt><a href="../reference/list_by_id.html#listmonk.list_by_id" class="doc-function doc-label doc-label-function">list_by_id()</a></dt>
 <dd>
-<p>Get the full details of a list with the given ID.</p>
+<p>Get the full details of a single mailing list by its ID.</p>
 </dd>
 <dt><a href="../reference/create_list.html#listmonk.create_list" class="doc-function doc-label doc-label-function">create_list()</a></dt>
 <dd>
@@ -626,11 +626,11 @@ ul.task-list li input[type="checkbox"] {
 </dd>
 <dt><a href="../reference/update_list.html#listmonk.update_list" class="doc-function doc-label doc-label-function">update_list()</a></dt>
 <dd>
-<p>Updates an existing mailing list on the server.</p>
+<p>Update an existing mailing list on the server.</p>
 </dd>
 <dt><a href="../reference/delete_list.html#listmonk.delete_list" class="doc-function doc-label doc-label-function">delete_list()</a></dt>
 <dd>
-<p>Delete a specific list by its ID.</p>
+<p>Delete a mailing list by its ID.</p>
 </dd>
 </dl>
 </section>
@@ -642,19 +642,19 @@ ul.task-list li input[type="checkbox"] {
 <dl>
 <dt><a href="../reference/subscribers.html#listmonk.subscribers" class="doc-function doc-label doc-label-function">subscribers()</a></dt>
 <dd>
-<p>Get a list of subscribers matching the criteria provided. If none, then all subscribers are returned.</p>
+<p>Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.</p>
 </dd>
 <dt><a href="../reference/subscriber_by_email.html#listmonk.subscriber_by_email" class="doc-function doc-label doc-label-function">subscriber_by_email()</a></dt>
 <dd>
-<p>Retrieves the subscribe by email (e.g.&nbsp;“some_user@talkpython.fm”)</p>
+<p>Retrieve a single subscriber by their email address (e.g.&nbsp;“some_user@talkpython.fm”).</p>
 </dd>
 <dt><a href="../reference/subscriber_by_id.html#listmonk.subscriber_by_id" class="doc-function doc-label doc-label-function">subscriber_by_id()</a></dt>
 <dd>
-<p>Retrieves the subscribe by id (e.g.&nbsp;201)</p>
+<p>Retrieve a single subscriber by their numeric Listmonk ID (e.g.&nbsp;201).</p>
 </dd>
 <dt><a href="../reference/subscriber_by_uuid.html#listmonk.subscriber_by_uuid" class="doc-function doc-label doc-label-function">subscriber_by_uuid()</a></dt>
 <dd>
-<p>Retrieves the subscriber by uuid (e.g.&nbsp;“c37786af-e6ab-4260-9b49-740adpcm6ed”)</p>
+<p>Retrieve a single subscriber by their UUID (e.g.&nbsp;“c37786af-e6ab-4260-9b49-740adpcm6ed”).</p>
 </dd>
 <dt><a href="../reference/create_subscriber.html#listmonk.create_subscriber" class="doc-function doc-label doc-label-function">create_subscriber()</a></dt>
 <dd>
@@ -662,31 +662,31 @@ ul.task-list li input[type="checkbox"] {
 </dd>
 <dt><a href="../reference/update_subscriber.html#listmonk.update_subscriber" class="doc-function doc-label doc-label-function">update_subscriber()</a></dt>
 <dd>
-<p>Update many aspects of a subscriber, from their email addresses and names, to custom attribute data, and</p>
+<p>Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status.</p>
 </dd>
 <dt><a href="../reference/add_subscribers_to_lists.html#listmonk.add_subscribers_to_lists" class="doc-function doc-label doc-label-function">add_subscribers_to_lists()</a></dt>
 <dd>
-<p>Add a number of subscribers to a number of lists.</p>
+<p>Add a number of subscribers to a number of lists in a single bulk operation.</p>
 </dd>
 <dt><a href="../reference/enable_subscriber.html#listmonk.enable_subscriber" class="doc-function doc-label doc-label-function">enable_subscriber()</a></dt>
 <dd>
-<p>Set a subscriber’s status to enable.</p>
+<p>Set a subscriber’s status to enabled so they will receive campaigns.</p>
 </dd>
 <dt><a href="../reference/disable_subscriber.html#listmonk.disable_subscriber" class="doc-function doc-label doc-label-function">disable_subscriber()</a></dt>
 <dd>
-<p>Set a subscriber’s status to disable.</p>
+<p>Set a subscriber’s status to disabled, pausing their subscription so they will not receive campaigns.</p>
 </dd>
 <dt><a href="../reference/block_subscriber.html#listmonk.block_subscriber" class="doc-function doc-label doc-label-function">block_subscriber()</a></dt>
 <dd>
-<p>Add a subscriber to the blocklist, AKA unsubscribe them.</p>
+<p>Add a subscriber to the blocklist, effectively unsubscribing them so they will not receive any mail.</p>
 </dd>
 <dt><a href="../reference/confirm_optin.html#listmonk.confirm_optin" class="doc-function doc-label doc-label-function">confirm_optin()</a></dt>
 <dd>
-<p>For opt-in situations, subscribers are added as unconfirmed first. This method will opt them in</p>
+<p>Confirm a subscriber’s opt-in to a list via the API.</p>
 </dd>
 <dt><a href="../reference/delete_subscriber.html#listmonk.delete_subscriber" class="doc-function doc-label doc-label-function">delete_subscriber()</a></dt>
 <dd>
-<p>Completely delete a subscriber from your system (it’s as if they were never there).</p>
+<p>Completely delete a subscriber from your system (as if they were never there).</p>
 </dd>
 </dl>
 </section>
@@ -698,7 +698,7 @@ ul.task-list li input[type="checkbox"] {
 <dl>
 <dt><a href="../reference/campaigns.html#listmonk.campaigns" class="doc-function doc-label doc-label-function">campaigns()</a></dt>
 <dd>
-<p>Get campaigns on the server.</p>
+<p>Get all campaigns on the server.</p>
 </dd>
 <dt><a href="../reference/campaign_by_id.html#listmonk.campaign_by_id" class="doc-function doc-label doc-label-function">campaign_by_id()</a></dt>
 <dd>
@@ -706,7 +706,7 @@ ul.task-list li input[type="checkbox"] {
 </dd>
 <dt><a href="../reference/campaign_preview_by_id.html#listmonk.campaign_preview_by_id" class="doc-function doc-label doc-label-function">campaign_preview_by_id()</a></dt>
 <dd>
-<p>Get the preview of a campaign with the given ID.</p>
+<p>Get the rendered preview of a campaign with the given ID.</p>
 </dd>
 <dt><a href="../reference/create_campaign.html#listmonk.create_campaign" class="doc-function doc-label doc-label-function">create_campaign()</a></dt>
 <dd>
@@ -714,7 +714,7 @@ ul.task-list li input[type="checkbox"] {
 </dd>
 <dt><a href="../reference/update_campaign.html#listmonk.update_campaign" class="doc-function doc-label doc-label-function">update_campaign()</a></dt>
 <dd>
-<p>Update the given campaign with the provided campaign information.</p>
+<p>Update an existing campaign with the provided campaign information.</p>
 </dd>
 <dt><a href="../reference/delete_campaign.html#listmonk.delete_campaign" class="doc-function doc-label doc-label-function">delete_campaign()</a></dt>
 <dd>
@@ -730,31 +730,31 @@ ul.task-list li input[type="checkbox"] {
 <dl>
 <dt><a href="../reference/templates.html#listmonk.templates" class="doc-function doc-label doc-label-function">templates()</a></dt>
 <dd>
-<p>This function retrieves a list of all templates available in the system.</p>
+<p>Retrieve all templates defined on the Listmonk instance.</p>
 </dd>
 <dt><a href="../reference/template_by_id.html#listmonk.template_by_id" class="doc-function doc-label doc-label-function">template_by_id()</a></dt>
 <dd>
-<p>Retrieve a template by its ID.</p>
+<p>Retrieve a single template by its numeric ID.</p>
 </dd>
 <dt><a href="../reference/template_preview_by_id.html#listmonk.template_preview_by_id" class="doc-function doc-label doc-label-function">template_preview_by_id()</a></dt>
 <dd>
-<p>Get the preview of a template with the given ID.</p>
+<p>Render and return a preview of a template.</p>
 </dd>
 <dt><a href="../reference/create_template.html#listmonk.create_template" class="doc-function doc-label doc-label-function">create_template()</a></dt>
 <dd>
-<p>Create a template with the specified details.</p>
+<p>Create a new template on the Listmonk instance.</p>
 </dd>
 <dt><a href="../reference/update_template.html#listmonk.update_template" class="doc-function doc-label doc-label-function">update_template()</a></dt>
 <dd>
-<p>Update a template in the system.</p>
+<p>Update an existing template on the Listmonk instance.</p>
 </dd>
 <dt><a href="../reference/set_default_template.html#listmonk.set_default_template" class="doc-function doc-label doc-label-function">set_default_template()</a></dt>
 <dd>
-<p>Set the given template ID as the default template.</p>
+<p>Mark the given template as the default for its type.</p>
 </dd>
 <dt><a href="../reference/delete_template.html#listmonk.delete_template" class="doc-function doc-label doc-label-function">delete_template()</a></dt>
 <dd>
-<p>Completely delete a template from your system.</p>
+<p>Permanently delete a template from the Listmonk instance.</p>
 </dd>
 </dl>
 </section>
@@ -766,7 +766,7 @@ ul.task-list li input[type="checkbox"] {
 <dl>
 <dt><a href="../reference/send_transactional_email.html#listmonk.send_transactional_email" class="doc-function doc-label doc-label-function">send_transactional_email()</a></dt>
 <dd>
-<p>Send a transactional email through Listmonk to the recipient.</p>
+<p>Send a transactional email through Listmonk to a single recipient.</p>
 </dd>
 </dl>
 </section>
