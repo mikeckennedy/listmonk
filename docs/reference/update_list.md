@@ -14,7 +14,8 @@ update_list(
     status=None,
     optin=None,
     tags=None,
-    description=None
+    description=None,
+    timeout_config=None
 )
 ```
 
@@ -46,11 +47,14 @@ Optional new list of tag strings for the list.
 `description: Optional[str] = None`  
 Optional new description for the list.
 
+`timeout_config: Optional[httpx2.Timeout] = None`  
+Optional per-request timeout; defaults to 10 seconds.
+
 
 ## Returns
 
 
-`Optional[models.MailingList]`  
+`models.MailingList`  
 The updated MailingList object as returned by the server.
 
 
@@ -66,5 +70,5 @@ If list_id is missing, or if list_type, status, or optin is not one of its accep
 `ValidationError`  
 If the server returns an empty or invalid JSON response.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.

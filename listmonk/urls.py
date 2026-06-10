@@ -1,3 +1,9 @@
+"""Relative URL templates for the Listmonk REST API.
+
+Placeholders like ``{list_id}`` are filled in with str.format() and the result
+is appended to the base URL configured via ``listmonk.set_url_base()``.
+"""
+
 health = '/api/health'
 lists = '/api/lists'
 lst = '/api/lists/{list_id}'

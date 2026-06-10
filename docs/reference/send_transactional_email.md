@@ -55,7 +55,7 @@ Optional list of pathlib.Path objects pointing to files to attach. Each path mus
 `email_headers: Optional[list[dict[str, Optional[str]]]] = None`  
 Optional list of custom headers, each a single-entry dict, e.g. \[{'X-Custom': 'value'}\].
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -78,7 +78,7 @@ If any attachment path does not exist or is not a file.
 `OperationNotAllowedError`  
 If the base URL has not been set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  

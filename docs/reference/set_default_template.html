@@ -622,11 +622,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1909-L1951" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1920-L1962" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">set_default_template</span>(
-    <span class="va">template_id</span><span class="op">=</span><span class="cn-none">None</span>,
+    <span class="va">template_id</span>,
     <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,
 )</span></code></pre></div>
 </div>
@@ -637,11 +637,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[int]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">int</span></code></dt>
 <dd>
 <p>The numeric ID of the template to set as default. Required.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
 Optional per-request timeout; defaults to 10 seconds.
 </dd>
@@ -666,13 +666,13 @@ given ID exists.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
 <dd>
-<p>If template_id is missing or falsy.</p>
+<p>If template_id is falsy (e.g.&nbsp;0).</p>
 </dd>
 <dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
 <dd>
 <p>If the base URL has not been set or you have not logged in.</p>
 </dd>
-<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
 <dd>
 <p>If the server responds with a 4xx or 5xx status.</p>
 </dd>

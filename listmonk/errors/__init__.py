@@ -1,5 +1,6 @@
 class ValidationError(Exception):
-    """Raised when an argument fails client-side validation before a request is sent."""
+    """Raised when an argument fails client-side validation before a request is sent,
+    or when the server returns an empty or malformed JSON response."""
 
 
 class OperationNotAllowedError(ValidationError):

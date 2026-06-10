@@ -620,7 +620,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L64-L97" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L64-L100" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.CLASS">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-class">models</span><span class="op">.</span><span class="sig-name">Subscriber</span>()</span></code></pre></div>
@@ -655,7 +655,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt><code><span class="doc-parameter-name">lists</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[dict[str, Any]]</span></code></dt>
 <dd>
-<p>The lists this subscriber belongs to, each as a dict describing the membership (list id, subscription status, and so on).</p>
+<p>The lists this subscriber belongs to, each as a dict describing the membership (list id, subscription status, and so on). Serialization via <code>model_dump()</code> emits plain list IDs.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">attribs</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">dict[str, Any]</span></code></dt>
 <dd>

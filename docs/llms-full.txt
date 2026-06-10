@@ -8,7 +8,7 @@ This is the API documentation for the listmonk library.
 Point the client at your Listmonk instance and authenticate.
 
 
-set_url_base(url: str)
+set_url_base(url: str) -> None
 
 Set the base URL of your Listmonk instance for all subsequent calls.
 
@@ -121,9 +121,9 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
     ValidationError: If the server returns an empty or invalid JSON response.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
-list_by_id(list_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList | None
+list_by_id(list_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList
 
 Get the full details of a single mailing list by its ID.
 
@@ -137,11 +137,11 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
     ValidationError: If the server returns an empty or invalid JSON response.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     Exception: If the server returns a result set that does not contain the
         requested list_id (a workaround for a known Listmonk server quirk).
 
-create_list(list_name: str, list_type: str = 'public', optin: str = 'single', tags: list[str] | None = None, description: str | None = None) -> listmonk.models.MailingList | None
+create_list(list_name: str, list_type: str = 'public', optin: str = 'single', tags: list[str] | None = None, description: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList
 
 Create a new mailing list on the server.
 
@@ -155,6 +155,7 @@ Args:
     optin: Opt-in mode. One of 'single' or 'double'. Defaults to 'single'.
     tags: Optional list of tag strings to associate with the list.
     description: Optional free-text description for the new list.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
     The MailingList object that was created on the server, including its
@@ -165,7 +166,7 @@ Raises:
     ValueError: If list_name is empty, or if list_type or optin is not one of
         its accepted values.
     ValidationError: If the server returns an empty or invalid JSON response.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 Examples:
     >>> import listmonk
@@ -173,7 +174,7 @@ Examples:
     >>> new_list.id
     7
 
-update_list(list_id: int, list_name: str | None = None, list_type: str | None = None, status: str | None = None, optin: str | None = None, tags: list[str] | None = None, description: str | None = None) -> listmonk.models.MailingList | None
+update_list(list_id: int, list_name: str | None = None, list_type: str | None = None, status: str | None = None, optin: str | None = None, tags: list[str] | None = None, description: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList
 
 Update an existing mailing list on the server.
 
@@ -188,6 +189,7 @@ Args:
     optin: Optional new opt-in mode. One of 'single' or 'double'.
     tags: Optional new list of tag strings for the list.
     description: Optional new description for the list.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
     The updated MailingList object as returned by the server.
@@ -197,28 +199,30 @@ Raises:
     ValueError: If list_id is missing, or if list_type, status, or optin is not
         one of its accepted values.
     ValidationError: If the server returns an empty or invalid JSON response.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
-delete_list(list_id: int) -> bool
+delete_list(list_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Delete a mailing list by its ID.
 
-The list's existence is checked first via list_by_id; if it does not exist,
-no delete request is sent and False is returned.
+The list's existence is checked first via list_by_id, which raises if the
+list does not exist.
 
 Args:
     list_id: The numeric ID of the list to delete. Must be a truthy value
         (0 or None is rejected).
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    True if the server reports the list was deleted, False if the list does
-    not exist or the server response does not confirm deletion.
+    True if the server reports the list was deleted, False if the server
+    response does not confirm deletion.
 
 Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
     ValueError: If list_id is missing or falsy.
     ValidationError: If the server returns an empty or invalid JSON response.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status,
+        including when the existence check finds no list with the given ID.
 
 
 ## Subscribers
@@ -248,7 +252,7 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 subscriber_by_email(email: str, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
@@ -267,7 +271,7 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 subscriber_by_id(subscriber_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
@@ -286,7 +290,7 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
 subscriber_by_uuid(subscriber_uuid: str, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
@@ -305,9 +309,9 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
-create_subscriber(email: str, name: str | None = None, list_ids: set[int] = None, pre_confirm: bool = False, attribs: dict[str, Any] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber
+create_subscriber(email: str, name: str | None = None, list_ids: set[int] | None = None, pre_confirm: bool = False, attribs: dict[str, Any] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber
 
 Create a new subscriber on the Listmonk server.
 
@@ -331,7 +335,7 @@ Raises:
     ValueError: If email is empty.
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
-    httpx.HTTPStatusError: If the server rejects the request (e.g. a 4xx for a duplicate
+    httpx2.HTTPStatusError: If the server rejects the request (e.g. a 4xx for a duplicate
         email) or returns a 5xx status.
 
 Examples:
@@ -346,7 +350,7 @@ Examples:
     >>> sub.id
     201
 
-update_subscriber(subscriber: listmonk.models.Subscriber | None, add_to_lists: set[int] | None = None, remove_from_lists: set[int] | None = None, status: listmonk.models.SubscriberStatuses = <SubscriberStatuses.enabled: 'enabled'>, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
+update_subscriber(subscriber: listmonk.models.Subscriber, add_to_lists: set[int] | None = None, remove_from_lists: set[int] | None = None, status: listmonk.models.SubscriberStatuses = <SubscriberStatuses.enabled: 'enabled'>, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
 Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status.
 
@@ -370,7 +374,7 @@ Returns:
 Raises:
     ValueError: If subscriber is None or has no id.
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 add_subscribers_to_lists(subscriber_ids: Iterable[int], list_ids: Iterable[int], timeout_config: httpx2.Timeout | None = None, status: str = 'confirmed') -> bool
@@ -407,10 +411,10 @@ Returns:
 Raises:
     ValueError: If subscriber is None or has no id.
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
-disable_subscriber(subscriber: listmonk.models.Subscriber | None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
+disable_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
 Set a subscriber's status to disabled, pausing their subscription so they will not receive campaigns.
 
@@ -426,7 +430,7 @@ Returns:
 Raises:
     ValueError: If subscriber is None or has no id.
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
 block_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
@@ -446,10 +450,10 @@ Returns:
 Raises:
     ValueError: If subscriber is None or has no id.
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
-confirm_optin(subscriber_uuid: str | None, list_uuid: str | None, timeout_config: httpx2.Timeout | None = None) -> bool
+confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Confirm a subscriber's opt-in to a list via the API.
 
@@ -490,7 +494,7 @@ Returns:
 Raises:
     ValueError: If neither email nor overriding_subscriber_id is provided.
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty or invalid JSON response.
 
 
@@ -515,7 +519,7 @@ Returns:
 
 Raises:
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
 campaign_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
@@ -532,10 +536,10 @@ Returns:
 
 Raises:
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
-campaign_preview_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.CampaignPreview | None
+campaign_preview_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.CampaignPreview
 
 Get the rendered preview of a campaign with the given ID.
 
@@ -549,9 +553,9 @@ Returns:
 
 Raises:
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
-create_campaign(name: str | None = None, subject: str | None = None, list_ids: set[int] | None = None, from_email: str | None = None, campaign_type: str | None = None, content_type: str | None = None, body: str | None = None, alt_body: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None = None, tags: list[str] | None = None, headers: dict[str, str | None] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
+create_campaign(name: str, subject: str, list_ids: set[int] | None = None, from_email: str | None = None, campaign_type: str | None = None, content_type: str | None = None, body: str | None = None, alt_body: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None = None, tags: list[str] | None = None, headers: list[dict[str, str | None]] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign
 
 Create a new campaign with the given parameters.
 
@@ -580,9 +584,9 @@ Returns:
     A Campaign object with the full details of the newly created campaign.
 
 Raises:
-    ValueError: If ``name`` or ``subject`` is not provided.
+    ValueError: If ``name`` is empty after stripping or ``subject`` is empty.
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
 Examples:
@@ -618,10 +622,10 @@ Returns:
 Raises:
     ValueError: If ``campaign`` is None or has no ``id``.
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
-delete_campaign(campaign_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
+delete_campaign(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Completely delete a campaign from your system.
 
@@ -637,9 +641,9 @@ Returns:
     the given ID was found or the server reported it was not deleted.
 
 Raises:
-    ValueError: If ``campaign_id`` is not provided.
+    ValueError: If ``campaign_id`` is falsy (e.g. 0).
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
 
@@ -664,7 +668,7 @@ Returns:
 
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
 template_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template | None
@@ -676,14 +680,15 @@ Args:
     timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
-    A models.Template built from the server's response for the given ID.
+    A models.Template built from the server's response for the given ID, or
+    None if the server returns no template data.
 
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
     ValidationError: If the response is empty or is not valid JSON.
 
-template_preview_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.TemplatePreview | None
+template_preview_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.TemplatePreview
 
 Render and return a preview of a template.
 
@@ -699,9 +704,9 @@ Returns:
 
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
 
-create_template(name: str | None = None, body: str | None = None, type: str | None = None, is_default: bool | None = None, subject: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template | None
+create_template(name: str, body: str, type: str | None = None, is_default: bool | None = None, subject: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template
 
 Create a new template on the Listmonk instance.
 
@@ -724,7 +729,7 @@ Raises:
     ValueError: If name is empty, if body is empty, or if body does not
         contain the {{ template "content" . }} placeholder.
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
 Examples:
@@ -752,10 +757,10 @@ Returns:
 Raises:
     ValueError: If template is None or has no id.
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the re-fetch response is empty or is not valid JSON.
 
-set_default_template(template_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
+set_default_template(template_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Mark the given template as the default for its type.
 
@@ -771,12 +776,12 @@ Returns:
     given ID exists.
 
 Raises:
-    ValueError: If template_id is missing or falsy.
+    ValueError: If template_id is falsy (e.g. 0).
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
-delete_template(template_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
+delete_template(template_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Permanently delete a template from the Listmonk instance.
 
@@ -792,9 +797,9 @@ Returns:
     the given ID exists.
 
 Raises:
-    ValueError: If template_id is missing or falsy.
+    ValueError: If template_id is falsy (e.g. 0).
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
 
@@ -838,7 +843,7 @@ Raises:
     ValueError: If subscriber_email is empty.
     ListmonkFileNotFoundError: If any attachment path does not exist or is not a file.
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-    httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
 Examples:
@@ -883,11 +888,11 @@ Attributes:
 
 SubscriberStatuses(*values)
 
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 
 Attributes:
-    enabled: The subscriber is actively subscribed and will receive campaigns.
-    disabled: The subscription exists but is paused; the subscriber will not receive campaigns.
+    enabled: The subscriber is active and will receive campaigns.
+    disabled: The subscriber is paused and will not receive campaigns.
     blocklisted: The subscriber has been blocked and will not receive any mail.
 
 Subscriber(*, id: int, email: str, name: str | None = None, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, uuid: str | None = None, lists: list[dict[str, typing.Any]] = <factory>, attribs: dict[str, typing.Any] = <factory>, status: str | None = None) -> None
@@ -902,7 +907,8 @@ Attributes:
     updated_at: When the subscriber was last modified, if ever.
     uuid: The globally unique identifier for the subscriber.
     lists: The lists this subscriber belongs to, each as a dict describing the
-        membership (list id, subscription status, and so on).
+        membership (list id, subscription status, and so on). Serialization via
+        ``model_dump()`` emits plain list IDs.
     attribs: Arbitrary custom attributes stored against the subscriber.
     status: The subscriber's global status, e.g. ``enabled``, ``disabled``, or ``blocklisted``.
 
@@ -910,8 +916,10 @@ CreateSubscriberModel(*, email: str, name: str | None = None, status: str, lists
 
 The payload used to create a new subscriber.
 
-This is the raw request body sent to Listmonk; the higher-level
-``create_subscriber`` helper populates it (always sending ``status='enabled'``).
+This is the raw request body sent to Listmonk. The higher-level
+``create_subscriber`` helper populates it (always sending ``status='enabled'``),
+and ``update_subscriber`` reuses it as the full PUT body when updating an
+existing subscriber (with the caller-supplied status).
 
 Attributes:
     email: The email address for the new subscriber (required).
@@ -982,9 +990,9 @@ UpdateCampaignModel(*, name: str | None = None, subject: str | None = None, list
 
 The payload used to update an existing campaign.
 
-Shares all fields with [CreateCampaignModel][listmonk.models.CreateCampaignModel]. As a
-safeguard, a ``send_at`` value that is already in the past is dropped (set to ``None``)
-before sending, so that updating a campaign does not fail on a stale scheduled time.
+Shares all fields with ``CreateCampaignModel``. As a safeguard, a ``send_at``
+value that is already in the past is dropped (set to ``None``) before sending,
+so that updating a campaign does not fail on a stale scheduled time.
 
 CampaignPreview(*, preview: str | None = None) -> None
 
@@ -1033,7 +1041,8 @@ Errors raised by the client.
 
 ValidationError
 
-Raised when an argument fails client-side validation before a request is sent.
+Raised when an argument fails client-side validation before a request is sent,
+or when the server returns an empty or malformed JSON response.
 
 OperationNotAllowedError
 

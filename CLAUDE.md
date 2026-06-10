@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python client library for the Listmonk email platform. The library provides a simplified interface to the Listmonk API, focusing on subscriber management, campaign operations, template handling, media uploads, and transactional emails.
+This is a Python client library for the Listmonk email platform. The library provides a simplified interface to the Listmonk API, focusing on subscriber management, campaign operations, template handling, and transactional emails.
 
 ### Architecture
 
@@ -29,6 +29,12 @@ ruff format
 python example_client/client.py
 ```
 
+### Rebuilding the Docs Site
+```bash
+./venv/bin/python scripts/build_docs.py
+```
+The committed `docs/` directory is a generated static site built from docstrings by great-docs (installed via the `dev` extra: `pip install -e .[dev]`, requires Python 3.11+). The script runs `great-docs build` and mirrors the `great-docs/_site/` output into `docs/`. Rebuild whenever a public docstring or signature changes. Never hand-edit files under `docs/` — fix the source docstrings instead. Use `scripts/serve_docs.py` to preview the site locally.
+
 ## Code Style and Conventions
 
 - **Line length**: 120 characters (configured in ruff.toml)
@@ -45,7 +51,8 @@ python example_client/client.py
 4. **URL Constants**: All API endpoints defined in `urls.py` with format string placeholders
 5. **Optional Timeouts**: All network operations accept optional `httpx2.Timeout` configuration
 6. **Code Organization**: Functions in `impl/__init__.py` are grouped with `# region` / `# endregion` comments
-7. **Multipart Uploads**: Media and transactional email attachments use httpx2 multipart form-data encoding
+7. **Multipart Uploads**: Transactional email attachments use httpx2 multipart form-data encoding
+8. **Typed Package**: The package ships `py.typed`, so public annotations are contractual for downstream type checkers
 
 ### Function Naming Convention
 

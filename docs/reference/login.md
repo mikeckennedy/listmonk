@@ -27,7 +27,7 @@ Your Listmonk username.
 `pw: str`  
 Your Listmonk password.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 

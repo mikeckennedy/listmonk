@@ -622,7 +622,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L217-L268" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L222-L272" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">list_by_id</span>(
@@ -638,7 +638,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dd>
 <p>The numeric ID of the list to retrieve, e.g.&nbsp;7.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
 Optional per-request timeout; defaults to 10 seconds.
 </dd>
@@ -649,7 +649,7 @@ Optional per-request timeout; defaults to 10 seconds.
 <h2 class="doc-returns">Returns</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code> <span class="doc-parameter-annotation">Optional[models.MailingList]</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">models.MailingList</span></code></dt>
 <dd>
 A MailingList object with the full details of the requested list.
 </dd>
@@ -668,7 +668,7 @@ A MailingList object with the full details of the requested list.
 <dd>
 <p>If the server returns an empty or invalid JSON response.</p>
 </dd>
-<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
 <dd>
 <p>If the server responds with a 4xx or 5xx status.</p>
 </dd>

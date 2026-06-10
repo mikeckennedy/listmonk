@@ -22,7 +22,7 @@ An iterable of subscriber IDs to add. Duplicates are de-duplicated.
 `list_ids: typing.Iterable[int]`  
 An iterable of target list IDs to subscribe them to. Duplicates are de-duplicated.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 `status: str = ``"confirmed"`  

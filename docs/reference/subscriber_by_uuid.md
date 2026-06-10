@@ -23,7 +23,7 @@ The UUID is matched against `subscribers.uuid` on the server and the first match
 `subscriber_uuid: str`  
 UUID of the subscriber to look up (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -43,5 +43,5 @@ If the base URL has not been set or you have not logged in.
 `ValidationError`  
 If the server returns an empty body or invalid JSON.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.

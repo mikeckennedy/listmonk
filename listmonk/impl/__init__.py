@@ -7,7 +7,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
-import httpx2 as httpx
+import httpx2
 
 from listmonk import models, urls
 
@@ -37,7 +37,7 @@ core_headers: dict[str, str] = {
 # endregion
 
 
-def _validate_and_parse_json_response(resp: httpx.Response) -> dict[str, Any]:
+def _validate_and_parse_json_response(resp: httpx2.Response) -> dict[str, Any]:
     """
     Internal helper to validate HTTP response and parse JSON with proper error handling.
 
@@ -48,6 +48,7 @@ def _validate_and_parse_json_response(resp: httpx.Response) -> dict[str, Any]:
         Parsed JSON data as dictionary
 
     Raises:
+        httpx2.HTTPStatusError: If the response status is 4xx or 5xx.
         ValidationError: If response is empty or contains invalid JSON
     """
     resp.raise_for_status()
@@ -85,7 +86,7 @@ def get_base_url() -> Optional[str]:
 # region def set_url_base(url: str)
 
 
-def set_url_base(url: str):
+def set_url_base(url: str) -> None:
     """
     Set the base URL of your Listmonk instance for all subsequent calls.
 
@@ -119,10 +120,10 @@ def set_url_base(url: str):
 # endregion
 
 
-# region def login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = None)
+# region def login(user_name: str, pw: str, timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
-def login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = None) -> bool:
+def login(user_name: str, pw: str, timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Log into Listmonk and cache the credentials for the life of your app.
 
@@ -162,6 +163,10 @@ def login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = Non
     username = user_name
     password = pw
 
+    # Reset so repeat login() calls re-validate the new credentials against the
+    # server instead of hitting the has_logged_in short-circuit in
+    # test_user_pw_on_server().
+    has_logged_in = False
     has_logged_in = test_user_pw_on_server(timeout_config)
 
     return has_logged_in
@@ -169,10 +174,10 @@ def login(user_name: str, pw: str, timeout_config: Optional[httpx.Timeout] = Non
 
 # endregion
 
-# region def lists() -> list[models.MailingList]
+# region def lists(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.MailingList]
 
 
-def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.MailingList]:
+def lists(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.MailingList]:
     """
     Get all mailing lists on the server.
 
@@ -189,16 +194,16 @@ def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Mailing
     Raises:
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         ValidationError: If the server returns an empty or invalid JSON response.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     # noinspection DuplicatedCode
     validate_state(url=True)
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
     url = f'{url_base}{urls.lists}?page=1&per_page=1000000'
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -211,10 +216,10 @@ def lists(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Mailing
 # endregion
 
 
-# region def list_by_id(list_id: int) -> Optional[models.MailingList]
+# region def list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> models.MailingList
 
 
-def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.MailingList]:
+def list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> models.MailingList:
     """
     Get the full details of a single mailing list by its ID.
 
@@ -228,21 +233,21 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
     Raises:
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         ValidationError: If the server returns an empty or invalid JSON response.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         Exception: If the server returns a result set that does not contain the
             requested list_id (a workaround for a known Listmonk server quirk).
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.lst}'
     url = url.format(list_id=list_id)
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -252,12 +257,11 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
 
     # This seems to be a bug, and we'll just work around it until listmonk fixes it
     # See https://github.com/knadh/listmonk/issues/2117
-    results: list[models.MailingList] = lst_data.get('results', [])
+    results: list[dict[str, Any]] = lst_data.get('results', [])
     if results:
         found = False
-        lst: models.MailingList
         for lst in results:
-            if lst.id == list_id:
+            if lst['id'] == list_id:
                 lst_data = lst
                 found = True
                 break
@@ -270,11 +274,11 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx.Timeout] = None) -> 
 
 # endregion
 
-# region def subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None) -> list[models.Subscriber]
+# region def subscribers(query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Subscriber]  # noqa: E501
 
 
 def subscribers(
-    query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None
+    query_text: Optional[str] = None, list_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None
 ) -> list[models.Subscriber]:
     """
     Get the list of subscribers matching the given criteria, or all subscribers if no criteria are given.
@@ -297,10 +301,10 @@ def subscribers(
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     raw_results = []
@@ -321,11 +325,11 @@ def subscribers(
 
 # endregion
 
-# region def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: Optional[str])
+# region def _fragment_of_subscribers(page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx2.Timeout] = None) -> Tuple[list[dict[str, Any]], bool]  # noqa: E501
 
 
 def _fragment_of_subscribers(
-    page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx.Timeout] = None
+    page_num: int, list_id: Optional[int], query_text: Optional[str], timeout_config: Optional[httpx2.Timeout] = None
 ) -> Tuple[list[dict[str, Any]], bool]:
     """
     Internal use only.
@@ -334,7 +338,7 @@ def _fragment_of_subscribers(
         Tuple of partial_results, more_to_retrieve
     """
     per_page = 500
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
     url = f'{url_base}{urls.subscribers}?page={page_num}&per_page={per_page}&order_by=updated_at&order=DESC'
 
@@ -344,9 +348,9 @@ def _fragment_of_subscribers(
     if query_text:
         url += f'&{urllib.parse.urlencode({"query": query_text})}'
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -366,10 +370,10 @@ def _fragment_of_subscribers(
 
 # endregion
 
-# region def subscriber_by_email(email: str) -> Optional[models.Subscriber]
+# region def subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
-def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Subscriber]:
+def subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]:
     """
     Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm").
 
@@ -386,19 +390,19 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     encoded_email = email.replace('+', '%2b')
     # noinspection DuplicatedCode
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -414,10 +418,12 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx.Timeout] = No
 
 # endregion
 
-# region def subscriber_by_id(subscriber_id: int) -> Optional[models.Subscriber]
+# region def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
-def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Subscriber]:
+def subscriber_by_id(
+    subscriber_id: int, timeout_config: Optional[httpx2.Timeout] = None
+) -> Optional[models.Subscriber]:
     """
     Retrieve a single subscriber by their numeric Listmonk ID (e.g. 201).
 
@@ -434,18 +440,18 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.id={subscriber_id}'
 
     # noinspection DuplicatedCode
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -461,11 +467,11 @@ def subscriber_by_id(subscriber_id: int, timeout_config: Optional[httpx.Timeout]
 
 # endregion
 
-# region subscriber_by_uuid(subscriber_uuid: str) -> Optional[models.Subscriber]
+# region def subscriber_by_uuid(subscriber_uuid: str, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
 def subscriber_by_uuid(
-    subscriber_uuid: str, timeout_config: Optional[httpx.Timeout] = None
+    subscriber_uuid: str, timeout_config: Optional[httpx2.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Retrieve a single subscriber by their UUID (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
@@ -483,18 +489,18 @@ def subscriber_by_uuid(
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     # noinspection DuplicatedCode
     url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -511,18 +517,18 @@ def subscriber_by_uuid(
 # endregion
 
 # region def create_subscriber(
-#       email: str, name: Optional[str] = None, list_ids: set[int], pre_confirm: bool,
-#       attribs: dict, timeout_config: Optional[httpx.Timeout] = None
+#       email: str, name: Optional[str] = None, list_ids: Optional[set[int]] = None, pre_confirm: bool = False,
+#       attribs: Optional[dict[str, Any]] = None, timeout_config: Optional[httpx2.Timeout] = None
 # )
 
 
 def create_subscriber(
     email: str,
     name: Optional[str] = None,
-    list_ids: set[int] = None,  # type: ignore - can't set it to set() because of mutable default argument gotcha
+    list_ids: Optional[set[int]] = None,
     pre_confirm: bool = False,
     attribs: Optional[dict[str, Any]] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
 ) -> models.Subscriber:
     """
     Create a new subscriber on the Listmonk server.
@@ -547,7 +553,7 @@ def create_subscriber(
         ValueError: If email is empty.
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
-        httpx.HTTPStatusError: If the server rejects the request (e.g. a 4xx for a duplicate
+        httpx2.HTTPStatusError: If the server rejects the request (e.g. a 4xx for a duplicate
             email) or returns a 5xx status.
 
     Examples:
@@ -563,7 +569,7 @@ def create_subscriber(
         201
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     email = (email or '').lower().strip()
     name = (name or '').strip()
@@ -580,9 +586,9 @@ def create_subscriber(
 
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.subscribers}'
-    resp = httpx.post(
+    resp = httpx2.post(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=model.model_dump(),
         headers=core_headers,
         follow_redirects=True,
@@ -595,13 +601,13 @@ def create_subscriber(
 
 # endregion
 
-# region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool  # noqa: E501
+# region def delete_subscriber(email: Optional[str] = None, overriding_subscriber_id: Optional[int] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool  # noqa: E501
 
 
 def delete_subscriber(
     email: Optional[str] = None,
     overriding_subscriber_id: Optional[int] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
 ) -> bool:
     """
     Completely delete a subscriber from your system (as if they were never there).
@@ -622,11 +628,11 @@ def delete_subscriber(
     Raises:
         ValueError: If neither email nor overriding_subscriber_id is provided.
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty or invalid JSON response.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     email = (email or '').lower().strip()
     if not email and not overriding_subscriber_id:
@@ -641,9 +647,9 @@ def delete_subscriber(
 
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}'
-    resp = httpx.delete(
+    resp = httpx2.delete(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -654,12 +660,10 @@ def delete_subscriber(
 
 # endregion
 
-# region def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional[httpx.Timeout] = None) -> bool
+# region def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional[httpx2.Timeout] = None) -> bool  # noqa: E501
 
 
-def confirm_optin(
-    subscriber_uuid: Optional[str], list_uuid: Optional[str], timeout_config: Optional[httpx.Timeout] = None
-) -> bool:
+def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Confirm a subscriber's opt-in to a list via the API.
 
@@ -681,7 +685,7 @@ def confirm_optin(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     if not subscriber_uuid:
         raise ValueError('subscriber_uuid is required')
@@ -697,16 +701,16 @@ def confirm_optin(
         'confirm': 'true',
     }
     url = f'{url_base}{urls.opt_in.format(subscriber_uuid=subscriber_uuid)}'
-    resp = httpx.post(
+    resp = httpx2.post(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         data=payload,
         follow_redirects=True,
         timeout=timeout_config,
     )
     try:
         resp.raise_for_status()
-    except httpx.HTTPStatusError:
+    except httpx2.HTTPStatusError:
         return False
 
     return True
@@ -714,11 +718,13 @@ def confirm_optin(
 
 # endregion
 
+# region def add_subscribers_to_lists(subscriber_ids: typing.Iterable[int], list_ids: typing.Iterable[int], timeout_config: Optional[httpx2.Timeout] = None, status: str = 'confirmed') -> bool  # noqa: E501
+
 
 def add_subscribers_to_lists(
     subscriber_ids: typing.Iterable[int],
     list_ids: typing.Iterable[int],
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
     status: str = 'confirmed',
 ) -> bool:
     """
@@ -739,7 +745,7 @@ def add_subscribers_to_lists(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     unique_subscriber_ids = set(subscriber_ids)
@@ -760,9 +766,9 @@ def add_subscribers_to_lists(
 
     url = f'{url_base}{urls.subscriber_lists}'
 
-    resp = httpx.put(
+    resp = httpx2.put(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=payload,
         headers=core_headers,
         follow_redirects=True,
@@ -777,15 +783,17 @@ def add_subscribers_to_lists(
     return True
 
 
-# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: set[int], remove_from_lists: set[int], status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx.Timeout] = None)  # noqa: E501
+# endregion
+
+# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: Optional[set[int]] = None, remove_from_lists: Optional[set[int]] = None, status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
 def update_subscriber(
-    subscriber: Optional[models.Subscriber],
+    subscriber: models.Subscriber,
     add_to_lists: Optional[set[int]] = None,
     remove_from_lists: Optional[set[int]] = None,
     status: SubscriberStatuses = SubscriberStatuses.enabled,
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
 ) -> Optional[models.Subscriber]:
     """
     Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status.
@@ -810,13 +818,13 @@ def update_subscriber(
     Raises:
         ValueError: If subscriber is None or has no id.
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
-    if subscriber is None or not subscriber.id:  # type: ignore
+    if subscriber is None or not subscriber.id:
         raise ValueError('Subscriber is required')
 
     add_to_lists = add_to_lists or set()
@@ -836,9 +844,9 @@ def update_subscriber(
     )
 
     url = f'{url_base}{urls.subscriber.format(subscriber_id=subscriber.id)}'
-    resp = httpx.put(
+    resp = httpx2.put(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=update_model.model_dump(),
         headers=core_headers,
         follow_redirects=True,
@@ -851,11 +859,11 @@ def update_subscriber(
 
 # endregion
 
-# region def disable_subscriber(subscriber: models.Subscriber) -> models.Subscriber
+# region def disable_subscriber(subscriber: models.Subscriber, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
 def disable_subscriber(
-    subscriber: Optional[models.Subscriber], timeout_config: Optional[httpx.Timeout] = None
+    subscriber: models.Subscriber, timeout_config: Optional[httpx2.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to disabled, pausing their subscription so they will not receive campaigns.
@@ -872,7 +880,7 @@ def disable_subscriber(
     Raises:
         ValueError: If subscriber is None or has no id.
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.disabled, timeout_config=timeout_config)
@@ -880,11 +888,11 @@ def disable_subscriber(
 
 # endregion
 
-# region def enable_subscriber(subscriber: models.Subscriber) -> models.Subscriber
+# region def enable_subscriber(subscriber: models.Subscriber, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
 def enable_subscriber(
-    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+    subscriber: models.Subscriber, timeout_config: Optional[httpx2.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Set a subscriber's status to enabled so they will receive campaigns.
@@ -901,7 +909,7 @@ def enable_subscriber(
     Raises:
         ValueError: If subscriber is None or has no id.
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.enabled, timeout_config=timeout_config)
@@ -909,11 +917,11 @@ def enable_subscriber(
 
 # endregion
 
-# region def block_subscriber(subscriber: models.Subscriber) -> models.Subscriber
+# region def block_subscriber(subscriber: models.Subscriber, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
 def block_subscriber(
-    subscriber: models.Subscriber, timeout_config: Optional[httpx.Timeout] = None
+    subscriber: models.Subscriber, timeout_config: Optional[httpx2.Timeout] = None
 ) -> Optional[models.Subscriber]:
     """
     Add a subscriber to the blocklist, effectively unsubscribing them so they will not receive any mail.
@@ -931,7 +939,7 @@ def block_subscriber(
     Raises:
         ValueError: If subscriber is None or has no id.
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.blocklisted, timeout_config=timeout_config)
@@ -939,7 +947,7 @@ def block_subscriber(
 
 # endregion
 
-# region def send_transactional_email(subscriber_email: str, template_id: int, from_email: Optional[str] = None, template_data: Optional[dict] = None, messenger_channel: str = "email", content_type: str = "markdown", attachments: Optional[list[Path]] = None)  # noqa: E501
+# region def send_transactional_email(subscriber_email: str, template_id: int, from_email: Optional[str] = None, template_data: Optional[dict[str, Any]] = None, messenger_channel: str = 'email', content_type: str = 'markdown', altbody: Optional[str] = None, attachments: Optional[list[Path]] = None, email_headers: Optional[list[dict[str, Optional[str]]]] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool  # noqa: E501
 
 
 def send_transactional_email(
@@ -952,7 +960,7 @@ def send_transactional_email(
     altbody: Optional[str] = None,
     attachments: Optional[list[Path]] = None,
     email_headers: Optional[list[dict[str, Optional[str]]]] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
 ) -> bool:
     """
     Send a transactional email through Listmonk to a single recipient.
@@ -988,7 +996,7 @@ def send_transactional_email(
         ValueError: If subscriber_email is empty.
         ListmonkFileNotFoundError: If any attachment path does not exist or is not a file.
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
 
     Examples:
@@ -1001,7 +1009,7 @@ def send_transactional_email(
         True
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     subscriber_email = (subscriber_email or '').lower().strip()
     if not subscriber_email:
@@ -1046,9 +1054,9 @@ def send_transactional_email(
             headers = core_headers.copy()
             headers.pop('Content-Type')
 
-            resp = httpx.post(
+            resp = httpx2.post(
                 url,
-                auth=httpx.BasicAuth(username or '', password or ''),
+                auth=httpx2.BasicAuth(username or '', password or ''),
                 data=data,
                 files=files,
                 headers=headers,
@@ -1056,9 +1064,9 @@ def send_transactional_email(
                 timeout=timeout_config,
             )
         else:
-            resp = httpx.post(
+            resp = httpx2.post(
                 url,
-                auth=httpx.BasicAuth(username or '', password or ''),
+                auth=httpx2.BasicAuth(username or '', password or ''),
                 json=body_data,
                 headers=core_headers,
                 follow_redirects=True,
@@ -1074,10 +1082,10 @@ def send_transactional_email(
 
 # endregion
 
-# region def is_healthy() -> bool
+# region def is_healthy(timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
-def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
+def is_healthy(timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Check whether the server is reachable and the stored credentials are valid.
 
@@ -1097,12 +1105,12 @@ def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
     # noinspection PyBroadException
     try:
         validate_state(url=True)
-        timeout_config = timeout_config or httpx.Timeout(timeout=10)
+        timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
         url = f'{url_base}{urls.health}'
-        resp = httpx.get(
+        resp = httpx2.get(
             url,
-            auth=httpx.BasicAuth(username or '', password or ''),
+            auth=httpx2.BasicAuth(username or '', password or ''),
             headers=core_headers,
             follow_redirects=True,
             timeout=timeout_config,
@@ -1116,8 +1124,8 @@ def is_healthy(timeout_config: Optional[httpx.Timeout] = None) -> bool:
 # endregion
 
 
-# region def verify_login() -> bool
-def verify_login(timeout_config: Optional[httpx.Timeout] = None) -> bool:
+# region def verify_login(timeout_config: Optional[httpx2.Timeout] = None) -> bool
+def verify_login(timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Verify that the stored login credentials are still valid at the server.
 
@@ -1137,10 +1145,10 @@ def verify_login(timeout_config: Optional[httpx.Timeout] = None) -> bool:
 
 # endregion
 
-# region def validate_login(user_name, pw)
+# region def validate_login(user_name: str, pw: str) -> None
 
 
-def validate_login(user_name: str, pw: str):
+def validate_login(user_name: str, pw: str) -> None:
     """
     Validate that login credentials are non-empty (internal use only).
 
@@ -1159,7 +1167,7 @@ def validate_login(user_name: str, pw: str):
 
 # endregion
 
-# region def validate_state(url=False, user=False)
+# region def validate_state(url: bool = False) -> None
 
 
 def validate_state(url: bool = False) -> None:
@@ -1183,8 +1191,10 @@ def validate_state(url: bool = False) -> None:
 
 # endregion
 
+# region def test_user_pw_on_server(timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
-def test_user_pw_on_server(timeout_config: Optional[httpx.Timeout] = None) -> bool:
+
+def test_user_pw_on_server(timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Test whether the cached username/password are valid on the server (internal use only).
 
@@ -1202,14 +1212,14 @@ def test_user_pw_on_server(timeout_config: Optional[httpx.Timeout] = None) -> bo
     if has_logged_in:
         return True
 
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
     # noinspection PyBroadException
     try:
         url = f'{url_base}{urls.health}'
-        resp = httpx.get(
+        resp = httpx2.get(
             url,
-            auth=httpx.BasicAuth(username or '', password or ''),
+            auth=httpx2.BasicAuth(username or '', password or ''),
             headers=core_headers,
             follow_redirects=True,
             timeout=timeout_config,
@@ -1221,10 +1231,12 @@ def test_user_pw_on_server(timeout_config: Optional[httpx.Timeout] = None) -> bo
         return False
 
 
-# region def campaigns() -> list[models.Campaign]
+# endregion
+
+# region def campaigns(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Campaign]
 
 
-def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Campaign]:
+def campaigns(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Campaign]:
     """
     Get all campaigns on the server.
 
@@ -1240,16 +1252,16 @@ def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Cam
 
     Raises:
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
     """
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.campaigns}?page=1&per_page=1000000'
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1261,10 +1273,10 @@ def campaigns(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Cam
 
 # endregion
 
-# region def campaign_by_id(campaign_id: int) -> Optional[models.Campaign]
+# region def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
 
 
-def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Campaign]:
+def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]:
     """
     Get the full details of a campaign with the given ID.
 
@@ -1278,20 +1290,20 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
 
     Raises:
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.campaign_id}'
     url = url.format(campaign_id=campaign_id)
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1307,12 +1319,10 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx.Timeout] = N
 # endregion
 
 
-# region def campaign_preview_by_id(campaign_id: int) -> Optional[models.CampaignPreview]
+# region def campaign_preview_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> models.CampaignPreview  # noqa: E501
 
 
-def campaign_preview_by_id(
-    campaign_id: int, timeout_config: Optional[httpx.Timeout] = None
-) -> Optional[models.CampaignPreview]:
+def campaign_preview_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> models.CampaignPreview:
     """
     Get the rendered preview of a campaign with the given ID.
 
@@ -1326,19 +1336,19 @@ def campaign_preview_by_id(
 
     Raises:
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.campaign_id_preview}'
     url = url.format(campaign_id=campaign_id)
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1351,12 +1361,12 @@ def campaign_preview_by_id(
 
 # endregion
 
-# region def create_campaign(...) -> Optional[models.CreateCampaignModel]  # noqa: F401, E402
+# region def create_campaign(...) -> models.Campaign
 
 
 def create_campaign(
-    name: Optional[str] = None,
-    subject: Optional[str] = None,
+    name: str,
+    subject: str,
     list_ids: Optional[set[int]] = None,
     from_email: Optional[str] = None,
     campaign_type: Optional[str] = None,
@@ -1366,10 +1376,10 @@ def create_campaign(
     send_at: Optional[datetime.datetime] = None,
     messenger: Optional[str] = None,
     template_id: Optional[int] = None,
-    tags: Optional[list[str]] = None,  # noqa
-    headers: Optional[dict[str, Optional[str]]] = None,  # noqa
-    timeout_config: Optional[httpx.Timeout] = None,
-) -> Optional[models.Campaign]:
+    tags: Optional[list[str]] = None,
+    headers: Optional[list[dict[str, Optional[str]]]] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> models.Campaign:
     """
     Create a new campaign with the given parameters.
 
@@ -1398,9 +1408,9 @@ def create_campaign(
         A Campaign object with the full details of the newly created campaign.
 
     Raises:
-        ValueError: If ``name`` or ``subject`` is not provided.
+        ValueError: If ``name`` is empty after stripping or ``subject`` is empty.
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
 
     Examples:
@@ -1421,7 +1431,7 @@ def create_campaign(
         tags = []
 
     validate_state(url=True)
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     from_email = (from_email or '').lower().strip()
     name = (name or '').strip()
     if not name:
@@ -1448,9 +1458,9 @@ def create_campaign(
     )
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.campaigns}'
-    resp = httpx.post(
+    resp = httpx2.post(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=model.model_dump(),
         headers=core_headers,
         follow_redirects=True,
@@ -1463,10 +1473,10 @@ def create_campaign(
 
 # endregion
 
-# region def delete_campaign(campaign_id: Optional[str] = None) -> bool
+# region def delete_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
-def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool:
+def delete_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Completely delete a campaign from your system.
 
@@ -1482,13 +1492,13 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
         the given ID was found or the server reported it was not deleted.
 
     Raises:
-        ValueError: If ``campaign_id`` is not provided.
+        ValueError: If ``campaign_id`` is falsy (e.g. 0).
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     if not campaign_id:
@@ -1500,9 +1510,9 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
         return False
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign_id)}'
-    resp = httpx.delete(
+    resp = httpx2.delete(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1513,12 +1523,12 @@ def delete_campaign(campaign_id: Optional[int] = None, timeout_config: Optional[
 
 # endregion
 
-# region def update_campaign(campaign: models.Campaign)
+# region def update_campaign(campaign: models.Campaign, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
 
 
 def update_campaign(
     campaign: models.Campaign,
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
     Update an existing campaign with the provided campaign information.
@@ -1540,11 +1550,11 @@ def update_campaign(
     Raises:
         ValueError: If ``campaign`` is None or has no ``id``.
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     if campaign is None or not campaign.id:  # type: ignore
         raise ValueError('Campaign is required')
@@ -1568,9 +1578,9 @@ def update_campaign(
     )
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}'
-    resp = httpx.put(
+    resp = httpx2.put(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=update_model.model_dump(),
         headers=core_headers,
         follow_redirects=True,
@@ -1584,10 +1594,10 @@ def update_campaign(
 # endregion
 
 
-# region def templates() -> list[models.Template]
+# region def templates(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Template]
 
 
-def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Template]:
+def templates(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Template]:
     """
     Retrieve all templates defined on the Listmonk instance.
 
@@ -1603,17 +1613,17 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
     """
     # noinspection DuplicatedCode
     validate_state(url=True)
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
     url = f'{url_base}{urls.templates}?page=1&per_page=1000000'
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1626,18 +1636,18 @@ def templates(timeout_config: Optional[httpx.Timeout] = None) -> list[models.Tem
 # endregion
 
 
-# region def create_template(...) -> Optional[models.CreateTemplateModel]  # noqa: F401, E402
+# region def create_template(...) -> models.Template
 
 
 # noinspection PyShadowingBuiltins
 def create_template(
-    name: Optional[str] = None,
-    body: Optional[str] = None,
+    name: str,
+    body: str,
     type: Optional[str] = None,
     is_default: Optional[bool] = None,
     subject: Optional[str] = None,
-    timeout_config: Optional[httpx.Timeout] = None,
-) -> Optional[models.Template]:
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> models.Template:
     """
     Create a new template on the Listmonk instance.
 
@@ -1660,7 +1670,7 @@ def create_template(
         ValueError: If name is empty, if body is empty, or if body does not
             contain the {{ template "content" . }} placeholder.
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
 
     Examples:
@@ -1671,7 +1681,7 @@ def create_template(
         7
     """
     validate_state(url=True)
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     name = (name or '').strip()
     if not name:
         raise ValueError('Name is required')
@@ -1690,9 +1700,9 @@ def create_template(
 
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.templates}'
-    resp = httpx.post(
+    resp = httpx2.post(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=model.model_dump(),
         headers=core_headers,
         follow_redirects=True,
@@ -1706,10 +1716,10 @@ def create_template(
 # endregion
 
 
-# region def template_by_id(template_id: int) -> Optional[models.template]
+# region def template_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Template]  # noqa: E501
 
 
-def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = None) -> Optional[models.Template]:
+def template_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Template]:
     """
     Retrieve a single template by its numeric ID.
 
@@ -1718,42 +1728,43 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx.Timeout] = N
         timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
-        A models.Template built from the server's response for the given ID.
+        A models.Template built from the server's response for the given ID, or
+        None if the server returns no template data.
 
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
         ValidationError: If the response is empty or is not valid JSON.
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.template_id}'
     url = url.format(template_id=template_id)
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
     )
     data = _validate_and_parse_json_response(resp)
     template_data = data.get('data', {})
+    if not template_data:
+        return None
 
-    return models.Template(**template_data)  # type: ignore
+    return models.Template(**template_data)
 
 
 # endregion
 
-# region def template_preview_by_id(template_id: int) -> Optional[models.TemplatePreview]
+# region def template_preview_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> models.TemplatePreview  # noqa: E501
 
 
-def template_preview_by_id(
-    template_id: int, timeout_config: Optional[httpx.Timeout] = None
-) -> Optional[models.TemplatePreview]:
+def template_preview_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> models.TemplatePreview:
     """
     Render and return a preview of a template.
 
@@ -1769,19 +1780,19 @@ def template_preview_by_id(
 
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     url = f'{url_base}{urls.template_id_preview}'
     url = url.format(template_id=template_id)
 
-    resp = httpx.get(
+    resp = httpx2.get(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1795,10 +1806,10 @@ def template_preview_by_id(
 # endregion
 
 
-# region def delete_template(template_id: Optional[str] = None) -> bool
+# region def delete_template(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
-def delete_template(template_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool:
+def delete_template(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Permanently delete a template from the Listmonk instance.
 
@@ -1814,14 +1825,14 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
         the given ID exists.
 
     Raises:
-        ValueError: If template_id is missing or falsy.
+        ValueError: If template_id is falsy (e.g. 0).
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     if not template_id:
@@ -1832,9 +1843,9 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
         return False
 
     url = f'{url_base}{urls.template_id.format(template_id=template_id)}'
-    resp = httpx.delete(
+    resp = httpx2.delete(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1846,12 +1857,12 @@ def delete_template(template_id: Optional[int] = None, timeout_config: Optional[
 # endregion
 
 
-# region def update_template(template: models.Template)
+# region def update_template(template: models.Template, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Template]  # noqa: E501
 
 
 def update_template(
     template: models.Template,
-    timeout_config: Optional[httpx.Timeout] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
 ) -> Optional[models.Template]:
     """
     Update an existing template on the Listmonk instance.
@@ -1870,11 +1881,11 @@ def update_template(
     Raises:
         ValueError: If template is None or has no id.
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the re-fetch response is empty or is not valid JSON.
     """
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     if template is None or not template.id:  # type: ignore
         raise ValueError('Template is required')
@@ -1887,9 +1898,9 @@ def update_template(
     )
 
     url = f'{url_base}{urls.template_id.format(template_id=template.id)}'
-    resp = httpx.put(
+    resp = httpx2.put(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=update_model.model_dump(),
         headers=core_headers,
         follow_redirects=True,
@@ -1903,10 +1914,10 @@ def update_template(
 # endregion
 
 
-# region def set_default_template(template_id: Optional[str] = None) -> bool
+# region def set_default_template(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
-def set_default_template(template_id: Optional[int] = None, timeout_config: Optional[httpx.Timeout] = None) -> bool:
+def set_default_template(template_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Mark the given template as the default for its type.
 
@@ -1922,14 +1933,14 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
         given ID exists.
 
     Raises:
-        ValueError: If template_id is missing or falsy.
+        ValueError: If template_id is falsy (e.g. 0).
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
     """
     # noinspection DuplicatedCode
     global core_headers
-    timeout_config = timeout_config or httpx.Timeout(timeout=10)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
     if not template_id:
@@ -1940,9 +1951,9 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
         return False
 
     url = f'{url_base}{urls.template_id_default.format(template_id=template_id)}'
-    resp = httpx.put(
+    resp = httpx2.put(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
         timeout=timeout_config,
@@ -1954,7 +1965,7 @@ def set_default_template(template_id: Optional[int] = None, timeout_config: Opti
 # endregion
 
 
-# region def set_default_template(template_id: Optional[str] = None) -> bool
+# region def create_list(list_name: str, ...) -> models.MailingList
 
 
 def create_list(
@@ -1963,7 +1974,8 @@ def create_list(
     optin: str = 'single',
     tags: Optional[list[str]] = None,
     description: Optional[str] = None,
-) -> Optional[models.MailingList]:
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> models.MailingList:
     """
     Create a new mailing list on the server.
 
@@ -1977,6 +1989,7 @@ def create_list(
         optin: Opt-in mode. One of 'single' or 'double'. Defaults to 'single'.
         tags: Optional list of tag strings to associate with the list.
         description: Optional free-text description for the new list.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
         The MailingList object that was created on the server, including its
@@ -1987,7 +2000,7 @@ def create_list(
         ValueError: If list_name is empty, or if list_type or optin is not one of
             its accepted values.
         ValidationError: If the server returns an empty or invalid JSON response.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
     Examples:
         >>> import listmonk
@@ -1998,6 +2011,7 @@ def create_list(
     global core_headers
 
     validate_state(url=True)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     list_name = (list_name or '').strip()
 
     if not list_name:
@@ -2023,12 +2037,13 @@ def create_list(
 
     url = f'{url_base}{urls.lists}'
 
-    resp = httpx.post(
+    resp = httpx2.post(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=payload,
         headers=core_headers,
         follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     list_data = raw_data['data']
@@ -2039,56 +2054,53 @@ def create_list(
 # endregion
 
 
-# region def delete_list(list_id: int) -> bool:
+# region def delete_list(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
-def delete_list(list_id: int) -> bool:
+def delete_list(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     """
     Delete a mailing list by its ID.
 
-    The list's existence is checked first via list_by_id; if it does not exist,
-    no delete request is sent and False is returned.
+    The list's existence is checked first via list_by_id, which raises if the
+    list does not exist.
 
     Args:
         list_id: The numeric ID of the list to delete. Must be a truthy value
             (0 or None is rejected).
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
-        True if the server reports the list was deleted, False if the list does
-        not exist or the server response does not confirm deletion.
+        True if the server reports the list was deleted, False if the server
+        response does not confirm deletion.
 
     Raises:
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         ValueError: If list_id is missing or falsy.
         ValidationError: If the server returns an empty or invalid JSON response.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status,
+            including when the existence check finds no list with the given ID.
     """
 
     global core_headers
 
     validate_state(url=True)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
     if not list_id:
         raise ValueError('List ID is required to delete a list.')
 
-    # Check if the list exists first (optional, but good practice)
-    # This prevents attempting to delete a non-existent list, though the API might handle it gracefully.
-    existing_list = list_by_id(list_id)
-
-    if not existing_list:
-        # Or raise an error? Depending on desired behavior.
-
-        return False
+    # Pre-flight existence check: list_by_id raises if the list doesn't exist.
+    list_by_id(list_id, timeout_config)
 
     url = f'{url_base}{urls.lst}'
     url = url.format(list_id=list_id)
 
-    resp = httpx.delete(
+    resp = httpx2.delete(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         headers=core_headers,
         follow_redirects=True,
-        timeout=30,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
 
@@ -2099,7 +2111,7 @@ def delete_list(list_id: int) -> bool:
 # endregion
 
 
-# region def update_list(list_id: int) -> Optional[models.MailingList]
+# region def update_list(list_id: int, ...) -> models.MailingList
 
 
 def update_list(
@@ -2110,7 +2122,8 @@ def update_list(
     optin: Optional[str] = None,
     tags: Optional[list[str]] = None,
     description: Optional[str] = None,
-) -> Optional[models.MailingList]:
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> models.MailingList:
     """
     Update an existing mailing list on the server.
 
@@ -2125,6 +2138,7 @@ def update_list(
         optin: Optional new opt-in mode. One of 'single' or 'double'.
         tags: Optional new list of tag strings for the list.
         description: Optional new description for the list.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
         The updated MailingList object as returned by the server.
@@ -2134,11 +2148,12 @@ def update_list(
         ValueError: If list_id is missing, or if list_type, status, or optin is not
             one of its accepted values.
         ValidationError: If the server returns an empty or invalid JSON response.
-        httpx.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     """
     global core_headers
 
     validate_state(url=True)
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
 
     if not list_id:
         raise ValueError('List ID is required')
@@ -2176,12 +2191,13 @@ def update_list(
     url = f'{url_base}{urls.lst}'
     url = url.format(list_id=list_id)
 
-    resp = httpx.put(
+    resp = httpx2.put(
         url,
-        auth=httpx.BasicAuth(username or '', password or ''),
+        auth=httpx2.BasicAuth(username or '', password or ''),
         json=payload,
         headers=core_headers,
         follow_redirects=True,
+        timeout=timeout_config,
     )
     raw_data = _validate_and_parse_json_response(resp)
     list_data = raw_data['data']

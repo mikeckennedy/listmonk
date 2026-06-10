@@ -1,7 +1,7 @@
 ## models.SubscriberStatuses
 
 
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 
 
 Usage
@@ -15,10 +15,10 @@ models.SubscriberStatuses()
 
 
 `enabled`  
-The subscriber is actively subscribed and will receive campaigns.
+The subscriber is active and will receive campaigns.
 
 `disabled`  
-The subscription exists but is paused; the subscriber will not receive campaigns.
+The subscriber is paused and will not receive campaigns.
 
 `blocklisted`  
 The subscriber has been blocked and will not receive any mail.
@@ -28,9 +28,9 @@ The subscriber has been blocked and will not receive any mail.
 
 | Name | Description |
 |----|----|
-| [blocklisted](#blocklisted) | The subscription status of a subscriber within a given mailing list. |
-| [disabled](#disabled) | The subscription status of a subscriber within a given mailing list. |
-| [enabled](#enabled) | The subscription status of a subscriber within a given mailing list. |
+| [blocklisted](#blocklisted) | The global status of a subscriber on the Listmonk instance. |
+| [disabled](#disabled) | The global status of a subscriber on the Listmonk instance. |
+| [enabled](#enabled) | The global status of a subscriber on the Listmonk instance. |
 
 ------------------------------------------------------------------------
 
@@ -38,13 +38,13 @@ The subscriber has been blocked and will not receive any mail.
 #### blocklisted
 
 
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 
 
 `blocklisted=``"blocklisted"`
 
 
-Attributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.
+Attributes: enabled: The subscriber is active and will receive campaigns. disabled: The subscriber is paused and will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.
 
 
 ------------------------------------------------------------------------
@@ -53,13 +53,13 @@ Attributes: enabled: The subscriber is actively subscribed and will receive camp
 #### disabled
 
 
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 
 
 `disabled=``"disabled"`
 
 
-Attributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.
+Attributes: enabled: The subscriber is active and will receive campaigns. disabled: The subscriber is paused and will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.
 
 
 ------------------------------------------------------------------------
@@ -68,10 +68,10 @@ Attributes: enabled: The subscriber is actively subscribed and will receive camp
 #### enabled
 
 
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 
 
 `enabled=``"enabled"`
 
 
-Attributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.
+Attributes: enabled: The subscriber is active and will receive campaigns. disabled: The subscriber is paused and will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.

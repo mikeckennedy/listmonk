@@ -17,7 +17,7 @@ Retrieves every mailing list in a single request (paged at one large page), so n
 ## Parameters
 
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -39,5 +39,5 @@ If the base URL is not set or you are not logged in.
 `ValidationError`  
 If the server returns an empty or invalid JSON response.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.

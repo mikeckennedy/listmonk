@@ -8,14 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+* Documentation site at https://mkennedy.codes/docs/listmonk/ generated from the docstrings with Great Docs
+* Ship a `py.typed` marker (and the `Typing :: Typed` classifier) so mypy/pyright type-check against the library's annotations
+* `create_list()`, `update_list()`, and `delete_list()` now accept the optional `timeout_config` parameter like every other network call (`delete_list()` previously hardcoded a 30-second timeout; all three now default to 10 seconds)
 
 ### Changed
+* Import `httpx2` directly instead of aliasing it as `httpx`, so signatures, docstrings, and the docs site all show `httpx2.Timeout` / `httpx2.HTTPStatusError` — the names users actually import
+* Tighten public signatures to match documented behavior: required parameters are no longer `Optional` (`create_campaign(name, subject)`, `create_template(name, body)`, `delete_campaign(campaign_id)`, `delete_template(template_id)`, `set_default_template(template_id)`, `confirm_optin(...)`), and functions that can never return `None` no longer claim `Optional` returns (`list_by_id`, `campaign_preview_by_id`, `template_preview_by_id`, `create_campaign`, `create_template`, `create_list`, `update_list`)
+* Fix the `headers` parameter annotation on `create_campaign()` — it is a list of single-entry dicts, not a dict
+* Accuracy pass over docstrings, the README, and the example client (corrected TLS/certifi guidance, README samples that would not run as written, stale claims about unimplemented list/template APIs)
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+* Fix `update_list()` sending the list type as `list_type` instead of `type`, so changing a list's type now actually takes effect
+* Fix `Subscriber.model_dump()` crashing on server-populated subscribers (list-membership dicts and a `None` `updated_at` now serialize cleanly)
+* Fix the `list_by_id()` workaround for listmonk#2117 crashing with `AttributeError` when the server returns a result set (dict access instead of attribute access)
+* Fix repeat `login()` calls returning `True` without re-validating the new credentials against the server
 
 ### Security
 
@@ -23,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 * Migrate the HTTP backend from `httpx` to [`httpx2`](https://github.com/pydantic/httpx2), the Pydantic-maintained fork, after the original `httpx` project paused releases and locked down its issue tracker. `httpx2` is imported internally as `httpx`, so the public API and all call sites are unchanged.
-* TLS certificates are now validated against the operating system trust store (via `truststore`, the `httpx2` default) instead of the bundled `certifi` CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set `SSL_CERT_FILE` / `SSL_CERT_DIR`. See the new SSL entry in the README F.A.Q.
+* TLS certificates continue to be validated against the bundled `certifi` CA list (the `httpx2` default). If you self-host Listmonk behind a custom or corporate CA, set `SSL_CERT_FILE` / `SSL_CERT_DIR` to point at your CA bundle. See the SSL entry in the README F.A.Q.
 * If you pass a custom `timeout_config`, construct it with `httpx2.Timeout(...)` (now the bundled dependency) instead of `httpx.Timeout(...)`.
 
 ## [0.4.0] - 2026-04-08

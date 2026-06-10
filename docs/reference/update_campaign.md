@@ -23,7 +23,7 @@ The campaign's target lists are normalized to their IDs before sending, and a `s
 `campaign: models.Campaign`  
 The Campaign object containing the updated information. Must have a valid `id`.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -45,7 +45,7 @@ If `campaign` is None or has no `id`.
 `OperationNotAllowedError`  
 If the base URL is not set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  

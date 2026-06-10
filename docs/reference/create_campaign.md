@@ -8,8 +8,8 @@ Usage
 
 ``` python
 create_campaign(
-    name=None,
-    subject=None,
+    name,
+    subject,
     list_ids=None,
     from_email=None,
     campaign_type=None,
@@ -32,10 +32,10 @@ Name and subject are required; all other fields fall back to defaults (for examp
 ## Parameters
 
 
-`name: Optional[str] = None`  
+`name: str`  
 The internal name of the campaign. Required.
 
-`subject: Optional[str] = None`  
+`subject: str`  
 The email subject line. Required.
 
 `list_ids: Optional[set[int]] = None`  
@@ -68,17 +68,17 @@ The ID of the template used to render the campaign.
 `tags: Optional[list[str]] = None`  
 A list of tags to attach to the campaign.
 
-`headers: Optional[dict[str, Optional[str]]] = None`  
+`headers: Optional[list[dict[str, Optional[str]]]] = None`  
 A list of custom email headers, each a single-entry dict.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
-`Optional[models.Campaign]`  
+`models.Campaign`  
 A Campaign object with the full details of the newly created campaign.
 
 
@@ -86,12 +86,12 @@ A Campaign object with the full details of the newly created campaign.
 
 
 `ValueError`  
-If `name` or `subject` is not provided.
+If `name` is empty after stripping or `subject` is empty.
 
 `OperationNotAllowedError`  
 If the base URL is not set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  

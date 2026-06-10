@@ -27,7 +27,7 @@ Optional SQL-like filter applied server-side, e.g. `"subscribers.attribs->>'city
 `list_id: Optional[int] = None`  
 Optional list ID; when given, only subscribers belonging to that list (and matching `query_text`, if any) are returned. Defaults to None.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -49,5 +49,5 @@ If the base URL has not been set or you have not logged in.
 `ValidationError`  
 If the server returns an empty body or invalid JSON.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.

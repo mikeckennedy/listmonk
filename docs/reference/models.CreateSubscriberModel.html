@@ -620,13 +620,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L100-L123" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L103-L128" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.CLASS">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-class">models</span><span class="op">.</span><span class="sig-name">CreateSubscriberModel</span>()</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>This is the raw request body sent to Listmonk; the higher-level <a href="create_subscriber.html#listmonk.create_subscriber" class="gdls-link gdls-code">create_subscriber</a> helper populates it (always sending <code>status='enabled'</code>).</p>
+<p>This is the raw request body sent to Listmonk. The higher-level <a href="create_subscriber.html#listmonk.create_subscriber" class="gdls-link gdls-code">create_subscriber</a> helper populates it (always sending <code>status='enabled'</code>), and <a href="update_subscriber.html#listmonk.update_subscriber" class="gdls-link gdls-code">update_subscriber</a> reuses it as the full PUT body when updating an existing subscriber (with the caller-supplied status).</p>
 </div>
 <section id="attributes" class="level2 doc-attributes">
 <h2 class="doc-attributes">Attributes</h2>

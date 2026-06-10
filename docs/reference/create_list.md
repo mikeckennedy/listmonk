@@ -8,7 +8,12 @@ Usage
 
 ``` python
 create_list(
-    list_name, list_type="public", optin="single", tags=None, description=None
+    list_name,
+    list_type="public",
+    optin="single",
+    tags=None,
+    description=None,
+    timeout_config=None
 )
 ```
 
@@ -34,11 +39,14 @@ Optional list of tag strings to associate with the list.
 `description: Optional[str] = None`  
 Optional free-text description for the new list.
 
+`timeout_config: Optional[httpx2.Timeout] = None`  
+Optional per-request timeout; defaults to 10 seconds.
+
 
 ## Returns
 
 
-`Optional[models.MailingList]`  
+`models.MailingList`  
 The MailingList object that was created on the server, including its
 
 assigned id and uuid.
@@ -56,7 +64,7 @@ If list_name is empty, or if list_type or optin is not one of its accepted value
 `ValidationError`  
 If the server returns an empty or invalid JSON response.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 

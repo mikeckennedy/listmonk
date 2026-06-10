@@ -1,6 +1,6 @@
 [project]
 name = "listmonk"
-version = "0.4.1"
+version = "0.4.2"
 description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
@@ -25,6 +25,7 @@ classifiers = [
     'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3.14',
     'Programming Language :: Python :: 3.15',
+    'Typing :: Typed',
 ]
 dependencies = [
     "httpx2>=2.0",
@@ -37,6 +38,7 @@ dev = [
     # Documentation generator (Quarto-based). Marker keeps [dev] installable on 3.10,
     # which great-docs does not support.
     "great-docs; python_version >= '3.11'",
+    "pytest",
 ]
 
 

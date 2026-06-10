@@ -167,7 +167,7 @@ A mailing list on the Listmonk instance.
 A breakdown of subscriber counts by subscription status for a mailing list.
 
 [models.SubscriberStatuses](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses)  
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 
 [models.Subscriber](models.Subscriber.md#listmonk.models.Subscriber)  
 A subscriber (contact) on the Listmonk instance.
@@ -204,7 +204,7 @@ Errors raised by the client.
 
 
 [errors.ValidationError](errors.ValidationError.md#listmonk.errors.ValidationError)  
-Raised when an argument fails client-side validation before a request is sent.
+Raised when an argument fails client-side validation before a request is sent,
 
 [errors.OperationNotAllowedError](errors.OperationNotAllowedError.md#listmonk.errors.OperationNotAllowedError)  
 Raised when an operation is not permitted in the client's current state.

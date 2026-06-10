@@ -23,14 +23,14 @@ The preview is rendered by the server using lorem-ipsum sample content, so it ca
 `template_id: int`  
 The numeric ID of the template to preview, e.g. 7.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
-`Optional[models.TemplatePreview]`  
+`models.TemplatePreview`  
 A models.TemplatePreview whose 'preview' field holds the rendered HTML.
 
 
@@ -40,5 +40,5 @@ A models.TemplatePreview whose 'preview' field holds the rendered HTML.
 `OperationNotAllowedError`  
 If the base URL has not been set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).

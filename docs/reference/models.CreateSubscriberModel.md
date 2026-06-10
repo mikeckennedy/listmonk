@@ -11,7 +11,7 @@ models.CreateSubscriberModel()
 ```
 
 
-This is the raw request body sent to Listmonk; the higher-level [create_subscriber](create_subscriber.md#listmonk.create_subscriber) helper populates it (always sending `status='enabled'`).
+This is the raw request body sent to Listmonk. The higher-level [create_subscriber](create_subscriber.md#listmonk.create_subscriber) helper populates it (always sending `status='enabled'`), and [update_subscriber](update_subscriber.md#listmonk.update_subscriber) reuses it as the full PUT body when updating an existing subscriber (with the caller-supplied status).
 
 
 ## Attributes

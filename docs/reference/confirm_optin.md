@@ -21,13 +21,13 @@ For opt-in lists, subscribers are added as unconfirmed first. Call this to opt t
 ## Parameters
 
 
-`subscriber_uuid: Optional[str]`  
+`subscriber_uuid: str`  
 The Subscriber.uuid value for the subscriber. Must be non-empty.
 
-`list_uuid: Optional[str]`  
+`list_uuid: str`  
 The MailingList.uuid value for the list. Must be non-empty.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 

@@ -17,7 +17,7 @@ This is a thin alias for is_healthy(): it issues an authenticated request to the
 ## Parameters
 
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 

@@ -5,7 +5,7 @@ Client for the open source, self-hosted [Listmonk email platform](https://listmo
 
 `listmonk` is intended for integrating your Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/) but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segment users (into separate lists).
 
-So while it doesn't currently cover every endpoint (for example you cannot create a list programmatically nor can you edit HTML templates for campaigns over APIs) it will likely work for you. That said, PRs are welcome.
+So while it doesn't currently cover every endpoint (for example campaign analytics and bulk subscriber deletion are not yet implemented) it will likely work for you. That said, PRs are welcome.
 
 🔀 Async is currently planned but not yet implemented. With the httpx2-base, it should be trivial if needed.
 
@@ -27,6 +27,7 @@ So while it doesn't currently cover every endpoint (for example you cannot creat
 - 📨 Manage campaign (bulk) emails from the API.
 - 🎨 Edit and create templates to control the overall look and feel of campaigns.
 - 📝 Create, edit and delete lists.
+- ✅ Fully type annotated and ships `py.typed`, so mypy/pyright type checking works out of the box.
 
 ## Installation
 
@@ -38,6 +39,7 @@ Just `pip install listmonk`
 
 import pathlib
 import listmonk
+from listmonk.models import MailingList, Subscriber
 from typing import Optional
 
 listmonk.set_url_base('https://yourlistmonkurl.com')
@@ -48,8 +50,10 @@ valid: bool = listmonk.verify_login()
 # Is it alive and working?
 up: bool = listmonk.is_healthy()
 
-# Create a new list
-new_list = listmonk.create_list(list_name="my_new_list")
+# Create, update, and delete lists
+new_list: MailingList = listmonk.create_list(list_name="my_new_list")
+listmonk.update_list(list_id=new_list.id, description='Updated description')
+listmonk.delete_list(new_list.id)
 
 # Read data about your lists
 lists: list[MailingList] = listmonk.lists()
@@ -58,9 +62,9 @@ the_list: MailingList = listmonk.list_by_id(list_id=7)
 # Various ways to access existing subscribers
 subscribers: list[Subscriber] = listmonk.subscribers(list_id=9)
 
-subscriber: Subscriber = listmonk.subscriber_by_email('testuser@some.domain')
-subscriber: Subscriber = listmonk.subscriber_by_id(2001)
-subscriber: Subscriber = listmonk.subscriber_by_uuid('f6668cf0-1c...')
+subscriber: Optional[Subscriber] = listmonk.subscriber_by_email('testuser@some.domain')
+subscriber: Optional[Subscriber] = listmonk.subscriber_by_id(2001)
+subscriber: Optional[Subscriber] = listmonk.subscriber_by_uuid('f6668cf0-1c...')
 
 # Create a new subscriber
 new_subscriber = listmonk.create_subscriber(
@@ -71,6 +75,9 @@ new_subscriber = listmonk.create_subscriber(
 subscriber.email = 'newemail@some.domain'
 subscriber.attribs['rating'] = 7
 subscriber = listmonk.update_subscriber(subscriber, {4, 6}, {5})
+
+# Bulk-add existing subscribers to lists in one call
+listmonk.add_subscribers_to_lists([2001, 2002], [4, 6])
 
 # Confirm single-opt-ins via the API (e.g. for when you manage that on your platform)
 listmonk.confirm_optin(subscriber.uuid, the_list.uuid)
@@ -126,7 +133,7 @@ from listmonk.models import Campaign
 from datetime import datetime, timedelta
 
 campaigns: list[Campaign] = listmonk.campaigns()
-campaign: Campaign = listmonk.campaign_by_id(15)
+campaign: Optional[Campaign] = listmonk.campaign_by_id(15)
 
 # Create a new Campaign
 listmonk.create_campaign(name='This is my Great Campaign!',
@@ -134,7 +141,7 @@ listmonk.create_campaign(name='This is my Great Campaign!',
                          body='<p>Some Insane HTML!</p>',  # Optional
                          alt_body='Some Insane TXT!',  # Optional
                          send_at=datetime.now() + timedelta(hours=1),  # Optional
-                         template_id=5,  # Optional Defaults to 1
+                         template_id=5,  # Optional; defaults to None (server uses its default template)
                          list_ids={1, 2},  # Optional Defaults to 1
                          tags=['good', 'better', 'best']  # Optional
                          )
@@ -149,13 +156,12 @@ campaign_to_update.lists = [3, 4]
 
 listmonk.update_campaign(campaign_to_update)
 
-# Delete a Campaign
-campaign_to_delete: Optional[Campaign] = listmonk.campaign_by_id(15)
-listmonk.delete_campaign(campaign_to_delete)
+# Delete a Campaign (by its numeric ID)
+listmonk.delete_campaign(15)
 
 # Preview Campaign
-preview_html = listmonk.campaign_preview_by_id(15)
-print(preview_html)
+preview = listmonk.campaign_preview_by_id(15)
+print(preview.preview)
 
 # Access existing Templates
 from listmonk.models import Template
@@ -173,18 +179,22 @@ new_template = listmonk.create_template(
 new_template.name = "Bob's Great Template"
 listmonk.update_template(new_template)
 
+# Mark a template as the default for its type
+listmonk.set_default_template(new_template.id)
+
 # Delete a Template
 listmonk.delete_template(3)
 
 # Preview Template
-preview_html = listmonk.template_preview_by_id(3)
-print(preview_html)
+preview = listmonk.template_preview_by_id(3)
+print(preview.preview)
 
 # Create a new template for Transactional Emails
+# (the {{ template "content" . }} placeholder is required in every template body)
 new_tx_template = listmonk.create_template(
     name='NEW TX TEMPLATE',
     subject='Your Transactional Email Subject',
-    body='<p>Some Insane HTML! {{ .Subscriber.FirstName }}</p>',
+    body='<p>Hi {{ .Subscriber.FirstName }}! {{ template "content" . }}</p>',
     type='tx',
 )
 ```
@@ -205,13 +215,13 @@ It means the authenticated user doesn’t have sufficient permissions to run SQL
 
 ### I got an SSL certificate verification error against my self-hosted Listmonk
 
-As of the move to [httpx2](https://github.com/pydantic/httpx2), TLS certificates are validated against your **operating system's trust store** (via the `truststore` package) instead of the bundled `certifi` CA list. If you self-host Listmonk behind a custom or corporate Certificate Authority you may see an error like:
+[httpx2](https://github.com/pydantic/httpx2) validates TLS certificates against the bundled `certifi` CA list by default. If you self-host Listmonk behind a custom or corporate Certificate Authority you may see an error like:
 
 ```text
 ssl.SSLCertVerificationError: certificate verify failed: unable to get local issuer certificate
 ```
 
-**Solution:** Install your CA certificate into your operating system's trust store, or point the client at your CA bundle via the standard environment variable before using the library:
+**Solution:** Point the client at your CA bundle via the standard environment variables before using the library:
 
 ```bash
 export SSL_CERT_FILE=/path/to/your-ca-bundle.pem   # or SSL_CERT_DIR=/path/to/ca-dir

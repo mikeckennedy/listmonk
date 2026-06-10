@@ -623,12 +623,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1357-L1461" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1367-L1471" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">create_campaign</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">name</span><span class="op">=</span><span class="cn-none">None</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">subject</span><span class="op">=</span><span class="cn-none">None</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">name</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">subject</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">list_ids</span><span class="op">=</span><span class="cn-none">None</span>,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="va">from_email</span><span class="op">=</span><span class="cn-none">None</span>,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="va">campaign_type</span><span class="op">=</span><span class="cn-none">None</span>,</span>
@@ -650,11 +650,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code><span class="doc-parameter-name">name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
 <p>The internal name of the campaign. Required.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">subject</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">subject</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
 <dd>
 <p>The email subject line. Required.</p>
 </dd>
@@ -698,11 +698,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dd>
 <p>A list of tags to attach to the campaign.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[dict[str, Optional[str]]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[dict[str, Optional[str]]]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
 <p>A list of custom email headers, each a single-entry dict.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
 Optional per-request timeout; defaults to 10 seconds.
 </dd>
@@ -713,7 +713,7 @@ Optional per-request timeout; defaults to 10 seconds.
 <h2 class="doc-returns">Returns</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code> <span class="doc-parameter-annotation">Optional[models.Campaign]</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">models.Campaign</span></code></dt>
 <dd>
 A Campaign object with the full details of the newly created campaign.
 </dd>
@@ -726,13 +726,13 @@ A Campaign object with the full details of the newly created campaign.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
 <dd>
-<p>If <code>name</code> or <code>subject</code> is not provided.</p>
+<p>If <code>name</code> is empty after stripping or <code>subject</code> is empty.</p>
 </dd>
 <dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
 <dd>
 <p>If the base URL is not set or you have not logged in.</p>
 </dd>
-<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
 <dd>
 <p>If the server responds with a 4xx or 5xx status.</p>
 </dd>

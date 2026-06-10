@@ -25,7 +25,7 @@ Email of the subscriber to delete. Required unless overriding_subscriber_id is p
 `overriding_subscriber_id: Optional[int] = None`  
 Optional ID of the subscriber to delete; takes precedence over email.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -47,7 +47,7 @@ If neither email nor overriding_subscriber_id is provided.
 `OperationNotAllowedError`  
 If the base URL is not set or you are not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  

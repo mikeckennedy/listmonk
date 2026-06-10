@@ -591,7 +591,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#methods" id="toc-methods" class="nav-link active" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#serialize_send_at" id="toc-serialize_send_at" class="nav-link" data-scroll-target="#serialize_send_at"><span class="doc-object-name doc-function doc-label doc-label-method">serialize_send_at()</span></a></li>
+  <li><a href="#validate_send_at" id="toc-validate_send_at" class="nav-link" data-scroll-target="#validate_send_at"><span class="doc-object-name doc-function doc-label doc-label-method">validate_send_at()</span></a></li>
   </ul></li>
   </ul>
 </nav>
@@ -623,13 +623,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L229-L255" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L234-L261" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.CLASS">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-class">models</span><span class="op">.</span><span class="sig-name">UpdateCampaignModel</span>()</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>Shares all fields with [CreateCampaignModel][listmonk.models.CreateCampaignModel]. As a safeguard, a <code>send_at</code> value that is already in the past is dropped (set to <code>None</code>) before sending, so that updating a campaign does not fail on a stale scheduled time.</p>
+<p>Shares all fields with <a href="models.CreateCampaignModel.html#listmonk.models.CreateCampaignModel" class="gdls-link gdls-code">CreateCampaignModel</a>. As a safeguard, a <code>send_at</code> value that is already in the past is dropped (set to <code>None</code>) before sending, so that updating a campaign does not fail on a stale scheduled time.</p>
 </div>
 <section id="methods" class="level2 doc-methods">
 <h2 class="doc-methods">Methods</h2>
@@ -647,29 +647,29 @@ Description
 <tbody>
 <tr>
 <td>
-<a href="#serialize_send_at" class="doc-function doc-label doc-label-method">serialize_send_at()</a>
+<a href="#validate_send_at" class="doc-function doc-label doc-label-method">validate_send_at()</a>
 </td>
 <td>
-Serialize the provided datetime field to prepare for sending, considering the specified send_at time.
+Drop a send_at value that is already in the past.
 </td>
 </tr>
 </tbody>
 </table>
 <hr style="border: none; border-top: 2px solid #c5c8cd; margin: 1.5rem 0 1rem 0;">
-<section id="serialize_send_at" class="level3">
-<h4 class="anchored" data-anchor-id="serialize_send_at"><span class="doc-object-name doc-function doc-label doc-label-method">serialize_send_at()</span></h4>
+<section id="validate_send_at" class="level3">
+<h4 class="anchored" data-anchor-id="validate_send_at"><span class="doc-object-name doc-function doc-label doc-label-method">validate_send_at()</span></h4>
 <div class="doc-subject">
-<p>Serialize the provided datetime field to prepare for sending, considering the specified send_at time.</p>
+<p>Drop a send_at value that is already in the past.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L238-L255" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L243-L261" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>serialize_send_at(fld)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>validate_send_at(fld)</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>If send_at is in the past then the update will fail, so we check if it is in the past and if it is we turn off the campaign scheduled send time.</p>
+<p>Listmonk rejects updates whose scheduled send time has passed, so a past send_at is replaced with None (unscheduling the campaign).</p>
 </div>
 <section id="parameters" class="level4 doc-parameters">
 <h5 class="doc-parameters anchored" data-anchor-id="parameters">Parameters</h5>
@@ -677,7 +677,7 @@ Serialize the provided datetime field to prepare for sending, considering the sp
 <dl>
 <dt><code><span class="doc-parameter-name">fld</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">datetime.datetime</span></code></dt>
 <dd>
-The datetime field to be serialized.
+The incoming send_at value.
 </dd>
 </dl>
 </div>
@@ -688,7 +688,7 @@ The datetime field to be serialized.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">Optional[datetime.datetime]</span></code></dt>
 <dd>
-The serialized datetime field, or None if the provided field is in the past.
+The original datetime, or None if it is in the past.
 </dd>
 </dl>
 </div>

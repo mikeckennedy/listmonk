@@ -33,7 +33,7 @@ When the subscriber was last modified, if ever.
 The globally unique identifier for the subscriber.
 
 `lists: list[dict[str, Any]]`  
-The lists this subscriber belongs to, each as a dict describing the membership (list id, subscription status, and so on).
+The lists this subscriber belongs to, each as a dict describing the membership (list id, subscription status, and so on). Serialization via `model_dump()` emits plain list IDs.
 
 `attribs: dict[str, Any]`  
 Arbitrary custom attributes stored against the subscriber.

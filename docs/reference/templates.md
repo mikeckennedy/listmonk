@@ -17,7 +17,7 @@ This fetches both campaign and transactional templates in a single (large) pagin
 ## Parameters
 
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -36,7 +36,7 @@ Returns an empty list if no templates are defined.
 `OperationNotAllowedError`  
 If the base URL has not been set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  

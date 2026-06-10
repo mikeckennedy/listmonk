@@ -622,7 +622,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1712-L1746" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1722-L1759" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">template_by_id</span>(
@@ -638,7 +638,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dd>
 <p>The numeric ID of the template to retrieve, e.g.&nbsp;7.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
 Optional per-request timeout; defaults to 10 seconds.
 </dd>
@@ -651,7 +651,8 @@ Optional per-request timeout; defaults to 10 seconds.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">Optional[models.Template]</span></code></dt>
 <dd>
-A models.Template built from the server’s response for the given ID.
+<p>A models.Template built from the server’s response for the given ID, or</p>
+None if the server returns no template data.
 </dd>
 </dl>
 </div>
@@ -664,7 +665,7 @@ A models.Template built from the server’s response for the given ID.
 <dd>
 <p>If the base URL has not been set or you have not logged in.</p>
 </dd>
-<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
 <dd>
 <p>If the server responds with a 4xx or 5xx status (e.g.&nbsp;an unknown template ID).</p>
 </dd>

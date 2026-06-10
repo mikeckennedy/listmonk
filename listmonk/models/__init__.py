@@ -7,11 +7,11 @@ from strenum import LowercaseStrEnum
 
 
 class SubscriberStatuses(LowercaseStrEnum):
-    """The subscription status of a subscriber within a given mailing list.
+    """The global status of a subscriber on the Listmonk instance.
 
     Attributes:
-        enabled: The subscriber is actively subscribed and will receive campaigns.
-        disabled: The subscription exists but is paused; the subscriber will not receive campaigns.
+        enabled: The subscriber is active and will receive campaigns.
+        disabled: The subscriber is paused and will not receive campaigns.
         blocklisted: The subscriber has been blocked and will not receive any mail.
     """
 
@@ -72,7 +72,8 @@ class Subscriber(BaseModel):
         updated_at: When the subscriber was last modified, if ever.
         uuid: The globally unique identifier for the subscriber.
         lists: The lists this subscriber belongs to, each as a dict describing the
-            membership (list id, subscription status, and so on).
+            membership (list id, subscription status, and so on). Serialization via
+            ``model_dump()`` emits plain list IDs.
         attribs: Arbitrary custom attributes stored against the subscriber.
         status: The subscriber's global status, e.g. ``enabled``, ``disabled``, or ``blocklisted``.
     """
@@ -88,21 +89,25 @@ class Subscriber(BaseModel):
     status: Optional[str] = None
 
     @field_serializer('created_at', 'updated_at')
-    def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> str:
+    def serialize_date_times(self, fld: Optional[datetime.datetime], _info: Any) -> Optional[str]:
+        if fld is None:
+            return None
         formatted_string = fld.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         return formatted_string
 
     @field_serializer('lists')
-    def serialize_lists(self, fld: list[int] | set[int], _info: Any) -> list[int]:
-        return [int(i) for i in fld]
+    def serialize_lists(self, fld: list[dict[str, Any] | int] | set[int], _info: Any) -> list[int]:
+        return [int(i['id']) if isinstance(i, dict) else int(i) for i in fld]
 
 
 class CreateSubscriberModel(BaseModel):
     """
     The payload used to create a new subscriber.
 
-    This is the raw request body sent to Listmonk; the higher-level
-    ``create_subscriber`` helper populates it (always sending ``status='enabled'``).
+    This is the raw request body sent to Listmonk. The higher-level
+    ``create_subscriber`` helper populates it (always sending ``status='enabled'``),
+    and ``update_subscriber`` reuses it as the full PUT body when updating an
+    existing subscriber (with the caller-supplied status).
 
     Attributes:
         email: The email address for the new subscriber (required).
@@ -229,24 +234,25 @@ class CreateCampaignModel(BaseModel):
 class UpdateCampaignModel(CreateCampaignModel):
     """The payload used to update an existing campaign.
 
-    Shares all fields with [CreateCampaignModel][listmonk.models.CreateCampaignModel]. As a
-    safeguard, a ``send_at`` value that is already in the past is dropped (set to ``None``)
-    before sending, so that updating a campaign does not fail on a stale scheduled time.
+    Shares all fields with ``CreateCampaignModel``. As a safeguard, a ``send_at``
+    value that is already in the past is dropped (set to ``None``) before sending,
+    so that updating a campaign does not fail on a stale scheduled time.
     """
 
     # noinspection PyMethodParameters
     @field_validator('send_at', mode='before')
-    def serialize_send_at(cls, fld: datetime.datetime) -> Optional[datetime.datetime]:
+    def validate_send_at(cls, fld: datetime.datetime) -> Optional[datetime.datetime]:
         """
-        Serialize the provided datetime field to prepare for sending, considering the specified send_at time.
-        If send_at is in the past then the update will fail, so we check if it is in the past and if it is we turn off
-        the campaign scheduled send time.
+        Drop a send_at value that is already in the past.
+
+        Listmonk rejects updates whose scheduled send time has passed, so a past
+        send_at is replaced with None (unscheduling the campaign).
 
         Args:
-            fld: The datetime field to be serialized.
+            fld: The incoming send_at value.
 
         Returns:
-            The serialized datetime field, or None if the provided field is in the past.
+            The original datetime, or None if it is in the past.
         """
         if isinstance(fld, datetime.datetime):  # type: ignore
             now = datetime.datetime.now(datetime.timezone.utc)

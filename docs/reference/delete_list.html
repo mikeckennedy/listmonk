@@ -622,13 +622,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L2045-L2096" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L2060-L2108" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">delete_list</span>(<span class="va">list_id</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">delete_list</span>(
+    <span class="va">list_id</span>,
+    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,
+)</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>The list’s existence is checked first via list_by_id; if it does not exist, no delete request is sent and False is returned.</p>
+<p>The list’s existence is checked first via list_by_id, which raises if the list does not exist.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -636,7 +639,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">list_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">int</span></code></dt>
 <dd>
-The numeric ID of the list to delete. Must be a truthy value (0 or None is rejected).
+<p>The numeric ID of the list to delete. Must be a truthy value (0 or None is rejected).</p>
+</dd>
+<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dd>
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
 </dl>
 </div>
@@ -647,8 +654,8 @@ The numeric ID of the list to delete. Must be a truthy value (0 or None is rejec
 <dl>
 <dt><code> <span class="doc-parameter-annotation">bool</span></code></dt>
 <dd>
-<p>True if the server reports the list was deleted, False if the list does</p>
-not exist or the server response does not confirm deletion.
+<p>True if the server reports the list was deleted, False if the server</p>
+response does not confirm deletion.
 </dd>
 </dl>
 </div>
@@ -669,9 +676,9 @@ not exist or the server response does not confirm deletion.
 <dd>
 <p>If the server returns an empty or invalid JSON response.</p>
 </dd>
-<dt><code> <span class="doc-parameter-annotation">httpx.HTTPStatusError</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
 <dd>
-If the server responds with a 4xx or 5xx status.
+If the server responds with a 4xx or 5xx status, including when the existence check finds no list with the given ID.
 </dd>
 </dl>
 </div>

@@ -23,7 +23,7 @@ This is a convenience wrapper around update_subscriber that sets the status to S
 `subscriber: models.Subscriber`  
 The subscriber to block/unsubscribe. Must have a valid id.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -43,7 +43,7 @@ If subscriber is None or has no id.
 `OperationNotAllowedError`  
 If the base URL is not set or you are not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  

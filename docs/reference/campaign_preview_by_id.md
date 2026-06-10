@@ -20,14 +20,14 @@ campaign_preview_by_id(
 `campaign_id: int`  
 The numeric ID of the campaign to preview, e.g. 7.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
-`Optional[models.CampaignPreview]`  
+`models.CampaignPreview`  
 A CampaignPreview object whose `preview` attribute holds the rendered
 
 HTML body returned by the server.
@@ -39,5 +39,5 @@ HTML body returned by the server.
 `OperationNotAllowedError`  
 If the base URL is not set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.

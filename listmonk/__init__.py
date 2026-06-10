@@ -1,4 +1,21 @@
+"""Listmonk Email API Client for Python.
+
+A client for the self-hosted Listmonk email platform (https://listmonk.app), covering
+subscriber management, mailing lists, campaigns, templates, and transactional email.
+
+Typical usage:
+
+    >>> import listmonk
+    >>> listmonk.set_url_base('https://listmonk.your.domain')
+    >>> listmonk.login('admin', 'super-secret')
+    True
+    >>> sub = listmonk.subscriber_by_email('some_user@example.com')
+
+Full documentation: https://mkennedy.codes/docs/listmonk/
+"""
+
 from listmonk import (
+    errors,
     impl,
     models,
 )
@@ -46,6 +63,7 @@ __version__: str = impl.__version__
 user_agent: str = impl.user_agent
 
 __all__ = [
+    'errors',
     'models',
     'login',
     'verify_login',

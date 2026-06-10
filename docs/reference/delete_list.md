@@ -7,11 +7,14 @@ Delete a mailing list by its ID.
 Usage
 
 ``` python
-delete_list(list_id)
+delete_list(
+    list_id,
+    timeout_config=None,
+)
 ```
 
 
-The list's existence is checked first via list_by_id; if it does not exist, no delete request is sent and False is returned.
+The list's existence is checked first via list_by_id, which raises if the list does not exist.
 
 
 ## Parameters
@@ -20,14 +23,17 @@ The list's existence is checked first via list_by_id; if it does not exist, no d
 `list_id: int`  
 The numeric ID of the list to delete. Must be a truthy value (0 or None is rejected).
 
+`timeout_config: Optional[httpx2.Timeout] = None`  
+Optional per-request timeout; defaults to 10 seconds.
+
 
 ## Returns
 
 
 `bool`  
-True if the server reports the list was deleted, False if the list does
+True if the server reports the list was deleted, False if the server
 
-not exist or the server response does not confirm deletion.
+response does not confirm deletion.
 
 
 ## Raises
@@ -42,5 +48,5 @@ If list_id is missing or falsy.
 `ValidationError`  
 If the server returns an empty or invalid JSON response.
 
-`httpx.HTTPStatusError`  
-If the server responds with a 4xx or 5xx status.
+`httpx2.HTTPStatusError`  
+If the server responds with a 4xx or 5xx status, including when the existence check finds no list with the given ID.

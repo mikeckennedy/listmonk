@@ -30,7 +30,7 @@ Email address of the subscriber. Required and must be non-empty after stripping.
 `name: Optional[str] = None`  
 Full name (e.g. "first last") of the subscriber. Defaults to None (stored as an empty string).
 
-`list_ids: set[int] = None`  
+`list_ids: Optional[set[int]] = None`  
 Set of list IDs to subscribe this person to. Defaults to None (no lists).
 
 `pre_confirm: bool = ``False`  
@@ -39,7 +39,7 @@ When True, mark the new subscriptions as confirmed immediately so no double opt-
 `attribs: Optional[dict[str, Any]] = None`  
 Custom attributes to store on the subscriber record (queryable in the subscriber UI). Defaults to None (stored as an empty dict).
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
@@ -62,7 +62,7 @@ If the base URL has not been set or you have not logged in.
 `ValidationError`  
 If the server returns an empty body or invalid JSON.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server rejects the request (e.g. a 4xx for a duplicate email) or returns a 5xx status.
 
 

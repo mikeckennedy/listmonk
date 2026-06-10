@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="The subscription status of a subscriber within a given mailing list.">
+  <meta name="description" content="The global status of a subscriber on the Listmonk instance.">
   <script type="application/ld+json">
 [
   {
@@ -140,12 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="models.SubscriberStatuses – Listmonk | Listmonk">
-  <meta property="og:description" content="The subscription status of a subscriber within a given mailing list.">
+  <meta property="og:description" content="The global status of a subscriber on the Listmonk instance.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/models.SubscriberStatuses.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="models.SubscriberStatuses – Listmonk | Listmonk">
-  <meta name="twitter:description" content="The subscription status of a subscriber within a given mailing list.">
+  <meta name="twitter:description" content="The global status of a subscriber on the Listmonk instance.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -622,7 +622,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>The subscription status of a subscriber within a given mailing list.</p>
+<p>The global status of a subscriber on the Listmonk instance.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
@@ -637,11 +637,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dl>
 <dt><code><span class="doc-parameter-name">enabled</span></code></dt>
 <dd>
-<p>The subscriber is actively subscribed and will receive campaigns.</p>
+<p>The subscriber is active and will receive campaigns.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">disabled</span></code></dt>
 <dd>
-<p>The subscription exists but is paused; the subscriber will not receive campaigns.</p>
+<p>The subscriber is paused and will not receive campaigns.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">blocklisted</span></code></dt>
 <dd>
@@ -669,7 +669,7 @@ Description
 <a href="#blocklisted" class="doc-attribute doc-label doc-label-constant">blocklisted</a>
 </td>
 <td>
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 </td>
 </tr>
 <tr>
@@ -677,7 +677,7 @@ The subscription status of a subscriber within a given mailing list.
 <a href="#disabled" class="doc-attribute doc-label doc-label-constant">disabled</a>
 </td>
 <td>
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 </td>
 </tr>
 <tr>
@@ -685,7 +685,7 @@ The subscription status of a subscriber within a given mailing list.
 <a href="#enabled" class="doc-attribute doc-label doc-label-constant">enabled</a>
 </td>
 <td>
-The subscription status of a subscriber within a given mailing list.
+The global status of a subscriber on the Listmonk instance.
 </td>
 </tr>
 </tbody>
@@ -694,39 +694,39 @@ The subscription status of a subscriber within a given mailing list.
 <section id="blocklisted" class="level3">
 <h4 class="anchored" data-anchor-id="blocklisted"><span class="doc-object-name doc-attribute doc-label doc-label-constant">blocklisted</span></h4>
 <div class="doc-subject">
-<p>The subscription status of a subscriber within a given mailing list.</p>
+<p>The global status of a subscriber on the Listmonk instance.</p>
 </div>
 <div class="doc-signature doc-attribute">
 <p><code><span class="doc-parameter-name">blocklisted</span><span class="doc-parameter-default-sep op">=</span><span class="doc-parameter-default"><span class="st">"blocklisted"</span></span></code></p>
 </div>
 <div class="doc-text">
-<p>Attributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.</p>
+<p>Attributes: enabled: The subscriber is active and will receive campaigns. disabled: The subscriber is paused and will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.</p>
 </div>
 </section>
 <hr style="border: none; border-top: 2px dotted #b0b4ba; margin: 1.5rem 0 1rem 0;">
 <section id="disabled" class="level3">
 <h4 class="anchored" data-anchor-id="disabled"><span class="doc-object-name doc-attribute doc-label doc-label-constant">disabled</span></h4>
 <div class="doc-subject">
-<p>The subscription status of a subscriber within a given mailing list.</p>
+<p>The global status of a subscriber on the Listmonk instance.</p>
 </div>
 <div class="doc-signature doc-attribute">
 <p><code><span class="doc-parameter-name">disabled</span><span class="doc-parameter-default-sep op">=</span><span class="doc-parameter-default"><span class="st">"disabled"</span></span></code></p>
 </div>
 <div class="doc-text">
-<p>Attributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.</p>
+<p>Attributes: enabled: The subscriber is active and will receive campaigns. disabled: The subscriber is paused and will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.</p>
 </div>
 </section>
 <hr style="border: none; border-top: 2px dotted #b0b4ba; margin: 1.5rem 0 1rem 0;">
 <section id="enabled" class="level3">
 <h4 class="anchored" data-anchor-id="enabled"><span class="doc-object-name doc-attribute doc-label doc-label-constant">enabled</span></h4>
 <div class="doc-subject">
-<p>The subscription status of a subscriber within a given mailing list.</p>
+<p>The global status of a subscriber on the Listmonk instance.</p>
 </div>
 <div class="doc-signature doc-attribute">
 <p><code><span class="doc-parameter-name">enabled</span><span class="doc-parameter-default-sep op">=</span><span class="doc-parameter-default"><span class="st">"enabled"</span></span></code></p>
 </div>
 <div class="doc-text">
-<p>Attributes: enabled: The subscriber is actively subscribed and will receive campaigns. disabled: The subscription exists but is paused; the subscriber will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.</p>
+<p>Attributes: enabled: The subscriber is active and will receive campaigns. disabled: The subscriber is paused and will not receive campaigns. blocklisted: The subscriber has been blocked and will not receive any mail.</p>
 </div>
 
 

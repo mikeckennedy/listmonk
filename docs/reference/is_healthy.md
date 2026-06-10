@@ -17,7 +17,7 @@ Issues an authenticated GET to the Listmonk health endpoint using the cached use
 ## Parameters
 
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 

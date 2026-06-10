@@ -8,12 +8,7 @@ Usage
 
 ``` python
 create_template(
-    name=None,
-    body=None,
-    type=None,
-    is_default=None,
-    subject=None,
-    timeout_config=None
+    name, body, type=None, is_default=None, subject=None, timeout_config=None
 )
 ```
 
@@ -24,10 +19,10 @@ The body must contain the placeholder {{ template "content" . }} exactly where t
 ## Parameters
 
 
-`name: Optional[str] = None`  
+`name: str`  
 The template name. Required; a ValueError is raised if empty.
 
-`body: Optional[str] = None`  
+`body: str`  
 The template body markup. Required, and must contain the {{ template "content" . }} placeholder.
 
 `type: Optional[str] = None`  
@@ -39,14 +34,14 @@ Whether the new template should become the default for its type.
 `subject: Optional[str] = None`  
 The default subject line for the template, if any.
 
-`timeout_config: Optional[httpx.Timeout] = None`  
+`timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
 
 ## Returns
 
 
-`Optional[models.Template]`  
+`models.Template`  
 A models.Template representing the newly created template.
 
 
@@ -59,7 +54,7 @@ If name is empty, if body is empty, or if body does not contain the {{ template 
 `OperationNotAllowedError`  
 If the base URL has not been set or you have not logged in.
 
-`httpx.HTTPStatusError`  
+`httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
