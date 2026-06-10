@@ -55,3 +55,6 @@ Arbitrary labels to attach to the campaign. Defaults to an empty list.
 
 `headers: list[dict[str, Optional[str]]]`  
 Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
+
+`media: list[int]`  
+The IDs of uploaded media files to attach to the campaign. Defaults to an empty list.

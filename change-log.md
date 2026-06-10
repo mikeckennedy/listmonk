@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+* Add media upload and campaign attachment support: new `upload_media()` function and `Media` model, plus a `media_ids` parameter on `create_campaign()` and `update_campaign()`. Updates preserve a campaign's existing attachments unless `media_ids` is passed explicitly. (fixes #16)
 * Documentation site at https://mkennedy.codes/docs/listmonk/ generated from the docstrings with Great Docs
 * Ship a `py.typed` marker (and the `Typing :: Typed` classifier) so mypy/pyright type-check against the library's annotations
 * `create_list()`, `update_list()`, and `delete_list()` now accept the optional `timeout_config` parameter like every other network call (`delete_list()` previously hardcoded a 30-second timeout; all three now default to 10 seconds)

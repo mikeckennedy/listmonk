@@ -412,9 +412,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start">
- <span class="menu-text">Templates</span></a>
+ <span class="menu-text">Media</span></a>
 </div>
       <ul id="quarto-sidebar-section-5" class="list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/upload_media.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="doc-object-name doc-function doc-label doc-label-function">upload_media()</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">Templates</span></a>
+</div>
+      <ul id="quarto-sidebar-section-6" class="list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/templates.html" class="sidebar-item-text sidebar-link">
@@ -464,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <a class="sidebar-item-text sidebar-link text-start">
  <span class="menu-text">Transactional Email</span></a>
 </div>
-      <ul id="quarto-sidebar-section-6" class="list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-7" class="list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/send_transactional_email.html" class="sidebar-item-text sidebar-link">
@@ -478,7 +492,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <a class="sidebar-item-text sidebar-link text-start">
  <span class="menu-text">Data Models</span></a>
 </div>
-      <ul id="quarto-sidebar-section-7" class="list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-8" class="list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/models.MailingList.html" class="sidebar-item-text sidebar-link">
@@ -551,6 +565,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="doc-object-name doc-class doc-label doc-label-class">models.TemplatePreview</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/models.Media.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="doc-object-name doc-class doc-label doc-label-class">models.Media</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -558,7 +578,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <a class="sidebar-item-text sidebar-link text-start">
  <span class="menu-text">Exceptions</span></a>
 </div>
-      <ul id="quarto-sidebar-section-8" class="list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-9" class="list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/errors.ValidationError.html" class="sidebar-item-text sidebar-link">
@@ -623,7 +643,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1367-L1471" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1435-L1543" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">create_campaign</span>(</span>
@@ -640,8 +660,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="va">template_id</span><span class="op">=</span><span class="cn-none">None</span>,</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="va">tags</span><span class="op">=</span><span class="cn-none">None</span>,</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="va">headers</span><span class="op">=</span><span class="cn-none">None</span>,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="va">media_ids</span><span class="op">=</span><span class="cn-none">None</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div class="doc-text">
 <p>Name and subject are required; all other fields fall back to defaults (for example, <code>list_ids</code> defaults to the single list {1} and <code>from_email</code> falls back to the instance settings when omitted).</p>
@@ -701,6 +722,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <dt><code><span class="doc-parameter-name">headers</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[dict[str, Optional[str]]]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
 <p>A list of custom email headers, each a single-entry dict.</p>
+</dd>
+<dt><code><span class="doc-parameter-name">media_ids</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[list[int]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dd>
+<p>The IDs of uploaded media files (from <a href="upload_media.html#listmonk.upload_media" class="gdls-link gdls-code">upload_media()</a>) to attach to the campaign.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>

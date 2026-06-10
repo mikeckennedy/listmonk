@@ -555,7 +555,7 @@ Raises:
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
-create_campaign(name: str, subject: str, list_ids: set[int] | None = None, from_email: str | None = None, campaign_type: str | None = None, content_type: str | None = None, body: str | None = None, alt_body: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None = None, tags: list[str] | None = None, headers: list[dict[str, str | None]] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign
+create_campaign(name: str, subject: str, list_ids: set[int] | None = None, from_email: str | None = None, campaign_type: str | None = None, content_type: str | None = None, body: str | None = None, alt_body: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None = None, tags: list[str] | None = None, headers: list[dict[str, str | None]] | None = None, media_ids: list[int] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign
 
 Create a new campaign with the given parameters.
 
@@ -578,6 +578,8 @@ Args:
     template_id: The ID of the template used to render the campaign.
     tags: A list of tags to attach to the campaign.
     headers: A list of custom email headers, each a single-entry dict.
+    media_ids: The IDs of uploaded media files (from ``upload_media()``) to
+        attach to the campaign.
     timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
@@ -601,7 +603,7 @@ Examples:
     >>> campaign.id
     7
 
-update_campaign(campaign: listmonk.models.Campaign, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
+update_campaign(campaign: listmonk.models.Campaign, media_ids: list[int] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
 
 Update an existing campaign with the provided campaign information.
 
@@ -613,6 +615,9 @@ re-fetched from the server and returned.
 Args:
     campaign: The Campaign object containing the updated information. Must
         have a valid ``id``.
+    media_ids: The IDs of uploaded media files (from ``upload_media()``) to
+        attach to the campaign. When omitted (None), the campaign's existing
+        attachments are kept; pass an empty list to remove all attachments.
     timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
@@ -642,6 +647,36 @@ Returns:
 
 Raises:
     ValueError: If ``campaign_id`` is falsy (e.g. 0).
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+
+## Media
+
+Upload files to the media library to attach to campaigns.
+
+
+upload_media(file: pathlib.Path | bytes, filename: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Media
+
+Upload a file to the Listmonk media library.
+
+The returned Media object's ``id`` can be passed to ``create_campaign()`` or
+``update_campaign()`` via ``media_ids`` to attach the file to a campaign.
+
+Args:
+    file: A Path to a file on disk, or the raw bytes of the file content.
+    filename: The name to store the file under. Required when ``file`` is bytes;
+        when ``file`` is a Path it defaults to the path's file name.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+Returns:
+    A Media object describing the uploaded file, including its ``id``.
+
+Raises:
+    ListmonkFileNotFoundError: If ``file`` is a Path that does not point to an existing file.
+    ValueError: If ``file`` is bytes and ``filename`` is not provided.
+    TypeError: If ``file`` is neither a Path nor bytes.
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
@@ -931,7 +966,7 @@ Attributes:
         confirmed immediately (skipping double opt-in confirmation emails).
     attribs: Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
 
-Campaign(*, id: int, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, views: int, clicks: int, lists: list[dict[str, typing.Any]] = <factory>, started_at: datetime.datetime | None = None, to_send: int, sent: int, uuid: str, name: str | None = None, type: str | None = None, subject: str | None = None, from_email: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, status: str | None = None, content_type: str | None = None, tags: list[str] = <factory>, template_id: int, messenger: str | None = None, headers: list[dict[str, str | None]] = <factory>) -> None
+Campaign(*, id: int, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, views: int, clicks: int, lists: list[dict[str, typing.Any]] = <factory>, started_at: datetime.datetime | None = None, to_send: int, sent: int, uuid: str, name: str | None = None, type: str | None = None, subject: str | None = None, from_email: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, status: str | None = None, content_type: str | None = None, tags: list[str] = <factory>, template_id: int, messenger: str | None = None, headers: list[dict[str, str | None]] = <factory>, media: list[dict[str, Any]] | None = None) -> None
 
 An email campaign on the Listmonk instance.
 
@@ -960,8 +995,10 @@ Attributes:
     template_id: The ID of the template used to render the campaign.
     messenger: The delivery channel, typically ``email``.
     headers: Custom email headers to include, each as a single-entry dict.
+    media: The media files attached to the campaign, each as a dict describing
+        the file (id, filename, and so on), or ``None`` if there are none.
 
-CreateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>) -> None
+CreateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>, media: list[int] = <factory>) -> None
 
 The payload used to create a new campaign.
 
@@ -985,8 +1022,9 @@ Attributes:
         may be ``None`` (it has no default and must be supplied explicitly).
     tags: Arbitrary labels to attach to the campaign. Defaults to an empty list.
     headers: Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
+    media: The IDs of uploaded media files to attach to the campaign. Defaults to an empty list.
 
-UpdateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>) -> None
+UpdateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>, media: list[int] = <factory>) -> None
 
 The payload used to update an existing campaign.
 
@@ -1032,6 +1070,20 @@ A rendered preview of a template.
 
 Attributes:
     preview: The rendered HTML preview of the template, using lorem-ipsum sample content.
+
+Media(*, id: int, uuid: str, filename: str | None = None, content_type: str | None = None, created_at: datetime.datetime | None = None, uri: str | None = None, thumb_uri: str | None = None) -> None
+
+A file uploaded to the Listmonk media library.
+
+Attributes:
+    id: The numeric media ID assigned by Listmonk. Pass it to ``create_campaign``
+        or ``update_campaign`` via ``media_ids`` to attach the file to a campaign.
+    uuid: The globally unique identifier for the media file.
+    filename: The name the file was stored under.
+    content_type: The MIME type of the file, if reported by the server.
+    created_at: When the file was uploaded.
+    uri: The server path the uploaded file is served from.
+    thumb_uri: The server path of the generated thumbnail, if any.
 
 
 ## Exceptions

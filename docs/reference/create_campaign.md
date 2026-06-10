@@ -21,6 +21,7 @@ create_campaign(
     template_id=None,
     tags=None,
     headers=None,
+    media_ids=None,
     timeout_config=None
 )
 ```
@@ -70,6 +71,9 @@ A list of tags to attach to the campaign.
 
 `headers: Optional[list[dict[str, Optional[str]]]] = None`  
 A list of custom email headers, each a single-entry dict.
+
+`media_ids: Optional[list[int]] = None`  
+The IDs of uploaded media files (from [upload_media()](upload_media.md#listmonk.upload_media)) to attach to the campaign.
 
 `timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.

@@ -1082,6 +1082,74 @@ def send_transactional_email(
 
 # endregion
 
+# region def upload_media(file: Path | bytes, filename: Optional[str] = None, timeout_config: Optional[httpx2.Timeout] = None) -> models.Media  # noqa: E501
+
+
+def upload_media(
+    file: Path | bytes,
+    filename: Optional[str] = None,
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> models.Media:
+    """
+    Upload a file to the Listmonk media library.
+
+    The returned Media object's ``id`` can be passed to ``create_campaign()`` or
+    ``update_campaign()`` via ``media_ids`` to attach the file to a campaign.
+
+    Args:
+        file: A Path to a file on disk, or the raw bytes of the file content.
+        filename: The name to store the file under. Required when ``file`` is bytes;
+            when ``file`` is a Path it defaults to the path's file name.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+    Returns:
+        A Media object describing the uploaded file, including its ``id``.
+
+    Raises:
+        ListmonkFileNotFoundError: If ``file`` is a Path that does not point to an existing file.
+        ValueError: If ``file`` is bytes and ``filename`` is not provided.
+        TypeError: If ``file`` is neither a Path nor bytes.
+        OperationNotAllowedError: If the base URL is not set or you have not logged in.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        ValidationError: If the server returns an empty body or invalid JSON.
+    """
+    global core_headers
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
+    validate_state(url=True)
+
+    if isinstance(file, Path):
+        if not file.exists() or not file.is_file():
+            raise ListmonkFileNotFoundError(f'File {file} does not exist')
+        filename = filename or file.name
+        file_bytes = file.read_bytes()
+    elif isinstance(file, bytes):
+        if not filename:
+            raise ValueError('filename is required when file is bytes')
+        file_bytes = file
+    else:
+        raise TypeError(f'file must be a Path or bytes, got {type(file).__name__}')
+
+    url = f'{url_base}{urls.media}'
+    # Content-Type must not be JSON here; httpx2 sets the multipart type and boundary itself.
+    headers = core_headers.copy()
+    headers.pop('Content-Type')
+
+    resp = httpx2.post(
+        url,
+        auth=httpx2.BasicAuth(username or '', password or ''),
+        files=[('file', (filename, file_bytes))],
+        headers=headers,
+        follow_redirects=True,
+        timeout=timeout_config,
+    )
+
+    raw_data = _validate_and_parse_json_response(resp)
+    media_data = raw_data['data']
+    return models.Media(**media_data)
+
+
+# endregion
+
 # region def is_healthy(timeout_config: Optional[httpx2.Timeout] = None) -> bool
 
 
@@ -1378,6 +1446,7 @@ def create_campaign(
     template_id: Optional[int] = None,
     tags: Optional[list[str]] = None,
     headers: Optional[list[dict[str, Optional[str]]]] = None,
+    media_ids: Optional[list[int]] = None,
     timeout_config: Optional[httpx2.Timeout] = None,
 ) -> models.Campaign:
     """
@@ -1402,6 +1471,8 @@ def create_campaign(
         template_id: The ID of the template used to render the campaign.
         tags: A list of tags to attach to the campaign.
         headers: A list of custom email headers, each a single-entry dict.
+        media_ids: The IDs of uploaded media files (from ``upload_media()``) to
+            attach to the campaign.
         timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
@@ -1455,6 +1526,7 @@ def create_campaign(
         template_id=template_id,
         tags=tags,
         headers=headers,
+        media=media_ids or [],
     )
     # noinspection DuplicatedCode
     url = f'{url_base}{urls.campaigns}'
@@ -1523,11 +1595,12 @@ def delete_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] =
 
 # endregion
 
-# region def update_campaign(campaign: models.Campaign, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
+# region def update_campaign(campaign: models.Campaign, media_ids: Optional[list[int]] = None, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
 
 
 def update_campaign(
     campaign: models.Campaign,
+    media_ids: Optional[list[int]] = None,
     timeout_config: Optional[httpx2.Timeout] = None,
 ) -> Optional[models.Campaign]:
     """
@@ -1541,6 +1614,9 @@ def update_campaign(
     Args:
         campaign: The Campaign object containing the updated information. Must
             have a valid ``id``.
+        media_ids: The IDs of uploaded media files (from ``upload_media()``) to
+            attach to the campaign. When omitted (None), the campaign's existing
+            attachments are kept; pass an empty list to remove all attachments.
         timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
@@ -1561,6 +1637,11 @@ def update_campaign(
 
     update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists]  # type: ignore
 
+    if media_ids is None:
+        # Listmonk replaces the attachment set on every update, so default to the
+        # campaign's current attachments rather than silently clearing them.
+        media_ids = [item['id'] for item in campaign.media or []]
+
     update_model = models.UpdateCampaignModel(
         name=campaign.name,
         subject=campaign.subject,
@@ -1575,6 +1656,7 @@ def update_campaign(
         template_id=campaign.template_id,
         tags=campaign.tags,
         headers=campaign.headers,  # type: ignore
+        media=media_ids,
     )
 
     url = f'{url_base}{urls.campaign_id.format(campaign_id=campaign.id)}'

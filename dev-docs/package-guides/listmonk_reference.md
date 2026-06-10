@@ -1488,4 +1488,4 @@ The following server endpoints are **not yet wrapped** by this Python client lib
 | `GET /api/bounces` | Bounce record retrieval |
 | `DELETE /api/bounces` | Bounce record deletion |
 | `GET/POST/DELETE /api/import/subscribers` | Bulk CSV import |
-| `GET/POST/DELETE /api/media` | Media file management |
+| `GET/DELETE /api/media` | Media library listing and deletion (upload is wrapped via `upload_media()`) |

@@ -50,6 +50,11 @@
 - [update_campaign](https://mkennedy.codes/docs/listmonk/reference/update_campaign.html): Update an existing campaign with the provided campaign information
 - [delete_campaign](https://mkennedy.codes/docs/listmonk/reference/delete_campaign.html): Completely delete a campaign from your system
 
+#### Media
+> Upload files to the media library to attach to campaigns.
+
+- [upload_media](https://mkennedy.codes/docs/listmonk/reference/upload_media.html): Upload a file to the Listmonk media library
+
 #### Templates
 > Manage email templates and set the default.
 
@@ -81,6 +86,7 @@
 - [models.Template](https://mkennedy.codes/docs/listmonk/reference/models.Template.html)
 - [models.CreateTemplateModel](https://mkennedy.codes/docs/listmonk/reference/models.CreateTemplateModel.html)
 - [models.TemplatePreview](https://mkennedy.codes/docs/listmonk/reference/models.TemplatePreview.html)
+- [models.Media](https://mkennedy.codes/docs/listmonk/reference/models.Media.html)
 
 #### Exceptions
 > Errors raised by the client.

@@ -1,275 +1,285 @@
 {
-  "build_time": "2026-06-10T03:00:31Z",
-  "total_seconds": 26.965,
+  "build_time": "2026-06-10T03:40:10Z",
+  "total_seconds": 27.979,
   "pages": [
     {
       "page": "reference/lists.qmd",
-      "seconds": 9.685,
+      "seconds": 9.759,
       "frozen": false
     },
     {
       "page": "index.qmd",
-      "seconds": 1.853,
+      "seconds": 1.897,
       "frozen": false
     },
     {
-      "page": "reference/models.CreateTemplateModel.qmd",
-      "seconds": 0.346,
-      "frozen": false
-    },
-    {
-      "page": "reference/create_campaign.qmd",
-      "seconds": 0.343,
-      "frozen": false
-    },
-    {
-      "page": "reference/create_subscriber.qmd",
-      "seconds": 0.342,
-      "frozen": false
-    },
-    {
-      "page": "reference/template_preview_by_id.qmd",
-      "seconds": 0.334,
-      "frozen": false
-    },
-    {
-      "page": "reference/index.qmd",
-      "seconds": 0.321,
-      "frozen": false
-    },
-    {
-      "page": "reference/verify_login.qmd",
-      "seconds": 0.32,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.SubscriberStatus.qmd",
-      "seconds": 0.31,
-      "frozen": false
-    },
-    {
-      "page": "reference/send_transactional_email.qmd",
-      "seconds": 0.309,
-      "frozen": false
-    },
-    {
-      "page": "reference/block_subscriber.qmd",
-      "seconds": 0.304,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.UpdateCampaignModel.qmd",
-      "seconds": 0.302,
-      "frozen": false
-    },
-    {
-      "page": "reference/login.qmd",
-      "seconds": 0.298,
-      "frozen": false
-    },
-    {
-      "page": "reference/update_subscriber.qmd",
-      "seconds": 0.29,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.SubscriberStatuses.qmd",
-      "seconds": 0.29,
-      "frozen": false
-    },
-    {
-      "page": "reference/subscriber_by_id.qmd",
-      "seconds": 0.289,
-      "frozen": false
-    },
-    {
-      "page": "reference/delete_subscriber.qmd",
-      "seconds": 0.289,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.CreateCampaignModel.qmd",
-      "seconds": 0.288,
-      "frozen": false
-    },
-    {
-      "page": "reference/delete_campaign.qmd",
-      "seconds": 0.288,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.Campaign.qmd",
-      "seconds": 0.285,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.MailingList.qmd",
-      "seconds": 0.285,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.CreateSubscriberModel.qmd",
-      "seconds": 0.283,
-      "frozen": false
-    },
-    {
-      "page": "reference/confirm_optin.qmd",
-      "seconds": 0.282,
-      "frozen": false
-    },
-    {
-      "page": "reference/create_template.qmd",
-      "seconds": 0.282,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.Subscriber.qmd",
-      "seconds": 0.282,
-      "frozen": false
-    },
-    {
-      "page": "reference/subscribers.qmd",
-      "seconds": 0.282,
-      "frozen": false
-    },
-    {
-      "page": "reference/enable_subscriber.qmd",
-      "seconds": 0.279,
-      "frozen": false
-    },
-    {
-      "page": "reference/errors.ValidationError.qmd",
-      "seconds": 0.277,
-      "frozen": false
-    },
-    {
-      "page": "reference/add_subscribers_to_lists.qmd",
-      "seconds": 0.276,
-      "frozen": false
-    },
-    {
-      "page": "reference/update_list.qmd",
-      "seconds": 0.276,
-      "frozen": false
-    },
-    {
-      "page": "reference/subscriber_by_email.qmd",
-      "seconds": 0.274,
-      "frozen": false
-    },
-    {
-      "page": "reference/campaign_preview_by_id.qmd",
-      "seconds": 0.273,
+      "page": "reference/list_by_id.qmd",
+      "seconds": 0.361,
       "frozen": false
     },
     {
       "page": "reference/update_campaign.qmd",
+      "seconds": 0.356,
+      "frozen": false
+    },
+    {
+      "page": "reference/subscriber_by_id.qmd",
+      "seconds": 0.328,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.SubscriberStatus.qmd",
+      "seconds": 0.325,
+      "frozen": false
+    },
+    {
+      "page": "reference/index.qmd",
+      "seconds": 0.324,
+      "frozen": false
+    },
+    {
+      "page": "reference/create_template.qmd",
+      "seconds": 0.324,
+      "frozen": false
+    },
+    {
+      "page": "reference/subscribers.qmd",
+      "seconds": 0.317,
+      "frozen": false
+    },
+    {
+      "page": "reference/send_transactional_email.qmd",
+      "seconds": 0.316,
+      "frozen": false
+    },
+    {
+      "page": "reference/create_campaign.qmd",
+      "seconds": 0.315,
+      "frozen": false
+    },
+    {
+      "page": "reference/update_subscriber.qmd",
+      "seconds": 0.31,
+      "frozen": false
+    },
+    {
+      "page": "reference/template_by_id.qmd",
+      "seconds": 0.309,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.Campaign.qmd",
+      "seconds": 0.308,
+      "frozen": false
+    },
+    {
+      "page": "reference/campaigns.qmd",
+      "seconds": 0.308,
+      "frozen": false
+    },
+    {
+      "page": "reference/confirm_optin.qmd",
+      "seconds": 0.299,
+      "frozen": false
+    },
+    {
+      "page": "reference/update_template.qmd",
+      "seconds": 0.296,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.CreateCampaignModel.qmd",
+      "seconds": 0.295,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.Subscriber.qmd",
+      "seconds": 0.293,
+      "frozen": false
+    },
+    {
+      "page": "reference/create_subscriber.qmd",
+      "seconds": 0.29,
+      "frozen": false
+    },
+    {
+      "page": "reference/update_list.qmd",
+      "seconds": 0.289,
+      "frozen": false
+    },
+    {
+      "page": "reference/upload_media.qmd",
+      "seconds": 0.287,
+      "frozen": false
+    },
+    {
+      "page": "reference/create_list.qmd",
+      "seconds": 0.286,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.UpdateCampaignModel.qmd",
+      "seconds": 0.286,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.Media.qmd",
+      "seconds": 0.286,
+      "frozen": false
+    },
+    {
+      "page": "reference/errors.ListmonkFileNotFoundError.qmd",
+      "seconds": 0.284,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.SubscriberStatuses.qmd",
+      "seconds": 0.284,
+      "frozen": false
+    },
+    {
+      "page": "reference/template_preview_by_id.qmd",
+      "seconds": 0.283,
+      "frozen": false
+    },
+    {
+      "page": "reference/delete_campaign.qmd",
+      "seconds": 0.283,
+      "frozen": false
+    },
+    {
+      "page": "reference/add_subscribers_to_lists.qmd",
+      "seconds": 0.282,
+      "frozen": false
+    },
+    {
+      "page": "reference/set_default_template.qmd",
+      "seconds": 0.282,
+      "frozen": false
+    },
+    {
+      "page": "reference/campaign_by_id.qmd",
+      "seconds": 0.28,
+      "frozen": false
+    },
+    {
+      "page": "reference/disable_subscriber.qmd",
+      "seconds": 0.28,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.Template.qmd",
+      "seconds": 0.28,
+      "frozen": false
+    },
+    {
+      "page": "reference/subscriber_by_uuid.qmd",
+      "seconds": 0.28,
+      "frozen": false
+    },
+    {
+      "page": "reference/delete_template.qmd",
+      "seconds": 0.279,
+      "frozen": false
+    },
+    {
+      "page": "reference/is_healthy.qmd",
+      "seconds": 0.279,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.CreateSubscriberModel.qmd",
+      "seconds": 0.279,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.CampaignPreview.qmd",
+      "seconds": 0.278,
+      "frozen": false
+    },
+    {
+      "page": "reference/get_base_url.qmd",
+      "seconds": 0.277,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.MailingList.qmd",
+      "seconds": 0.277,
+      "frozen": false
+    },
+    {
+      "page": "reference/verify_login.qmd",
+      "seconds": 0.277,
+      "frozen": false
+    },
+    {
+      "page": "reference/enable_subscriber.qmd",
+      "seconds": 0.277,
+      "frozen": false
+    },
+    {
+      "page": "reference/campaign_preview_by_id.qmd",
+      "seconds": 0.276,
+      "frozen": false
+    },
+    {
+      "page": "reference/login.qmd",
+      "seconds": 0.276,
+      "frozen": false
+    },
+    {
+      "page": "reference/delete_subscriber.qmd",
+      "seconds": 0.276,
+      "frozen": false
+    },
+    {
+      "page": "reference/errors.OperationNotAllowedError.qmd",
+      "seconds": 0.274,
+      "frozen": false
+    },
+    {
+      "page": "reference/subscriber_by_email.qmd",
+      "seconds": 0.273,
+      "frozen": false
+    },
+    {
+      "page": "reference/block_subscriber.qmd",
       "seconds": 0.273,
       "frozen": false
     },
     {
       "page": "reference/delete_list.qmd",
-      "seconds": 0.273,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.Template.qmd",
-      "seconds": 0.273,
-      "frozen": false
-    },
-    {
-      "page": "reference/campaigns.qmd",
       "seconds": 0.272,
       "frozen": false
     },
     {
-      "page": "reference/disable_subscriber.qmd",
+      "page": "reference/models.TemplatePreview.qmd",
       "seconds": 0.271,
-      "frozen": false
-    },
-    {
-      "page": "reference/create_list.qmd",
-      "seconds": 0.271,
-      "frozen": false
-    },
-    {
-      "page": "reference/set_default_template.qmd",
-      "seconds": 0.271,
-      "frozen": false
-    },
-    {
-      "page": "reference/is_healthy.qmd",
-      "seconds": 0.27,
-      "frozen": false
-    },
-    {
-      "page": "reference/get_base_url.qmd",
-      "seconds": 0.269,
-      "frozen": false
-    },
-    {
-      "page": "reference/set_url_base.qmd",
-      "seconds": 0.269,
-      "frozen": false
-    },
-    {
-      "page": "reference/list_by_id.qmd",
-      "seconds": 0.268,
-      "frozen": false
-    },
-    {
-      "page": "reference/errors.ListmonkFileNotFoundError.qmd",
-      "seconds": 0.267,
       "frozen": false
     },
     {
       "page": "reference/templates.qmd",
+      "seconds": 0.271,
+      "frozen": false
+    },
+    {
+      "page": "reference/set_url_base.qmd",
+      "seconds": 0.27,
+      "frozen": false
+    },
+    {
+      "page": "reference/models.CreateTemplateModel.qmd",
       "seconds": 0.266,
       "frozen": false
     },
     {
-      "page": "reference/template_by_id.qmd",
-      "seconds": 0.264,
+      "page": "reference/errors.ValidationError.qmd",
+      "seconds": 0.265,
       "frozen": false
     },
     {
       "page": "changelog.qmd",
-      "seconds": 0.263,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.TemplatePreview.qmd",
-      "seconds": 0.263,
-      "frozen": false
-    },
-    {
-      "page": "reference/errors.OperationNotAllowedError.qmd",
-      "seconds": 0.263,
-      "frozen": false
-    },
-    {
-      "page": "reference/update_template.qmd",
-      "seconds": 0.262,
-      "frozen": false
-    },
-    {
-      "page": "reference/campaign_by_id.qmd",
-      "seconds": 0.261,
-      "frozen": false
-    },
-    {
-      "page": "reference/subscriber_by_uuid.qmd",
-      "seconds": 0.261,
-      "frozen": false
-    },
-    {
-      "page": "reference/delete_template.qmd",
-      "seconds": 0.26,
-      "frozen": false
-    },
-    {
-      "page": "reference/models.CampaignPreview.qmd",
-      "seconds": 0.26,
+      "seconds": 0.253,
       "frozen": false
     },
     {
@@ -279,12 +289,12 @@
     },
     {
       "page": "skills.qmd",
-      "seconds": 0.214,
+      "seconds": 0.22,
       "frozen": false
     },
     {
       "page": "license.qmd",
-      "seconds": 0.2,
+      "seconds": 0.194,
       "frozen": false
     }
   ]

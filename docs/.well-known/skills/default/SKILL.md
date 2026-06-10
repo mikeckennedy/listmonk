@@ -66,6 +66,12 @@ Create, preview, update, and delete email campaigns.
 - `update_campaign`: Update an existing campaign with the provided campaign information
 - `delete_campaign`: Completely delete a campaign from your system
 
+### Media
+
+Upload files to the media library to attach to campaigns.
+
+- `upload_media`: Upload a file to the Listmonk media library
+
 ### Templates
 
 Manage email templates and set the default.
@@ -100,6 +106,7 @@ Pydantic models returned by and passed to the API functions.
 - `models.Template`
 - `models.CreateTemplateModel`
 - `models.TemplatePreview`
+- `models.Media`
 
 ### Exceptions
 

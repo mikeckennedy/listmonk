@@ -25,6 +25,7 @@ So while it doesn't currently cover every endpoint (for example campaign analyti
 - 💥 Completely delete a subscriber from your instance.
 - 📧 Send transactional email with template data (e.g. password reset emails).
 - 📨 Manage campaign (bulk) emails from the API.
+- 📎 Upload media and attach files to campaigns.
 - 🎨 Edit and create templates to control the overall look and feel of campaigns.
 - 📝 Create, edit and delete lists.
 - ✅ Fully type annotated and ships `py.typed`, so mypy/pyright type checking works out of the box.
@@ -135,7 +136,10 @@ from datetime import datetime, timedelta
 campaigns: list[Campaign] = listmonk.campaigns()
 campaign: Optional[Campaign] = listmonk.campaign_by_id(15)
 
-# Create a new Campaign
+# Upload media and create a campaign with attachments
+media = listmonk.upload_media(pathlib.Path("/path/to/report.pdf"))
+# Or upload from bytes: media = listmonk.upload_media(pdf_bytes, filename="report.pdf")
+
 listmonk.create_campaign(name='This is my Great Campaign!',
                          subject="You won't believe this!",
                          body='<p>Some Insane HTML!</p>',  # Optional
@@ -143,7 +147,8 @@ listmonk.create_campaign(name='This is my Great Campaign!',
                          send_at=datetime.now() + timedelta(hours=1),  # Optional
                          template_id=5,  # Optional; defaults to None (server uses its default template)
                          list_ids={1, 2},  # Optional Defaults to 1
-                         tags=['good', 'better', 'best']  # Optional
+                         tags=['good', 'better', 'best'],  # Optional
+                         media_ids=[media.id],  # Optional, attach uploaded media
                          )
 
 # Update A Campaign
@@ -154,6 +159,8 @@ campaign_to_update.body = "<p>There's a lot more we need to say so we're updatin
 campaign_to_update.altbody = "There's a lot more we need to say so we're updating this programmatically!"
 campaign_to_update.lists = [3, 4]
 
+# Existing attachments are kept on update; pass media_ids=[...] to change them
+# (or media_ids=[] to remove them all).
 listmonk.update_campaign(campaign_to_update)
 
 # Delete a Campaign (by its numeric ID)

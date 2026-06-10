@@ -55,6 +55,7 @@ from listmonk.impl import (
     update_list,
     update_subscriber,
     update_template,
+    upload_media,
     verify_login,
 )
 
@@ -101,4 +102,5 @@ __all__ = [
     'create_list',
     'delete_list',
     'update_list',
+    'upload_media',
 ]

@@ -142,6 +142,29 @@ if fetched_campaign:
 
 print(f'Deleted campaign: {listmonk.delete_campaign(campaign.id)}', flush=True)
 
+# Media upload and campaign attachments. Commented out because uploaded files stay
+# in the server's media library (the delete-media endpoint isn't wrapped yet) and
+# the default Listmonk settings only allow image file extensions.
+#
+# media = listmonk.upload_media(Path('/path/to/image.png'))
+# print(f'Uploaded media: id={media.id}, filename={media.filename}')
+#
+# # Or upload from bytes (filename required):
+# media = listmonk.upload_media(Path('/path/to/image.png').read_bytes(), filename='image.png')
+#
+# # Attach it when creating a campaign:
+# campaign = listmonk.create_campaign(
+#     name='Campaign With Attachment',
+#     subject='Check out the attached file',
+#     body='<p>Please see the attached file.</p>',
+#     list_ids={test_list_id},
+#     media_ids=[media.id],
+# )
+#
+# # Updates keep existing attachments; pass media_ids=[...] to change them
+# # (or media_ids=[] to remove them all).
+# listmonk.update_campaign(campaign, media_ids=[media.id])
+
 # Templates: list, create, fetch, preview, update, delete.
 templates = listmonk.templates()
 print(f'{len(templates):,} templates on the server.', flush=True)

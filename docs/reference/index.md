@@ -116,6 +116,16 @@ Update an existing campaign with the provided campaign information.
 Completely delete a campaign from your system.
 
 
+## Media
+
+
+Upload files to the media library to attach to campaigns.
+
+
+[upload_media()](upload_media.md#listmonk.upload_media)  
+Upload a file to the Listmonk media library.
+
+
 ## Templates
 
 
@@ -195,6 +205,9 @@ The payload used to create a new template.
 
 [models.TemplatePreview](models.TemplatePreview.md#listmonk.models.TemplatePreview)  
 A rendered preview of a template.
+
+[models.Media](models.Media.md#listmonk.models.Media)  
+A file uploaded to the Listmonk media library.
 
 
 ## Exceptions

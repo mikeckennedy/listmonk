@@ -250,6 +250,7 @@ section.level2:first-of-type > h2:first-child,
 <li>💥 Completely delete a subscriber from your instance.</li>
 <li>📧 Send transactional email with template data (e.g.&nbsp;password reset emails).</li>
 <li>📨 Manage campaign (bulk) emails from the API.</li>
+<li>📎 Upload media and attach files to campaigns.</li>
 <li>🎨 Edit and create templates to control the overall look and feel of campaigns.</li>
 <li>📝 Create, edit and delete lists.</li>
 <li>✅ Fully type annotated and ships <code>py.typed</code>, so mypy/pyright type checking works out of the box.</li>
@@ -360,68 +361,74 @@ section.level2:first-of-type > h2:first-child,
 <span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>campaigns: <span class="bu">list</span>[Campaign] <span class="op">=</span> listmonk.campaigns()</span>
 <span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>campaign: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
 <span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="co">## Create a new Campaign</span></span>
-<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>listmonk.create_campaign(name<span class="op">=</span><span class="st">'This is my Great Campaign!'</span>,</span>
-<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>                         subject<span class="op">=</span><span class="st">"You won't believe this!"</span>,</span>
-<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>                         body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML!&lt;/p&gt;'</span>,  <span class="co"># Optional</span></span>
-<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>                         alt_body<span class="op">=</span><span class="st">'Some Insane TXT!'</span>,  <span class="co"># Optional</span></span>
-<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>                         send_at<span class="op">=</span>datetime.now() <span class="op">+</span> timedelta(hours<span class="op">=</span><span class="dv">1</span>),  <span class="co"># Optional</span></span>
-<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>                         template_id<span class="op">=</span><span class="dv">5</span>,  <span class="co"># Optional; defaults to None (server uses its default template)</span></span>
-<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>                         list_ids<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">2</span>},  <span class="co"># Optional Defaults to 1</span></span>
-<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a>                         tags<span class="op">=</span>[<span class="st">'good'</span>, <span class="st">'better'</span>, <span class="st">'best'</span>]  <span class="co"># Optional</span></span>
-<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>                         )</span>
-<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a><span class="co">## Update A Campaign</span></span>
-<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>campaign_to_update: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
-<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>campaign_to_update.name <span class="op">=</span> <span class="st">"More Elegant Name"</span></span>
-<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>campaign_to_update.subject <span class="op">=</span> <span class="st">"Even More Clickbait!!"</span></span>
-<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>campaign_to_update.body <span class="op">=</span> <span class="st">"&lt;p&gt;There's a lot more we need to say so we're updating this programmatically!"</span></span>
-<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>campaign_to_update.altbody <span class="op">=</span> <span class="st">"There's a lot more we need to say so we're updating this programmatically!"</span></span>
-<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>campaign_to_update.lists <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">4</span>]</span>
-<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>listmonk.update_campaign(campaign_to_update)</span>
-<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a><span class="co">## Delete a Campaign (by its numeric ID)</span></span>
-<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>listmonk.delete_campaign(<span class="dv">15</span>)</span>
-<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a><span class="co">## Preview Campaign</span></span>
-<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.campaign_preview_by_id(<span class="dv">15</span>)</span>
-<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
-<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="co">## Access existing Templates</span></span>
-<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.models <span class="im">import</span> Template</span>
-<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>templates: <span class="bu">list</span>[Template] <span class="op">=</span> listmonk.templates()</span>
-<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>template: Template <span class="op">=</span> listmonk.template_by_id(<span class="dv">2</span>)</span>
-<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="co">## Create a new Template for Campaigns</span></span>
-<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>new_template <span class="op">=</span> listmonk.create_template(</span>
-<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TEMPLATE'</span>,</span>
-<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st"> &lt;/p&gt;'</span>,</span>
-<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'campaign'</span>,</span>
-<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="co">## Update A Template</span></span>
-<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>new_template.name <span class="op">=</span> <span class="st">"Bob's Great Template"</span></span>
-<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>listmonk.update_template(new_template)</span>
-<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a><span class="co">## Mark a template as the default for its type</span></span>
-<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a>listmonk.set_default_template(new_template.<span class="bu">id</span>)</span>
-<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a><span class="co">## Delete a Template</span></span>
-<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>listmonk.delete_template(<span class="dv">3</span>)</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="co">## Upload media and create a campaign with attachments</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>media <span class="op">=</span> listmonk.upload_media(pathlib.Path(<span class="st">"/path/to/report.pdf"</span>))</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a><span class="co">## Or upload from bytes: media = listmonk.upload_media(pdf_bytes, filename="report.pdf")</span></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>listmonk.create_campaign(name<span class="op">=</span><span class="st">'This is my Great Campaign!'</span>,</span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>                         subject<span class="op">=</span><span class="st">"You won't believe this!"</span>,</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>                         body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML!&lt;/p&gt;'</span>,  <span class="co"># Optional</span></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>                         alt_body<span class="op">=</span><span class="st">'Some Insane TXT!'</span>,  <span class="co"># Optional</span></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a>                         send_at<span class="op">=</span>datetime.now() <span class="op">+</span> timedelta(hours<span class="op">=</span><span class="dv">1</span>),  <span class="co"># Optional</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>                         template_id<span class="op">=</span><span class="dv">5</span>,  <span class="co"># Optional; defaults to None (server uses its default template)</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>                         list_ids<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">2</span>},  <span class="co"># Optional Defaults to 1</span></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>                         tags<span class="op">=</span>[<span class="st">'good'</span>, <span class="st">'better'</span>, <span class="st">'best'</span>],  <span class="co"># Optional</span></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>                         media_ids<span class="op">=</span>[media.<span class="bu">id</span>],  <span class="co"># Optional, attach uploaded media</span></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>                         )</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a><span class="co">## Update A Campaign</span></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>campaign_to_update: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>campaign_to_update.name <span class="op">=</span> <span class="st">"More Elegant Name"</span></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>campaign_to_update.subject <span class="op">=</span> <span class="st">"Even More Clickbait!!"</span></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>campaign_to_update.body <span class="op">=</span> <span class="st">"&lt;p&gt;There's a lot more we need to say so we're updating this programmatically!"</span></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>campaign_to_update.altbody <span class="op">=</span> <span class="st">"There's a lot more we need to say so we're updating this programmatically!"</span></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>campaign_to_update.lists <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">4</span>]</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a><span class="co">## Existing attachments are kept on update; pass media_ids=[...] to change them</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a><span class="co">## (or media_ids=[] to remove them all).</span></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>listmonk.update_campaign(campaign_to_update)</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a><span class="co">## Delete a Campaign (by its numeric ID)</span></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a>listmonk.delete_campaign(<span class="dv">15</span>)</span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a><span class="co">## Preview Campaign</span></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.campaign_preview_by_id(<span class="dv">15</span>)</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a><span class="co">## Access existing Templates</span></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.models <span class="im">import</span> Template</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>templates: <span class="bu">list</span>[Template] <span class="op">=</span> listmonk.templates()</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>template: Template <span class="op">=</span> listmonk.template_by_id(<span class="dv">2</span>)</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a><span class="co">## Create a new Template for Campaigns</span></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>new_template <span class="op">=</span> listmonk.create_template(</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TEMPLATE'</span>,</span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st"> &lt;/p&gt;'</span>,</span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'campaign'</span>,</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="co">## Update A Template</span></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>new_template.name <span class="op">=</span> <span class="st">"Bob's Great Template"</span></span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>listmonk.update_template(new_template)</span>
 <span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a><span class="co">## Preview Template</span></span>
-<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.template_preview_by_id(<span class="dv">3</span>)</span>
-<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
-<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a><span class="co">## Create a new template for Transactional Emails</span></span>
-<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a><span class="co">## (the {{ template "content" . }} placeholder is required in every template body)</span></span>
-<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a>new_tx_template <span class="op">=</span> listmonk.create_template(</span>
-<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TX TEMPLATE'</span>,</span>
-<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a>    subject<span class="op">=</span><span class="st">'Your Transactional Email Subject'</span>,</span>
-<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Hi </span><span class="sc">{{</span><span class="st"> .Subscriber.FirstName </span><span class="sc">}}</span><span class="st">! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st">&lt;/p&gt;'</span>,</span>
-<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'tx'</span>,</span>
-<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a><span class="co">## Mark a template as the default for its type</span></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>listmonk.set_default_template(new_template.<span class="bu">id</span>)</span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="co">## Delete a Template</span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>listmonk.delete_template(<span class="dv">3</span>)</span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="co">## Preview Template</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.template_preview_by_id(<span class="dv">3</span>)</span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a><span class="co">## Create a new template for Transactional Emails</span></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a><span class="co">## (the {{ template "content" . }} placeholder is required in every template body)</span></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a>new_tx_template <span class="op">=</span> listmonk.create_template(</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TX TEMPLATE'</span>,</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>    subject<span class="op">=</span><span class="st">'Your Transactional Email Subject'</span>,</span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Hi </span><span class="sc">{{</span><span class="st"> .Subscriber.FirstName </span><span class="sc">}}</span><span class="st">! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st">&lt;/p&gt;'</span>,</span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'tx'</span>,</span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </section>
 <section id="f.a.q." class="level2">
 <h2 class="anchored" data-anchor-id="f.a.q.">F.A.Q.</h2>

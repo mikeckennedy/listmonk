@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>models.CreateSubscriberModel – Listmonk | Listmonk</title>
+<title>upload_media() – Listmonk | Listmonk</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../theme-init.js"></script>
 
 
-  <meta name="description" content="The payload used to create a new subscriber.">
+  <meta name="description" content="Upload a file to the Listmonk media library.">
   <script type="application/ld+json">
 [
   {
@@ -129,23 +129,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "models.CreateSubscriberModel - Listmonk",
+    "name": "upload_media - Listmonk",
     "isPartOf": {
       "@type": "WebSite",
       "name": "Listmonk"
     },
-    "url": "https://mkennedy.codes/docs/listmonk/reference/models.CreateSubscriberModel.html"
+    "url": "https://mkennedy.codes/docs/listmonk/reference/upload_media.html"
   }
 ]
 </script>
   <meta property="og:type" content="website">
-  <meta property="og:title" content="models.CreateSubscriberModel – Listmonk | Listmonk">
-  <meta property="og:description" content="The payload used to create a new subscriber.">
-  <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/models.CreateSubscriberModel.html">
+  <meta property="og:title" content="upload_media() – Listmonk | Listmonk">
+  <meta property="og:description" content="Upload a file to the Listmonk media library.">
+  <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/upload_media.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="models.CreateSubscriberModel – Listmonk | Listmonk">
-  <meta name="twitter:description" content="The payload used to create a new subscriber.">
+  <meta name="twitter:title" content="upload_media() – Listmonk | Listmonk">
+  <meta name="twitter:description" content="Upload a file to the Listmonk media library.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -191,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <h1 class="quarto-secondary-nav-title no-breadcrumbs gd-ref-title"><span class="gd-ref-title-prefix">API</span><span class="gd-ref-title-sep">/</span><span class="gd-ref-title-name">models.CreateSubscriberModel</span></h1>
+        <h1 class="quarto-secondary-nav-title no-breadcrumbs gd-ref-title"><span class="gd-ref-title-prefix">API</span><span class="gd-ref-title-sep">/</span><span class="gd-ref-title-name">upload_media()</span></h1>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -417,7 +417,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-5" class="list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../reference/upload_media.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/upload_media.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="doc-object-name doc-function doc-label doc-label-function">upload_media()</span></span></a>
   </div>
 </li>
@@ -519,7 +519,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../reference/models.CreateSubscriberModel.html" class="sidebar-item-text sidebar-link active">
+  <a href="../reference/models.CreateSubscriberModel.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="doc-object-name doc-class doc-label doc-label-class">models.CreateSubscriberModel</span></span></a>
   </div>
 </li>
@@ -609,7 +609,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h3 id="toc-title">On this page</h3>
    
   <ul class="collapse">
-  <li><a href="#attributes" id="toc-attributes" class="nav-link active" data-scroll-target="#attributes">Attributes</a></li>
+  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
+  <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   </ul>
 </nav>
     </div>
@@ -618,7 +620,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h2 class="title" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 1.25rem;"><span class="doc-object-name doc-class doc-label doc-label-class">models.CreateSubscriberModel</span></h2>
+<h2 class="title" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 1.25rem;"><span class="doc-object-name doc-function doc-label doc-label-function">upload_media()</span></h2>
 </div>
 
 
@@ -636,45 +638,79 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>The payload used to create a new subscriber.</p>
+<p>Upload a file to the Listmonk media library.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/models/__init__.py#L103-L128" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L1088-L1148" target="_blank" rel="noopener">Source</a></p>
 </div>
-<div class="doc-signature doc-Kind.CLASS">
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-class">models</span><span class="op">.</span><span class="sig-name">CreateSubscriberModel</span>()</span></code></pre></div>
+<div class="doc-signature doc-Kind.FUNCTION">
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">upload_media</span>(
+    <span class="va">file</span>,
+    <span class="va">filename</span><span class="op">=</span><span class="cn-none">None</span>,
+    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,
+)</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>This is the raw request body sent to Listmonk. The higher-level <a href="create_subscriber.html#listmonk.create_subscriber" class="gdls-link gdls-code">create_subscriber</a> helper populates it (always sending <code>status='enabled'</code>), and <a href="update_subscriber.html#listmonk.update_subscriber" class="gdls-link gdls-code">update_subscriber</a> reuses it as the full PUT body when updating an existing subscriber (with the caller-supplied status).</p>
+<p>The returned Media object’s <code>id</code> can be passed to <a href="create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign()</a> or <a href="update_campaign.html#listmonk.update_campaign" class="gdls-link gdls-code">update_campaign()</a> via <code>media_ids</code> to attach the file to a campaign.</p>
 </div>
-<section id="attributes" class="level2 doc-attributes">
-<h2 class="doc-attributes">Attributes</h2>
+<section id="parameters" class="level2 doc-parameters">
+<h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code><span class="doc-parameter-name">email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
+<dt><code><span class="doc-parameter-name">file</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Path | bytes</span></code></dt>
 <dd>
-<p>The email address for the new subscriber (required).</p>
+<p>A Path to a file on disk, or the raw bytes of the file content.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">name</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span></code></dt>
+<dt><code><span class="doc-parameter-name">filename</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The subscriber’s display name, if any.</p>
+<p>The name to store the file under. Required when <code>file</code> is bytes; when <code>file</code> is a Path it defaults to the path’s file name.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">status</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
+<dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-<p>The initial global status (required), e.g.&nbsp;<a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.enabled" class="gdls-link gdls-code">enabled</a>, <a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.disabled" class="gdls-link gdls-code">disabled</a>, or <a href="models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.blocklisted" class="gdls-link gdls-code">blocklisted</a>.</p>
+Optional per-request timeout; defaults to 10 seconds.
 </dd>
-<dt><code><span class="doc-parameter-name">lists</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">list[int]</span></code></dt>
+</dl>
+</div>
+</section>
+<section id="returns" class="level2 doc-returns">
+<h2 class="doc-returns">Returns</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">models.Media</span></code></dt>
 <dd>
-<p>The IDs of the lists to subscribe this person to. Defaults to an empty list.</p>
+A Media object describing the uploaded file, including its <code>id</code>.
 </dd>
-<dt><code><span class="doc-parameter-name">preconfirm_subscriptions</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">bool</span></code></dt>
+</dl>
+</div>
+</section>
+<section id="raises" class="level2 doc-raises">
+<h2 class="doc-raises">Raises</h2>
+<div class="doc-definition-items">
+<dl>
+<dt><code> <span class="doc-parameter-annotation">ListmonkFileNotFoundError</span></code></dt>
 <dd>
-<p>Required flag; when <code>True</code>, mark the new subscriptions as confirmed immediately (skipping double opt-in confirmation emails).</p>
+<p>If <code>file</code> is a Path that does not point to an existing file.</p>
 </dd>
-<dt><code><span class="doc-parameter-name">attribs</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">dict[str, Any]</span></code></dt>
+<dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
 <dd>
-Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
+<p>If <code>file</code> is bytes and <code>filename</code> is not provided.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">TypeError</span></code></dt>
+<dd>
+<p>If <code>file</code> is neither a Path nor bytes.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">OperationNotAllowedError</span></code></dt>
+<dd>
+<p>If the base URL is not set or you have not logged in.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
+<dd>
+<p>If the server responds with a 4xx or 5xx status.</p>
+</dd>
+<dt><code> <span class="doc-parameter-annotation">ValidationError</span></code></dt>
+<dd>
+If the server returns an empty body or invalid JSON.
 </dd>
 </dl>
 </div>

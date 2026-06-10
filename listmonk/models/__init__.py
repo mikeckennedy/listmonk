@@ -156,6 +156,8 @@ class Campaign(BaseModel):
         template_id: The ID of the template used to render the campaign.
         messenger: The delivery channel, typically ``email``.
         headers: Custom email headers to include, each as a single-entry dict.
+        media: The media files attached to the campaign, each as a dict describing
+            the file (id, filename, and so on), or ``None`` if there are none.
     """
 
     id: int
@@ -181,6 +183,7 @@ class Campaign(BaseModel):
     template_id: int
     messenger: Optional[str] = None
     headers: list[dict[str, Optional[str]]] = pydantic.Field(default_factory=list)
+    media: Optional[list[dict[str, Any]]] = None
 
 
 class CreateCampaignModel(BaseModel):
@@ -207,6 +210,7 @@ class CreateCampaignModel(BaseModel):
             may be ``None`` (it has no default and must be supplied explicitly).
         tags: Arbitrary labels to attach to the campaign. Defaults to an empty list.
         headers: Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
+        media: The IDs of uploaded media files to attach to the campaign. Defaults to an empty list.
     """
 
     name: Optional[str] = None
@@ -222,6 +226,7 @@ class CreateCampaignModel(BaseModel):
     template_id: Optional[int]
     tags: list[str] = pydantic.Field(default_factory=list)
     headers: list[dict[str, Optional[str]]] = pydantic.Field(default_factory=list)
+    media: list[int] = pydantic.Field(default_factory=list)
 
     @field_serializer('send_at')
     def serialize_date_times(self, fld: datetime.datetime, _info: Any) -> Optional[str]:
@@ -322,3 +327,26 @@ class TemplatePreview(BaseModel):
     """
 
     preview: Optional[str] = None
+
+
+class Media(BaseModel):
+    """A file uploaded to the Listmonk media library.
+
+    Attributes:
+        id: The numeric media ID assigned by Listmonk. Pass it to ``create_campaign``
+            or ``update_campaign`` via ``media_ids`` to attach the file to a campaign.
+        uuid: The globally unique identifier for the media file.
+        filename: The name the file was stored under.
+        content_type: The MIME type of the file, if reported by the server.
+        created_at: When the file was uploaded.
+        uri: The server path the uploaded file is served from.
+        thumb_uri: The server path of the generated thumbnail, if any.
+    """
+
+    id: int
+    uuid: str
+    filename: Optional[str] = None
+    content_type: Optional[str] = None
+    created_at: Optional[datetime.datetime] = None
+    uri: Optional[str] = None
+    thumb_uri: Optional[str] = None

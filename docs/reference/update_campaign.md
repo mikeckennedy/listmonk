@@ -9,6 +9,7 @@ Usage
 ``` python
 update_campaign(
     campaign,
+    media_ids=None,
     timeout_config=None,
 )
 ```
@@ -22,6 +23,9 @@ The campaign's target lists are normalized to their IDs before sending, and a `s
 
 `campaign: models.Campaign`  
 The Campaign object containing the updated information. Must have a valid `id`.
+
+`media_ids: Optional[list[int]] = None`  
+The IDs of uploaded media files (from [upload_media()](upload_media.md#listmonk.upload_media)) to attach to the campaign. When omitted (None), the campaign's existing attachments are kept; pass an empty list to remove all attachments.
 
 `timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.

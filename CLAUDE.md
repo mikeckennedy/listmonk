@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python client library for the Listmonk email platform. The library provides a simplified interface to the Listmonk API, focusing on subscriber management, campaign operations, template handling, and transactional emails.
+This is a Python client library for the Listmonk email platform. The library provides a simplified interface to the Listmonk API, focusing on subscriber management, campaign operations, template handling, media uploads, and transactional emails.
 
 ### Architecture
 
@@ -51,7 +51,7 @@ The committed `docs/` directory is a generated static site built from docstrings
 4. **URL Constants**: All API endpoints defined in `urls.py` with format string placeholders
 5. **Optional Timeouts**: All network operations accept optional `httpx2.Timeout` configuration
 6. **Code Organization**: Functions in `impl/__init__.py` are grouped with `# region` / `# endregion` comments
-7. **Multipart Uploads**: Transactional email attachments use httpx2 multipart form-data encoding
+7. **Multipart Uploads**: Media uploads and transactional email attachments use httpx2 multipart form-data encoding
 8. **Typed Package**: The package ships `py.typed`, so public annotations are contractual for downstream type checkers
 
 ### Function Naming Convention

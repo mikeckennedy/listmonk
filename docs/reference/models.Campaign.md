@@ -82,3 +82,6 @@ The delivery channel, typically `email`.
 
 `headers: list[dict[str, Optional[str]]]`  
 Custom email headers to include, each as a single-entry dict.
+
+`media: Optional[list[dict[str, Any]]]`  
+The media files attached to the campaign, each as a dict describing the file (id, filename, and so on), or `None` if there are none.

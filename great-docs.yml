@@ -99,6 +99,11 @@ reference:
         - update_campaign
         - delete_campaign
 
+    - title: Media
+      desc: "Upload files to the media library to attach to campaigns."
+      contents:
+        - upload_media
+
     - title: Templates
       desc: "Manage email templates and set the default."
       contents:
@@ -130,6 +135,7 @@ reference:
         - models.Template
         - models.CreateTemplateModel
         - models.TemplatePreview
+        - models.Media
 
     - title: Exceptions
       desc: "Errors raised by the client."
