@@ -64,6 +64,7 @@ exclude = [
     "/example_client",
     "settings.json",
     "/docs",
+    "/test",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -74,4 +75,5 @@ exclude = [
     "/example_client",
     "settings.json",
     "/docs",
+    "/test",
 ]
