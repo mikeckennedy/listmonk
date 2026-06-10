@@ -67,4 +67,11 @@ The `dev-docs/package-guides/` directory (from [python-package-guides-for-agents
 
 ## Testing and Examples
 
-No formal test suite exists. The `example_client/client.py` serves as both documentation and integration testing, demonstrating all major API operations against a real Listmonk instance.
+### Unit Tests
+```bash
+./venv/bin/python -m pytest
+```
+Tests live in `tests/` and exercise the public API end to end against an in-memory fake of the Listmonk HTTP API — no server or network needed. `tests/conftest.py` provides the `fake_server` fixture (patches the httpx2 verbs, returns real `httpx2.Response` objects, and records every request for assertions) and the `logged_in` fixture (puts the module-level auth state into a logged-in condition). Canned response payloads come from `tests/factories.py`. When adding or changing a public function, add a behavior-level test: register the canned server response, call the public function, and assert on the return value and/or the recorded outbound request.
+
+### Integration Example
+The `example_client/client.py` serves as both documentation and integration testing, demonstrating all major API operations against a real Listmonk instance.

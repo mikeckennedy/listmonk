@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.4.2] - 2026-06-09
+
+### Added
 * Add media upload and campaign attachment support: new `upload_media()` function and `Media` model, plus a `media_ids` parameter on `create_campaign()` and `update_campaign()`. Updates preserve a campaign's existing attachments unless `media_ids` is passed explicitly. (fixes #16)
 * Documentation site at https://mkennedy.codes/docs/listmonk/ generated from the docstrings with Great Docs
 * Ship a `py.typed` marker (and the `Typing :: Typed` classifier) so mypy/pyright type-check against the library's annotations
@@ -19,17 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fix the `headers` parameter annotation on `create_campaign()` — it is a list of single-entry dicts, not a dict
 * Accuracy pass over docstrings, the README, and the example client (corrected TLS/certifi guidance, README samples that would not run as written, stale claims about unimplemented list/template APIs)
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 * Fix `update_list()` sending the list type as `list_type` instead of `type`, so changing a list's type now actually takes effect
 * Fix `Subscriber.model_dump()` crashing on server-populated subscribers (list-membership dicts and a `None` `updated_at` now serialize cleanly)
 * Fix the `list_by_id()` workaround for listmonk#2117 crashing with `AttributeError` when the server returns a result set (dict access instead of attribute access)
 * Fix repeat `login()` calls returning `True` without re-validating the new credentials against the server
-
-### Security
 
 ## [0.4.1] - 2026-06-03
 
@@ -94,7 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.4.1...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/mikeckennedy/listmonk/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/mikeckennedy/listmonk/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/mikeckennedy/listmonk/compare/v0.3.13...v0.4.0
 [0.3.13]: https://github.com/mikeckennedy/listmonk/compare/v0.3.12...v0.3.13

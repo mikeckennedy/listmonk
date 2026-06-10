@@ -52,6 +52,10 @@ Documentation = "https://mkennedy.codes/docs/listmonk/"
 requires = ["hatchling>=1.27.0", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+
 
 [tool.hatch.build.targets.sdist]
 exclude = [
