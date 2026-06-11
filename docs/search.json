@@ -460,40 +460,47 @@
     "objectID": "changelog.html#section",
     "href": "changelog.html#section",
     "title": "Changelog",
-    "section": "[0.4.1] - 2026-06-03",
-    "text": "[0.4.1] - 2026-06-03\n\nChanged\n\nMigrate the HTTP backend from httpx to httpx2, the Pydantic-maintained fork, after the original httpx project paused releases and locked down its issue tracker. httpx2 is imported internally as httpx, so the public API and all call sites are unchanged.\nTLS certificates are now validated against the operating system trust store (via truststore, the httpx2 default) instead of the bundled certifi CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set SSL_CERT_FILE / SSL_CERT_DIR. See the new SSL entry in the README F.A.Q.\nIf you pass a custom timeout_config, construct it with httpx2.Timeout(...) (now the bundled dependency) instead of httpx.Timeout(...)."
+    "section": "[0.4.2] - 2026-06-09",
+    "text": "[0.4.2] - 2026-06-09\n\nAdded\n\nAdd media upload and campaign attachment support: new upload_media() function and Media model, plus a media_ids parameter on create_campaign() and update_campaign(). Updates preserve a campaign’s existing attachments unless media_ids is passed explicitly. (fixes #16)\nDocumentation site at https://mkennedy.codes/docs/listmonk/ generated from the docstrings with Great Docs\nShip a py.typed marker (and the Typing :: Typed classifier) so mypy/pyright type-check against the library’s annotations\ncreate_list(), update_list(), and delete_list() now accept the optional timeout_config parameter like every other network call (delete_list() previously hardcoded a 30-second timeout; all three now default to 10 seconds)\n\n\n\nChanged\n\nImport httpx2 directly instead of aliasing it as httpx, so signatures, docstrings, and the docs site all show httpx2.Timeout / httpx2.HTTPStatusError — the names users actually import\nTighten public signatures to match documented behavior: required parameters are no longer Optional (create_campaign(name, subject), create_template(name, body), delete_campaign(campaign_id), delete_template(template_id), set_default_template(template_id), confirm_optin(...)), and functions that can never return None no longer claim Optional returns (list_by_id, campaign_preview_by_id, template_preview_by_id, create_campaign, create_template, create_list, update_list)\nFix the headers parameter annotation on create_campaign() — it is a list of single-entry dicts, not a dict\nAccuracy pass over docstrings, the README, and the example client (corrected TLS/certifi guidance, README samples that would not run as written, stale claims about unimplemented list/template APIs)\n\n\n\nFixed\n\nFix update_list() sending the list type as list_type instead of type, so changing a list’s type now actually takes effect\nFix Subscriber.model_dump() crashing on server-populated subscribers (list-membership dicts and a None updated_at now serialize cleanly)\nFix the list_by_id() workaround for listmonk#2117 crashing with AttributeError when the server returns a result set (dict access instead of attribute access)\nFix repeat login() calls returning True without re-validating the new credentials against the server"
   },
   {
     "objectID": "changelog.html#section-1",
     "href": "changelog.html#section-1",
     "title": "Changelog",
-    "section": "[0.4.0] - 2026-04-08",
-    "text": "[0.4.0] - 2026-04-08\n\nAdded\n\nAdd altbody support to send_transactional_email() for multipart HTML transactional emails. Thank you @neilime"
+    "section": "[0.4.1] - 2026-06-03",
+    "text": "[0.4.1] - 2026-06-03\n\nChanged\n\nMigrate the HTTP backend from httpx to httpx2, the Pydantic-maintained fork, after the original httpx project paused releases and locked down its issue tracker. httpx2 is imported internally as httpx, so the public API and all call sites are unchanged.\nTLS certificates are now validated against the operating system trust store (via truststore, the httpx2 default) instead of the bundled certifi CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set SSL_CERT_FILE / SSL_CERT_DIR. See the new SSL entry in the README F.A.Q.\nIf you pass a custom timeout_config, construct it with httpx2.Timeout(...) (now the bundled dependency) instead of httpx.Timeout(...)."
   },
   {
     "objectID": "changelog.html#section-2",
     "href": "changelog.html#section-2",
     "title": "Changelog",
-    "section": "[0.3.13] - 2026-04-03",
-    "text": "[0.3.13] - 2026-04-03\n\nFixed\n\nFix confirm_optin() returning False on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes #23)"
+    "section": "[0.4.0] - 2026-04-08",
+    "text": "[0.4.0] - 2026-04-08\n\nAdded\n\nAdd altbody support to send_transactional_email() for multipart HTML transactional emails. Thank you @neilime"
   },
   {
     "objectID": "changelog.html#section-3",
     "href": "changelog.html#section-3",
     "title": "Changelog",
-    "section": "[0.3.11] - 2026-04-03",
-    "text": "[0.3.11] - 2026-04-03\n\nFixed\n\nFix campaign creation failing with listmonk server 6.0.0 - headers field now correctly uses a list of dictionaries instead of a plain dictionary (PR #28)"
+    "section": "[0.3.13] - 2026-04-03",
+    "text": "[0.3.13] - 2026-04-03\n\nFixed\n\nFix confirm_optin() returning False on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes #23)"
   },
   {
     "objectID": "changelog.html#section-4",
     "href": "changelog.html#section-4",
     "title": "Changelog",
-    "section": "[0.3.10] - 2026-01-28",
-    "text": "[0.3.10] - 2026-01-28\n\nAdded\n\nAdd update_list function (thanks @ChrisH861, PR #27)"
+    "section": "[0.3.11] - 2026-04-03",
+    "text": "[0.3.11] - 2026-04-03\n\nFixed\n\nFix campaign creation failing with listmonk server 6.0.0 - headers field now correctly uses a list of dictionaries instead of a plain dictionary (PR #28)"
   },
   {
     "objectID": "changelog.html#section-5",
     "href": "changelog.html#section-5",
+    "title": "Changelog",
+    "section": "[0.3.10] - 2026-01-28",
+    "text": "[0.3.10] - 2026-01-28\n\nAdded\n\nAdd update_list function (thanks @ChrisH861, PR #27)"
+  },
+  {
+    "objectID": "changelog.html#section-6",
+    "href": "changelog.html#section-6",
     "title": "Changelog",
     "section": "[0.3.9] - 2026-01-05",
     "text": "[0.3.9] - 2026-01-05\n\nAdded\n\nAdd add_subscribers_to_lists function (thanks @MochaSteve256)\n\n\n\nChanged\n\nLoosen some of the types to allow more flexible usage (avoid type errors when DTOs/ViewModels/etc have VALUE|None typing but are known to be in a good state)\nRefactor client implementation to improve organization and maintainability"

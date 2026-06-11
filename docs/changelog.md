@@ -3,6 +3,38 @@
 This changelog is generated automatically from [GitHub Releases](https://github.com/mikeckennedy/listmonk/releases).
 
 
+# v0.4.2
+
+*2026-06-10* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.2)
+
+
+## \[0.4.2\] - 2026-06-09
+
+
+### Added
+
+- Add media upload and campaign attachment support: new [upload_media()](reference/upload_media.html#listmonk.upload_media) function and [Media](reference/models.Media.html#listmonk.models.Media) model, plus a `media_ids` parameter on [create_campaign()](reference/create_campaign.html#listmonk.create_campaign) and [update_campaign()](reference/update_campaign.html#listmonk.update_campaign). Updates preserve a campaign's existing attachments unless `media_ids` is passed explicitly. (fixes [\#16](https://github.com/mikeckennedy/listmonk/issues/16))
+- Documentation site at https://mkennedy.codes/docs/listmonk/ generated from the docstrings with Great Docs
+- Ship a `py.typed` marker (and the `Typing :: Typed` classifier) so mypy/pyright type-check against the library's annotations
+- [create_list()](reference/create_list.html#listmonk.create_list), [update_list()](reference/update_list.html#listmonk.update_list), and [delete_list()](reference/delete_list.html#listmonk.delete_list) now accept the optional `timeout_config` parameter like every other network call ([delete_list()](reference/delete_list.html#listmonk.delete_list) previously hardcoded a 30-second timeout; all three now default to 10 seconds)
+
+
+### Changed
+
+- Import `httpx2` directly instead of aliasing it as `httpx`, so signatures, docstrings, and the docs site all show `httpx2.Timeout` / `httpx2.HTTPStatusError` -- the names users actually import
+- Tighten public signatures to match documented behavior: required parameters are no longer `Optional` (`create_campaign(name, subject)`, `create_template(name, body)`, `delete_campaign(campaign_id)`, `delete_template(template_id)`, `set_default_template(template_id)`, `confirm_optin(...)`), and functions that can never return `None` no longer claim `Optional` returns ([list_by_id](reference/list_by_id.html#listmonk.list_by_id), [campaign_preview_by_id](reference/campaign_preview_by_id.html#listmonk.campaign_preview_by_id), [template_preview_by_id](reference/template_preview_by_id.html#listmonk.template_preview_by_id), [create_campaign](reference/create_campaign.html#listmonk.create_campaign), [create_template](reference/create_template.html#listmonk.create_template), [create_list](reference/create_list.html#listmonk.create_list), [update_list](reference/update_list.html#listmonk.update_list))
+- Fix the `headers` parameter annotation on [create_campaign()](reference/create_campaign.html#listmonk.create_campaign) -- it is a list of single-entry dicts, not a dict
+- Accuracy pass over docstrings, the README, and the example client (corrected TLS/certifi guidance, README samples that would not run as written, stale claims about unimplemented list/template APIs)
+
+
+### Fixed
+
+- Fix [update_list()](reference/update_list.html#listmonk.update_list) sending the list type as `list_type` instead of `type`, so changing a list's type now actually takes effect
+- Fix `Subscriber.model_dump()` crashing on server-populated subscribers (list-membership dicts and a `None` `updated_at` now serialize cleanly)
+- Fix the [list_by_id()](reference/list_by_id.html#listmonk.list_by_id) workaround for listmonk[\#2117](https://github.com/mikeckennedy/listmonk/issues/2117) crashing with `AttributeError` when the server returns a result set (dict access instead of attribute access)
+- Fix repeat [login()](reference/login.html#listmonk.login) calls returning `True` without re-validating the new credentials against the server
+
+
 # v0.4.1
 
 *2026-06-03* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.1)

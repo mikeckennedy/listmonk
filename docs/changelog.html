@@ -70,6 +70,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script async="" src="https://uma.mkennedy.codes/script.js" data-website-id="fc9b6770-3b44-4073-944e-4a4f0e79f66a"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script>document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:(document.querySelector('meta[name="quarto:offset"]')||{content:''}).content+'termshow.css'}));</script>
 <script src="theme-init.js"></script>
@@ -94,7 +95,7 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Listmonk <span class="version-badge" title="Released 2026-06-03">v0.4.1</span></span>
+    <span class="navbar-title">Listmonk <span class="version-badge" title="Released 2026-06-10">v0.4.2</span></span>
     </a>
   </div>
             <div id="quarto-search" class=""></div>
@@ -134,30 +135,34 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul class="collapse">
-  <li><a href="#v0.4.1" id="toc-v0.4.1" class="nav-link active" data-scroll-target="#v0.4.1">v0.4.1</a>
+  <li><a href="#v0.4.2" id="toc-v0.4.2" class="nav-link active" data-scroll-target="#v0.4.2">v0.4.2</a>
   <ul class="collapse">
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section">[0.4.1] - 2026-06-03</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section">[0.4.2] - 2026-06-09</a></li>
+  </ul></li>
+  <li><a href="#v0.4.1" id="toc-v0.4.1" class="nav-link" data-scroll-target="#v0.4.1">v0.4.1</a>
+  <ul class="collapse">
+  <li><a href="#section-1" id="toc-section-1" class="nav-link" data-scroll-target="#section-1">[0.4.1] - 2026-06-03</a></li>
   </ul></li>
   <li><a href="#v0.4.0" id="toc-v0.4.0" class="nav-link" data-scroll-target="#v0.4.0">v0.4.0</a>
   <ul class="collapse">
-  <li><a href="#section-1" id="toc-section-1" class="nav-link" data-scroll-target="#section-1">[0.4.0] - 2026-04-08</a></li>
+  <li><a href="#section-2" id="toc-section-2" class="nav-link" data-scroll-target="#section-2">[0.4.0] - 2026-04-08</a></li>
   </ul></li>
   <li><a href="#v0.3.13" id="toc-v0.3.13" class="nav-link" data-scroll-target="#v0.3.13">v0.3.13</a>
   <ul class="collapse">
-  <li><a href="#section-2" id="toc-section-2" class="nav-link" data-scroll-target="#section-2">[0.3.13] - 2026-04-03</a></li>
+  <li><a href="#section-3" id="toc-section-3" class="nav-link" data-scroll-target="#section-3">[0.3.13] - 2026-04-03</a></li>
   </ul></li>
   <li><a href="#v0.3.12" id="toc-v0.3.12" class="nav-link" data-scroll-target="#v0.3.12">v0.3.12</a></li>
   <li><a href="#v0.3.11" id="toc-v0.3.11" class="nav-link" data-scroll-target="#v0.3.11">v0.3.11</a>
   <ul class="collapse">
-  <li><a href="#section-3" id="toc-section-3" class="nav-link" data-scroll-target="#section-3">[0.3.11] - 2026-04-03</a></li>
+  <li><a href="#section-4" id="toc-section-4" class="nav-link" data-scroll-target="#section-4">[0.3.11] - 2026-04-03</a></li>
   </ul></li>
   <li><a href="#v0.3.10" id="toc-v0.3.10" class="nav-link" data-scroll-target="#v0.3.10">v0.3.10</a>
   <ul class="collapse">
-  <li><a href="#section-4" id="toc-section-4" class="nav-link" data-scroll-target="#section-4">[0.3.10] - 2026-01-28</a></li>
+  <li><a href="#section-5" id="toc-section-5" class="nav-link" data-scroll-target="#section-5">[0.3.10] - 2026-01-28</a></li>
   </ul></li>
   <li><a href="#v0.3.9" id="toc-v0.3.9" class="nav-link" data-scroll-target="#v0.3.9">v0.3.9</a>
   <ul class="collapse">
-  <li><a href="#section-5" id="toc-section-5" class="nav-link" data-scroll-target="#section-5">[0.3.9] - 2026-01-05</a></li>
+  <li><a href="#section-6" id="toc-section-6" class="nav-link" data-scroll-target="#section-6">[0.3.9] - 2026-01-05</a></li>
   </ul></li>
   <li><a href="#v0.3.8" id="toc-v0.3.8" class="nav-link" data-scroll-target="#v0.3.8">v0.3.8</a></li>
   <li><a href="#v0.3.7" id="toc-v0.3.7" class="nav-link" data-scroll-target="#v0.3.7">v0.3.7</a></li>
@@ -200,13 +205,47 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>This changelog is generated automatically from <a href="https://github.com/mikeckennedy/listmonk/releases">GitHub Releases</a>.</p>
+<section id="v0.4.2" class="level1 changelog-version">
+<h1 class="changelog-version">v0.4.2</h1>
+<p><em>2026-06-10</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.2">GitHub</a></p>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section">[0.4.2] - 2026-06-09</h2>
+<section id="added" class="level3">
+<h3 class="anchored" data-anchor-id="added">Added</h3>
+<ul>
+<li>Add media upload and campaign attachment support: new <a href="reference/upload_media.html#listmonk.upload_media" class="gdls-link gdls-code">upload_media()</a> function and <a href="reference/models.Media.html#listmonk.models.Media" class="gdls-link gdls-code">Media</a> model, plus a <code>media_ids</code> parameter on <a href="reference/create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign()</a> and <a href="reference/update_campaign.html#listmonk.update_campaign" class="gdls-link gdls-code">update_campaign()</a>. Updates preserve a campaign’s existing attachments unless <code>media_ids</code> is passed explicitly. (fixes <a href="https://github.com/mikeckennedy/listmonk/issues/16">#16</a>)</li>
+<li>Documentation site at https://mkennedy.codes/docs/listmonk/ generated from the docstrings with Great Docs</li>
+<li>Ship a <code>py.typed</code> marker (and the <code>Typing :: Typed</code> classifier) so mypy/pyright type-check against the library’s annotations</li>
+<li><a href="reference/create_list.html#listmonk.create_list" class="gdls-link gdls-code">create_list()</a>, <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list()</a>, and <a href="reference/delete_list.html#listmonk.delete_list" class="gdls-link gdls-code">delete_list()</a> now accept the optional <code>timeout_config</code> parameter like every other network call (<a href="reference/delete_list.html#listmonk.delete_list" class="gdls-link gdls-code">delete_list()</a> previously hardcoded a 30-second timeout; all three now default to 10 seconds)</li>
+</ul>
+</section>
+<section id="changed" class="level3">
+<h3 class="anchored" data-anchor-id="changed">Changed</h3>
+<ul>
+<li>Import <code>httpx2</code> directly instead of aliasing it as <code>httpx</code>, so signatures, docstrings, and the docs site all show <code>httpx2.Timeout</code> / <code>httpx2.HTTPStatusError</code> — the names users actually import</li>
+<li>Tighten public signatures to match documented behavior: required parameters are no longer <code>Optional</code> (<code>create_campaign(name, subject)</code>, <code>create_template(name, body)</code>, <code>delete_campaign(campaign_id)</code>, <code>delete_template(template_id)</code>, <code>set_default_template(template_id)</code>, <code>confirm_optin(...)</code>), and functions that can never return <code>None</code> no longer claim <code>Optional</code> returns (<a href="reference/list_by_id.html#listmonk.list_by_id" class="gdls-link gdls-code">list_by_id</a>, <a href="reference/campaign_preview_by_id.html#listmonk.campaign_preview_by_id" class="gdls-link gdls-code">campaign_preview_by_id</a>, <a href="reference/template_preview_by_id.html#listmonk.template_preview_by_id" class="gdls-link gdls-code">template_preview_by_id</a>, <a href="reference/create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign</a>, <a href="reference/create_template.html#listmonk.create_template" class="gdls-link gdls-code">create_template</a>, <a href="reference/create_list.html#listmonk.create_list" class="gdls-link gdls-code">create_list</a>, <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list</a>)</li>
+<li>Fix the <code>headers</code> parameter annotation on <a href="reference/create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign()</a> — it is a list of single-entry dicts, not a dict</li>
+<li>Accuracy pass over docstrings, the README, and the example client (corrected TLS/certifi guidance, README samples that would not run as written, stale claims about unimplemented list/template APIs)</li>
+</ul>
+</section>
+<section id="fixed" class="level3">
+<h3 class="anchored" data-anchor-id="fixed">Fixed</h3>
+<ul>
+<li>Fix <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list()</a> sending the list type as <code>list_type</code> instead of <code>type</code>, so changing a list’s type now actually takes effect</li>
+<li>Fix <code>Subscriber.model_dump()</code> crashing on server-populated subscribers (list-membership dicts and a <code>None</code> <code>updated_at</code> now serialize cleanly)</li>
+<li>Fix the <a href="reference/list_by_id.html#listmonk.list_by_id" class="gdls-link gdls-code">list_by_id()</a> workaround for listmonk<a href="https://github.com/mikeckennedy/listmonk/issues/2117">#2117</a> crashing with <code>AttributeError</code> when the server returns a result set (dict access instead of attribute access)</li>
+<li>Fix repeat <a href="reference/login.html#listmonk.login" class="gdls-link gdls-code">login()</a> calls returning <code>True</code> without re-validating the new credentials against the server</li>
+</ul>
+</section>
+</section>
+</section>
 <section id="v0.4.1" class="level1 changelog-version">
 <h1 class="changelog-version">v0.4.1</h1>
 <p><em>2026-06-03</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.1">GitHub</a></p>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section">[0.4.1] - 2026-06-03</h2>
-<section id="changed" class="level3">
-<h3 class="anchored" data-anchor-id="changed">Changed</h3>
+<section id="section-1" class="level2">
+<h2 class="anchored" data-anchor-id="section-1">[0.4.1] - 2026-06-03</h2>
+<section id="changed-1" class="level3">
+<h3 class="anchored" data-anchor-id="changed-1">Changed</h3>
 <ul>
 <li>Migrate the HTTP backend from <code>httpx</code> to <a href="https://github.com/pydantic/httpx2"><code>httpx2</code></a>, the Pydantic-maintained fork, after the original <code>httpx</code> project paused releases and locked down its issue tracker. <code>httpx2</code> is imported internally as <code>httpx</code>, so the public API and all call sites are unchanged.</li>
 <li>TLS certificates are now validated against the operating system trust store (via <code>truststore</code>, the <code>httpx2</code> default) instead of the bundled <code>certifi</code> CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set <code>SSL_CERT_FILE</code> / <code>SSL_CERT_DIR</code>. See the new SSL entry in the README F.A.Q.</li>
@@ -218,10 +257,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="v0.4.0" class="level1 changelog-version">
 <h1 class="changelog-version">v0.4.0</h1>
 <p><em>2026-04-08</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.0">GitHub</a></p>
-<section id="section-1" class="level2">
-<h2 class="anchored" data-anchor-id="section-1">[0.4.0] - 2026-04-08</h2>
-<section id="added" class="level3">
-<h3 class="anchored" data-anchor-id="added">Added</h3>
+<section id="section-2" class="level2">
+<h2 class="anchored" data-anchor-id="section-2">[0.4.0] - 2026-04-08</h2>
+<section id="added-1" class="level3">
+<h3 class="anchored" data-anchor-id="added-1">Added</h3>
 <ul>
 <li>Add <code>altbody</code> support to <a href="reference/send_transactional_email.html#listmonk.send_transactional_email" class="gdls-link gdls-code">send_transactional_email()</a> for multipart HTML transactional emails. Thank you <a href="https://github.com/neilime"><span class="citation" data-cites="neilime">@neilime</span></a></li>
 </ul>
@@ -231,10 +270,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="v0.3.13" class="level1 changelog-version">
 <h1 class="changelog-version">v0.3.13</h1>
 <p><em>2026-04-04</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.13">GitHub</a></p>
-<section id="section-2" class="level2">
-<h2 class="anchored" data-anchor-id="section-2">[0.3.13] - 2026-04-03</h2>
-<section id="fixed" class="level3">
-<h3 class="anchored" data-anchor-id="fixed">Fixed</h3>
+<section id="section-3" class="level2">
+<h2 class="anchored" data-anchor-id="section-3">[0.3.13] - 2026-04-03</h2>
+<section id="fixed-1" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-1">Fixed</h3>
 <ul>
 <li>Fix <a href="reference/confirm_optin.html#listmonk.confirm_optin" class="gdls-link gdls-code">confirm_optin()</a> returning <code>False</code> on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes <a href="https://github.com/mikeckennedy/listmonk/issues/23">#23</a>)</li>
 </ul>
@@ -250,10 +289,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="v0.3.11" class="level1 changelog-version">
 <h1 class="changelog-version">v0.3.11</h1>
 <p><em>2026-04-04</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.11">GitHub</a></p>
-<section id="section-3" class="level2">
-<h2 class="anchored" data-anchor-id="section-3">[0.3.11] - 2026-04-03</h2>
-<section id="fixed-1" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-1">Fixed</h3>
+<section id="section-4" class="level2">
+<h2 class="anchored" data-anchor-id="section-4">[0.3.11] - 2026-04-03</h2>
+<section id="fixed-2" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-2">Fixed</h3>
 <ul>
 <li>Fix campaign creation failing with listmonk server 6.0.0 - <code>headers</code> field now correctly uses a list of dictionaries instead of a plain dictionary (PR <a href="https://github.com/mikeckennedy/listmonk/issues/28">#28</a>)</li>
 </ul>
@@ -263,10 +302,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="v0.3.10" class="level1 changelog-version">
 <h1 class="changelog-version">v0.3.10</h1>
 <p><em>2026-01-28</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.10">GitHub</a></p>
-<section id="section-4" class="level2">
-<h2 class="anchored" data-anchor-id="section-4">[0.3.10] - 2026-01-28</h2>
-<section id="added-1" class="level3">
-<h3 class="anchored" data-anchor-id="added-1">Added</h3>
+<section id="section-5" class="level2">
+<h2 class="anchored" data-anchor-id="section-5">[0.3.10] - 2026-01-28</h2>
+<section id="added-2" class="level3">
+<h3 class="anchored" data-anchor-id="added-2">Added</h3>
 <ul>
 <li>Add <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list</a> function (thanks <a href="https://github.com/ChrisH861"><span class="citation" data-cites="ChrisH861">@ChrisH861</span></a>, PR <a href="https://github.com/mikeckennedy/listmonk/issues/27">#27</a>)</li>
 </ul>
@@ -276,16 +315,16 @@ ul.task-list li input[type="checkbox"] {
 <section id="v0.3.9" class="level1 changelog-version">
 <h1 class="changelog-version">v0.3.9</h1>
 <p><em>2026-01-06</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.9">GitHub</a></p>
-<section id="section-5" class="level2">
-<h2 class="anchored" data-anchor-id="section-5">[0.3.9] - 2026-01-05</h2>
-<section id="added-2" class="level3">
-<h3 class="anchored" data-anchor-id="added-2">Added</h3>
+<section id="section-6" class="level2">
+<h2 class="anchored" data-anchor-id="section-6">[0.3.9] - 2026-01-05</h2>
+<section id="added-3" class="level3">
+<h3 class="anchored" data-anchor-id="added-3">Added</h3>
 <ul>
 <li>Add add_subscribers_to_lists function (thanks <a href="https://github.com/MochaSteve256"><span class="citation" data-cites="MochaSteve256">@MochaSteve256</span></a>)</li>
 </ul>
 </section>
-<section id="changed-1" class="level3">
-<h3 class="anchored" data-anchor-id="changed-1">Changed</h3>
+<section id="changed-2" class="level3">
+<h3 class="anchored" data-anchor-id="changed-2">Changed</h3>
 <ul>
 <li>Loosen some of the types to allow more flexible usage (avoid type errors when DTOs/ViewModels/etc have VALUE|None typing but are known to be in a good state)</li>
 <li>Refactor client implementation to improve organization and maintainability</li>
@@ -296,8 +335,8 @@ ul.task-list li input[type="checkbox"] {
 <section id="v0.3.8" class="level1 changelog-version">
 <h1 class="changelog-version">v0.3.8</h1>
 <p><em>2025-10-22</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.8">GitHub</a></p>
-<section id="added-3" class="level3">
-<h3 class="anchored" data-anchor-id="added-3">Added</h3>
+<section id="added-4" class="level3">
+<h3 class="anchored" data-anchor-id="added-4">Added</h3>
 <ul>
 <li>Support for subject parameter in transactional templates (PR <a href="https://github.com/mikeckennedy/listmonk/issues/24">#24</a>)</li>
 <li>FAQ section to README.md (PR <a href="https://github.com/mikeckennedy/listmonk/issues/22">#22</a>)</li>
@@ -307,8 +346,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Ruff formatting configuration</li>
 </ul>
 </section>
-<section id="changed-2" class="level3">
-<h3 class="anchored" data-anchor-id="changed-2">Changed</h3>
+<section id="changed-3" class="level3">
+<h3 class="anchored" data-anchor-id="changed-3">Changed</h3>
 <ul>
 <li>Extensive type annotation improvements for better IDE support (PyLance/VS Code)</li>
 <li>HTTP response validation and parsing refactored for better error handling</li>
@@ -317,8 +356,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Documentation improvements in README.md</li>
 </ul>
 </section>
-<section id="fixed-2" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-2">Fixed</h3>
+<section id="fixed-3" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-3">Fixed</h3>
 <ul>
 <li>Custom exception renamed from <code>FileNotFoundError</code> to <a href="reference/errors.ListmonkFileNotFoundError.html#listmonk.errors.ListmonkFileNotFoundError" class="gdls-link gdls-code">ListmonkFileNotFoundError</a> to avoid builtin conflict</li>
 <li>Non-string to string types in <code>__all__</code> exports</li>
