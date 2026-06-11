@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.4.3] - 2026-06-11
+
+### Added
+* Enrich the PyPI package metadata with a broader set of keywords (listmonk, email-marketing, campaigns, subscribers, transactional-email, etc.) for better discoverability
+
+### Changed
+* Exclude the `tests` directory from the published wheel and sdist, shrinking the installed package
+
 ## [0.4.2] - 2026-06-09
 
 ### Added
@@ -102,7 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.4.2...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/mikeckennedy/listmonk/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/mikeckennedy/listmonk/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/mikeckennedy/listmonk/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/mikeckennedy/listmonk/compare/v0.3.13...v0.4.0

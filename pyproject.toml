@@ -1,15 +1,27 @@
 [project]
 name = "listmonk"
-version = "0.4.2"
+version = "0.4.3"
 description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 keywords = [
+    "listmonk",
     "email",
+    "email-marketing",
     "newsletters",
+    "newsletter",
     "marketing",
+    "campaigns",
+    "subscribers",
+    "mailing-list",
+    "transactional-email",
+    "templates",
     "api-client",
+    "rest-api",
+    "client-library",
+    "pydantic",
+    "httpx",
 ]
 authors = [
     { name = "Michael Kennedy", email = "michael@talkpython.fm" },
