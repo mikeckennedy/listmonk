@@ -87,6 +87,41 @@ def test_send_transactional_email_omits_unset_optional_fields(fake_server):
     payload = fake_server.last_request.json
     assert 'from_email' not in payload
     assert 'altbody' not in payload
+    assert 'subscriber_mode' not in payload
+
+
+def test_send_transactional_email_forwards_subscriber_mode(fake_server):
+    fake_server.respond('POST', '/api/tx', json={'data': True})
+
+    listmonk.send_transactional_email('person@example.com', template_id=3, subscriber_mode='external')
+
+    payload = fake_server.last_request.json
+    assert payload['subscriber_mode'] == 'external'
+
+
+def test_send_transactional_email_sends_plural_recipients(fake_server):
+    fake_server.respond('POST', '/api/tx', json={'data': True})
+
+    ok = listmonk.send_transactional_email(
+        subscriber_email=None,
+        template_id=3,
+        subscriber_emails=[' One@Example.COM ', 'two@example.com'],
+        subscriber_mode='external',
+    )
+
+    assert ok is True
+    payload = fake_server.last_request.json
+    assert payload['subscriber_emails'] == ['one@example.com', 'two@example.com']
+    assert 'subscriber_email' not in payload
+
+
+def test_send_transactional_email_rejects_both_recipient_forms(fake_server):
+    with pytest.raises(ValueError):
+        listmonk.send_transactional_email(
+            'person@example.com',
+            template_id=3,
+            subscriber_emails=['other@example.com'],
+        )
 
 
 def test_send_transactional_email_requires_a_recipient(fake_server):

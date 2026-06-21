@@ -5,7 +5,7 @@ import typing
 import urllib.parse
 from importlib.metadata import version
 from pathlib import Path
-from typing import Any, Optional, Tuple
+from typing import Any, Literal, Optional, Tuple
 
 import httpx2
 
@@ -947,11 +947,11 @@ def block_subscriber(
 
 # endregion
 
-# region def send_transactional_email(subscriber_email: str, template_id: int, from_email: Optional[str] = None, template_data: Optional[dict[str, Any]] = None, messenger_channel: str = 'email', content_type: str = 'markdown', altbody: Optional[str] = None, attachments: Optional[list[Path]] = None, email_headers: Optional[list[dict[str, Optional[str]]]] = None, timeout_config: Optional[httpx2.Timeout] = None) -> bool  # noqa: E501
+# region def send_transactional_email(subscriber_email: Optional[str], template_id: int, from_email: Optional[str] = None, template_data: Optional[dict[str, Any]] = None, messenger_channel: str = 'email', content_type: str = 'markdown', altbody: Optional[str] = None, attachments: Optional[list[Path]] = None, email_headers: Optional[list[dict[str, Optional[str]]]] = None, timeout_config: Optional[httpx2.Timeout] = None, subscriber_mode: Optional[Literal['default', 'fallback', 'external']] = None, subscriber_emails: Optional[list[str]] = None) -> bool  # noqa: E501
 
 
 def send_transactional_email(
-    subscriber_email: str,
+    subscriber_email: Optional[str],
     template_id: int,
     from_email: Optional[str] = None,
     template_data: Optional[dict[str, Any]] = None,
@@ -961,18 +961,22 @@ def send_transactional_email(
     attachments: Optional[list[Path]] = None,
     email_headers: Optional[list[dict[str, Optional[str]]]] = None,
     timeout_config: Optional[httpx2.Timeout] = None,
+    subscriber_mode: Optional[Literal['default', 'fallback', 'external']] = None,
+    subscriber_emails: Optional[list[str]] = None,
 ) -> bool:
     """
-    Send a transactional email through Listmonk to a single recipient.
+    Send a transactional email through Listmonk to one or more recipients.
 
-    The recipient must already be a subscriber on at least one list. Delivery
-    errors may surface in the logs section of your Listmonk dashboard rather than
-    as exceptions here. The subscriber_email is lowercased and stripped before sending.
+    By default the recipient must already be a subscriber on at least one list
+    (see subscriber_mode to relax this). Delivery errors may surface in the logs
+    section of your Listmonk dashboard rather than as exceptions here. Recipient
+    addresses are lowercased and stripped before sending.
 
     Args:
-        subscriber_email: The recipient's email address. Required; they must be a
-            subscriber of some list on your server.
-        template_id: The ID of the template to render. Must be a 'tx'
+        subscriber_email: A single recipient's email address, or None to address
+            recipients via subscriber_emails instead. Provide exactly one of the
+            two. By default they must be a subscriber of some list on your server.
+        template_id: The ID of the template to render. Required. Must be a 'tx'
             (transactional) template, not a campaign template.
         from_email: The From address. Omit to use the default address at your
             sending provider.
@@ -988,12 +992,23 @@ def send_transactional_email(
         email_headers: Optional list of custom headers, each a single-entry dict,
             e.g. [{'X-Custom': 'value'}].
         timeout_config: Optional per-request timeout; defaults to 10 seconds.
+        subscriber_mode: How the recipient is resolved (Listmonk v6+). One of
+            'default', 'fallback', or 'external'. Omit (None) to let the server
+            default to 'default', which requires the recipient to already be a
+            subscriber. 'fallback' attempts a lookup but sends anyway if not found.
+            'external' sends without any lookup, allowing non-subscribers. In
+            'fallback' and 'external' modes, subscriber fields other than the email
+            are unavailable in templates; use {{ .Tx.Data.* }} instead.
+        subscriber_emails: A list of recipient email addresses (Listmonk v6+).
+            Provide either this or subscriber_email (not both). Only supported with
+            subscriber_mode of 'default', 'fallback', or 'external'.
 
     Returns:
         True if the server accepted the send, False otherwise.
 
     Raises:
-        ValueError: If subscriber_email is empty.
+        ValueError: If no recipient is given, or if both subscriber_email and
+            subscriber_emails are given.
         ListmonkFileNotFoundError: If any attachment path does not exist or is not a file.
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
@@ -1012,7 +1027,12 @@ def send_transactional_email(
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
     subscriber_email = (subscriber_email or '').lower().strip()
-    if not subscriber_email:
+    normalized_emails = [e.lower().strip() for e in (subscriber_emails or []) if (e or '').strip()]
+
+    # The server rejects sending the singular and plural recipient fields together.
+    if subscriber_email and normalized_emails:
+        raise ValueError('Provide either subscriber_email or subscriber_emails, not both')
+    if not subscriber_email and not normalized_emails:
         raise ValueError('Email is required')
 
     # Verify attachments
@@ -1022,7 +1042,6 @@ def send_transactional_email(
                 raise ListmonkFileNotFoundError(f'Attachment {attachment} does not exist')
 
     body_data = {
-        'subscriber_email': subscriber_email,
         'template_id': template_id,
         'data': template_data or {},
         'messenger': messenger_channel,
@@ -1030,11 +1049,19 @@ def send_transactional_email(
         'headers': email_headers or [],
     }
 
+    if subscriber_email:
+        body_data['subscriber_email'] = subscriber_email
+    else:
+        body_data['subscriber_emails'] = normalized_emails
+
     if from_email is not None:
         body_data['from_email'] = from_email
 
     if altbody is not None:
         body_data['altbody'] = altbody
+
+    if subscriber_mode is not None:
+        body_data['subscriber_mode'] = subscriber_mode
 
     try:
         url = f'{url_base}{urls.send_tx}'
