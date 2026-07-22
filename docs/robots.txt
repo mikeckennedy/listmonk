@@ -4,3 +4,7 @@ User-agent: *
 Allow: /
 
 Sitemap: https://mkennedy.codes/docs/listmonk/sitemap.xml
+
+# AI agent context files
+Llms-txt: https://mkennedy.codes/docs/listmonk/llms.txt
+Llms-txt: https://mkennedy.codes/docs/listmonk/llms-full.txt

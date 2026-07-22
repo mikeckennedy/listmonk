@@ -43,6 +43,46 @@ include_in_header:
   - text: |
       <script async src="https://uma.mkennedy.codes/script.js" data-website-id="fc9b6770-3b44-4073-944e-4a4f0e79f66a"></script>
 
+# Agent skill enrichment. The generated skill already carries the API signatures;
+# this block adds the sharp edges and wiring the signatures can't convey.
+skill:
+  # Hand-written prose injected into the generated skill body: end-to-end wiring, the
+  # raises-vs-returns-False error model, the mutate-then-pass-back update pattern, Go
+  # template syntax, and media/attachment flows. Adapted from the listmonk_reference.md
+  # agent guide.
+  extra_body: skill_extra_body.md
+  gotchas:
+    - "Call set_url_base() then login() before any other function, or every data call raises OperationNotAllowedError."
+    - "login(), is_healthy(), and verify_login() return False (they do not raise) when credentials are rejected or the server is unreachable — check the bool."
+    - "Timeouts use httpx2 (a fork of httpx), not httpx: build them with httpx2.Timeout(...) and catch httpx2.HTTPStatusError."
+    - "Every template body must contain the Go-template placeholder {{ template \"content\" . }} exactly once, or create_template() raises ValueError. It is Go template syntax, not Jinja."
+    - "update_campaign() replaces the whole attachment set: media_ids=None re-sends the campaign's existing media, media_ids=[] clears them, and a new list swaps them. A past send_at is silently dropped to None."
+    - "subscribers(query_text=...) requires the subscribers:sql_query permission on the user's role, or the server returns HTTP 403."
+    - "send_transactional_email() requires the recipient to already be a subscriber, and template_id must reference a 'tx' template, not a 'campaign' template."
+    - "Auth is module-level global state: only one instance can be targeted at a time and credential changes are not thread-safe."
+    - "Custom email headers are a list of single-entry dicts (e.g. [{'X-Priority': '1'}]), not one dict."
+  best_practices:
+    - "Configure set_url_base() then login() once at startup and check login()'s bool return before proceeding."
+    - "Update objects by fetching the model, mutating fields in place, then passing it back to update_subscriber/update_campaign/update_template — the client re-fetches and returns the server's fresh copy."
+    - "Use block_subscriber() to unsubscribe someone while keeping their record; use delete_subscriber() to erase them entirely."
+    - "Attach files to a campaign with upload_media() then media_ids=[...]; attach to a transactional email inline via attachments=[Path(...)]."
+    - "Pass a custom httpx2.Timeout via timeout_config for slow or self-hosted instances (the default is 10 seconds)."
+  decision_table:
+    - need: "Look up a single subscriber"
+      use: "subscriber_by_email(email) / subscriber_by_id(id) / subscriber_by_uuid(uuid)"
+    - need: "Filter subscribers by a custom attribute"
+      use: "subscribers(query_text=\"subscribers.attribs->>'city' = 'Portland'\")"
+    - need: "Unsubscribe someone but keep their record"
+      use: "block_subscriber(subscriber)"
+    - need: "Erase a subscriber entirely"
+      use: "delete_subscriber(email)"
+    - need: "Send a one-off email (reset code, receipt)"
+      use: "send_transactional_email(email, tx_template_id, template_data={...})"
+    - need: "Attach a file to a campaign"
+      use: "upload_media(path) then create_campaign(..., media_ids=[m.id])"
+    - need: "Schedule a campaign for later"
+      use: "create_campaign(..., send_at=datetime.now() + timedelta(hours=1))"
+
 # Author metadata for the landing-page sidebar.
 authors:
   - name: Michael Kennedy
