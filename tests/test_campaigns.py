@@ -141,3 +141,87 @@ def test_update_campaign_drops_a_stale_send_time(fake_server):
 def test_update_campaign_requires_a_saved_campaign(fake_server):
     with pytest.raises(ValueError):
         listmonk.update_campaign(models.Campaign(**campaign_json(id=0)))
+
+
+def test_test_campaign_posts_the_campaign_body_with_the_recipients(fake_server):
+    fake_server.respond('GET', '/api/campaigns/7', json={'data': campaign_json(lists=[{'id': 1}, {'id': 2}])})
+    fake_server.respond('POST', '/api/campaigns/7/test', json={'data': True})
+
+    assert listmonk.test_campaign(7, ['pat@example.com', 'sam@example.com']) is True
+
+    assert [(r.method, r.path) for r in fake_server.requests] == [
+        ('GET', '/api/campaigns/7'),
+        ('POST', '/api/campaigns/7/test'),
+    ]
+    payload = fake_server.last_request.json
+    assert payload['subscribers'] == ['pat@example.com', 'sam@example.com']
+    assert payload['lists'] == [1, 2]
+    assert payload['subject'] == 'Our June Update'
+    assert payload['body'] == '# Big news\n\nHello there!'
+    assert payload['template_id'] == 1
+
+
+def test_test_campaign_returns_false_when_the_campaign_is_missing(fake_server):
+    fake_server.respond('GET', '/api/campaigns/123', json={'data': {}})
+
+    assert listmonk.test_campaign(123, ['pat@example.com']) is False
+
+    assert [r.method for r in fake_server.requests] == ['GET']
+
+
+def test_test_campaign_requires_at_least_one_email(fake_server):
+    with pytest.raises(ValueError):
+        listmonk.test_campaign(7, [])
+    assert fake_server.requests == []
+
+
+def test_test_campaign_requires_an_id(fake_server):
+    with pytest.raises(ValueError):
+        listmonk.test_campaign(0, ['pat@example.com'])
+    assert fake_server.requests == []
+
+
+def test_set_campaign_status_puts_the_new_status(fake_server):
+    fake_server.respond('GET', '/api/campaigns/7', json={'data': campaign_json()})
+    fake_server.respond('PUT', '/api/campaigns/7/status', json={'data': campaign_json(status='running')})
+
+    campaign = listmonk.set_campaign_status(7, models.CampaignStatuses.running)
+
+    assert campaign is not None
+    assert campaign.status == 'running'
+    put = fake_server.last_request
+    assert (put.method, put.path) == ('PUT', '/api/campaigns/7/status')
+    assert put.json == {'status': 'running'}
+
+
+def test_set_campaign_status_returns_none_when_the_campaign_is_missing(fake_server):
+    fake_server.respond('GET', '/api/campaigns/123', json={'data': {}})
+
+    assert listmonk.set_campaign_status(123, models.CampaignStatuses.running) is None
+
+    assert [r.method for r in fake_server.requests] == ['GET']
+
+
+def test_set_campaign_status_requires_an_id(fake_server):
+    with pytest.raises(ValueError):
+        listmonk.set_campaign_status(0, models.CampaignStatuses.running)
+    assert fake_server.requests == []
+
+
+@pytest.mark.parametrize(
+    'func, expected_status',
+    [
+        (listmonk.start_campaign, 'running'),
+        (listmonk.pause_campaign, 'paused'),
+        (listmonk.cancel_campaign, 'cancelled'),
+    ],
+)
+def test_campaign_status_wrappers_send_their_status(fake_server, func, expected_status):
+    fake_server.respond('GET', '/api/campaigns/7', json={'data': campaign_json()})
+    fake_server.respond('PUT', '/api/campaigns/7/status', json={'data': campaign_json(status=expected_status)})
+
+    campaign = func(7)
+
+    assert campaign is not None
+    assert campaign.status == expected_status
+    assert fake_server.last_request.json == {'status': expected_status}

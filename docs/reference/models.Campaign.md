@@ -66,7 +66,7 @@ The optional plain-text alternative body for multipart HTML emails.
 The scheduled send time, if the campaign is scheduled.
 
 `status: Optional[str]`  
-The campaign status, e.g. `draft`, `scheduled`, `running`, `paused`, `cancelled`, or `finished`.
+The campaign status, e.g. [draft](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.draft), [scheduled](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.scheduled), [running](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.running), [paused](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.paused), [cancelled](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.cancelled), or [finished](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.finished).
 
 `content_type: Optional[str]`  
 The body format, e.g. `richtext`, `html`, `markdown`, or `plain`.

@@ -21,7 +21,7 @@ Because auth is module-level global state, only one Listmonk instance can be tar
 This trips people up. Some functions raise on failure; others report failure through their return value. Do not wrap the "returns False" ones in `try/except` expecting an exception.
 
 - **Return `False` (never raise on failure):** `login()`, `is_healthy()`, `verify_login()` (rejected creds / unreachable), `confirm_optin()` (non-2xx status), `add_subscribers_to_lists()` (empty inputs or error status).
-- **Return `None` when nothing matches:** `subscriber_by_email()`, `subscriber_by_id()`, `subscriber_by_uuid()`, `campaign_by_id()`, `template_by_id()`.
+- **Return `None` when nothing matches:** `subscriber_by_email()`, `subscriber_by_id()`, `subscriber_by_uuid()`, `campaign_by_id()`, `template_by_id()`, and `set_campaign_status()` / `start_campaign()` / `pause_campaign()` / `cancel_campaign()` for an unknown campaign ID. `test_campaign()` returns `False` in that same case.
 - **Raise:** most create/update/delete calls raise `ValueError` for bad arguments, `httpx2.HTTPStatusError` on 4xx/5xx, and `ValidationError` on an empty/malformed server body. `list_by_id()` returns a `MailingList` (not `Optional`) and raises if the ID is missing.
 
 Note `httpx2` (a fork of `httpx` with a near-identical API), not `httpx`: catch `httpx2.HTTPStatusError` and build timeouts with `httpx2.Timeout(timeout=30.0)`.
@@ -79,6 +79,26 @@ listmonk.send_transactional_email('user@example.com', template_id=3,
 ```
 
 `update_campaign` replaces the whole attachment set each call: with `media_ids=None` it re-sends the campaign's existing media, `media_ids=[]` clears them, and a new list swaps them. It also silently drops a `send_at` that is already in the past so a stale schedule doesn't fail the update. The default Listmonk server only allows image extensions in the media library, and there's no delete-media endpoint in this client.
+
+## Testing and sending a campaign
+
+Creating a campaign does not send it. A campaign starts as a `draft` and only begins delivering once its status becomes `running`, which is a **separate endpoint** — `update_campaign` ignores `status`.
+
+```python
+from listmonk.models import CampaignStatuses
+
+campaign = listmonk.create_campaign(name='June', subject='Our June Update', body='# Hi')
+
+# Send a test copy first. Each address must already be a subscriber; the campaign
+# stays a draft and its stats are untouched.
+listmonk.test_campaign(campaign.id, ['you@example.com'])  # -> True
+
+listmonk.start_campaign(campaign.id)   # or set_campaign_status(id, CampaignStatuses.running)
+listmonk.pause_campaign(campaign.id)   # halt, resumable with start_campaign()
+listmonk.cancel_campaign(campaign.id)  # stop for good
+```
+
+`start_campaign`, `pause_campaign`, and `cancel_campaign` are thin wrappers over `set_campaign_status(campaign_id, status)`; reach for `set_campaign_status` directly for the other members of `CampaignStatuses` (`draft`, `scheduled`, `finished`). All of them return the updated `Campaign`, or `None` if no campaign has that ID. Prefer the enum over a raw string: an unrecognized status reaches Postgres and surfaces as an opaque HTTP 500. A rejected but valid transition (starting an already-finished campaign, say) raises `httpx2.HTTPStatusError`.
 
 ## Scheduling and content types
 

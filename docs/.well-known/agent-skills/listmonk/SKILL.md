@@ -27,6 +27,9 @@ pip install listmonk
 | Send a one-off email (reset code, receipt) | `send_transactional_email(email, tx_template_id, template_data={...})` |
 | Attach a file to a campaign | `upload_media(path) then create_campaign(..., media_ids=[m.id])` |
 | Schedule a campaign for later | `create_campaign(..., send_at=datetime.now() + timedelta(hours=1))` |
+| Send a test copy of a campaign to yourself | `test_campaign(campaign_id, ['you@example.com'])` |
+| Actually send a draft campaign | `start_campaign(campaign_id) — or set_campaign_status(id, CampaignStatuses.running)` |
+| Stop a campaign that is sending | `pause_campaign(campaign_id) to resume later, cancel_campaign(campaign_id) to stop for good` |
 
 ## API overview
 
@@ -69,13 +72,18 @@ Create, query, update, and manage the status of subscribers.
 
 ### Campaigns
 
-Create, preview, update, and delete email campaigns.
+Create, preview, update, test, send, and delete email campaigns.
 
 - `campaigns`: Get all campaigns on the server
 - `campaign_by_id`: Get the full details of a campaign with the given ID
 - `campaign_preview_by_id`: Get the rendered preview of a campaign with the given ID
 - `create_campaign`: Create a new campaign with the given parameters
 - `update_campaign`: Update an existing campaign with the provided campaign information
+- `test_campaign`: Send a one-off test copy of a campaign to specific addresses
+- `set_campaign_status`: Move a campaign to a new lifecycle status
+- `start_campaign`: Start sending a campaign
+- `pause_campaign`: Pause a campaign that is currently sending
+- `cancel_campaign`: Stop a campaign for good
 - `delete_campaign`: Completely delete a campaign from your system
 
 ### Media
@@ -112,6 +120,7 @@ Pydantic models returned by and passed to the API functions.
 - `models.Subscriber`
 - `models.CreateSubscriberModel`
 - `models.Campaign`
+- `models.CampaignStatuses`
 - `models.CreateCampaignModel`
 - `models.UpdateCampaignModel`
 - `models.CampaignPreview`
@@ -135,10 +144,12 @@ Errors raised by the client.
 3. Timeouts use httpx2 (a fork of httpx), not httpx: build them with httpx2.Timeout(...) and catch httpx2.HTTPStatusError.
 4. Every template body must contain the Go-template placeholder {{ template "content" . }} exactly once, or create_template() raises ValueError. It is Go template syntax, not Jinja.
 5. update_campaign() replaces the whole attachment set: media_ids=None re-sends the campaign's existing media, media_ids=[] clears them, and a new list swaps them. A past send_at is silently dropped to None.
-6. subscribers(query_text=...) requires the subscribers:sql_query permission on the user's role, or the server returns HTTP 403.
-7. send_transactional_email() requires the recipient to already be a subscriber, and template_id must reference a 'tx' template, not a 'campaign' template.
-8. Auth is module-level global state: only one instance can be targeted at a time and credential changes are not thread-safe.
-9. Custom email headers are a list of single-entry dicts (e.g. [{'X-Priority': '1'}]), not one dict.
+6. update_campaign() cannot change a campaign's status — Listmonk ignores `status` on PUT /api/campaigns/{id}. Use set_campaign_status() (or start/pause/cancel_campaign()), which calls the dedicated /status endpoint.
+7. test_campaign() only delivers to addresses that already exist as subscribers; Listmonk will not create them, and a test to an unknown address silently sends nothing.
+8. subscribers(query_text=...) requires the subscribers:sql_query permission on the user's role, or the server returns HTTP 403.
+9. send_transactional_email() requires the recipient to already be a subscriber, and template_id must reference a 'tx' template, not a 'campaign' template.
+10. Auth is module-level global state: only one instance can be targeted at a time and credential changes are not thread-safe.
+11. Custom email headers are a list of single-entry dicts (e.g. [{'X-Priority': '1'}]), not one dict.
 
 ## Best practices
 
@@ -146,6 +157,8 @@ Errors raised by the client.
 - Update objects by fetching the model, mutating fields in place, then passing it back to update_subscriber/update_campaign/update_template — the client re-fetches and returns the server's fresh copy.
 - Use block_subscriber() to unsubscribe someone while keeping their record; use delete_subscriber() to erase them entirely.
 - Attach files to a campaign with upload_media() then media_ids=[...]; attach to a transactional email inline via attachments=[Path(...)].
+- Preview a campaign with campaign_preview_by_id(), then test_campaign(id, ['you@example.com']) to a real inbox, before start_campaign() sends it to the lists.
+- Pass the models.CampaignStatuses enum to set_campaign_status() rather than a raw string — an unrecognized status reaches Postgres and comes back as an opaque HTTP 500.
 - Pass a custom httpx2.Timeout via timeout_config for slow or self-hosted instances (the default is 10 seconds).
 
 ## End-to-end wiring
@@ -171,7 +184,7 @@ Because auth is module-level global state, only one Listmonk instance can be tar
 This trips people up. Some functions raise on failure; others report failure through their return value. Do not wrap the "returns False" ones in `try/except` expecting an exception.
 
 - **Return `False` (never raise on failure):** `login()`, `is_healthy()`, `verify_login()` (rejected creds / unreachable), `confirm_optin()` (non-2xx status), `add_subscribers_to_lists()` (empty inputs or error status).
-- **Return `None` when nothing matches:** `subscriber_by_email()`, `subscriber_by_id()`, `subscriber_by_uuid()`, `campaign_by_id()`, `template_by_id()`.
+- **Return `None` when nothing matches:** `subscriber_by_email()`, `subscriber_by_id()`, `subscriber_by_uuid()`, `campaign_by_id()`, `template_by_id()`, and `set_campaign_status()` / `start_campaign()` / `pause_campaign()` / `cancel_campaign()` for an unknown campaign ID. `test_campaign()` returns `False` in that same case.
 - **Raise:** most create/update/delete calls raise `ValueError` for bad arguments, `httpx2.HTTPStatusError` on 4xx/5xx, and `ValidationError` on an empty/malformed server body. `list_by_id()` returns a `MailingList` (not `Optional`) and raises if the ID is missing.
 
 Note `httpx2` (a fork of `httpx` with a near-identical API), not `httpx`: catch `httpx2.HTTPStatusError` and build timeouts with `httpx2.Timeout(timeout=30.0)`.
@@ -229,6 +242,26 @@ listmonk.send_transactional_email('user@example.com', template_id=3,
 ```
 
 `update_campaign` replaces the whole attachment set each call: with `media_ids=None` it re-sends the campaign's existing media, `media_ids=[]` clears them, and a new list swaps them. It also silently drops a `send_at` that is already in the past so a stale schedule doesn't fail the update. The default Listmonk server only allows image extensions in the media library, and there's no delete-media endpoint in this client.
+
+## Testing and sending a campaign
+
+Creating a campaign does not send it. A campaign starts as a `draft` and only begins delivering once its status becomes `running`, which is a **separate endpoint** — `update_campaign` ignores `status`.
+
+```python
+from listmonk.models import CampaignStatuses
+
+campaign = listmonk.create_campaign(name='June', subject='Our June Update', body='# Hi')
+
+# Send a test copy first. Each address must already be a subscriber; the campaign
+# stays a draft and its stats are untouched.
+listmonk.test_campaign(campaign.id, ['you@example.com'])  # -> True
+
+listmonk.start_campaign(campaign.id)   # or set_campaign_status(id, CampaignStatuses.running)
+listmonk.pause_campaign(campaign.id)   # halt, resumable with start_campaign()
+listmonk.cancel_campaign(campaign.id)  # stop for good
+```
+
+`start_campaign`, `pause_campaign`, and `cancel_campaign` are thin wrappers over `set_campaign_status(campaign_id, status)`; reach for `set_campaign_status` directly for the other members of `CampaignStatuses` (`draft`, `scheduled`, `finished`). All of them return the updated `Campaign`, or `None` if no campaign has that ID. Prefer the enum over a raw string: an unrecognized status reaches Postgres and surfaces as an opaque HTTP 500. A rejected but valid transition (starting an already-finished campaign, say) raises `httpx2.HTTPStatusError`.
 
 ## Scheduling and content types
 

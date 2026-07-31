@@ -60,7 +60,7 @@ This changelog is generated automatically from [GitHub Releases](https://github.
 
 ### Added
 
-- Add `altbody` support to [send_transactional_email()](reference/send_transactional_email.html#listmonk.send_transactional_email) for multipart HTML transactional emails. Thank you [<span class="citation" cites="neilime">@neilime</span>](https://github.com/neilime)
+- Add `altbody` support to [send_transactional_email()](reference/send_transactional_email.html#listmonk.send_transactional_email) for multipart HTML transactional emails. Thank you [<span class="citation" data-cites="neilime">@neilime</span>](https://github.com/neilime)
 
 
 # v0.3.13
@@ -108,7 +108,7 @@ This update aligns the SDK with the Listmonk API and UI by making the `name` fie
 
 ### Added
 
-- Add [update_list](reference/update_list.html#listmonk.update_list) function (thanks [<span class="citation" cites="ChrisH861">@ChrisH861</span>](https://github.com/ChrisH861), PR [\#27](https://github.com/mikeckennedy/listmonk/issues/27))
+- Add [update_list](reference/update_list.html#listmonk.update_list) function (thanks [<span class="citation" data-cites="ChrisH861">@ChrisH861</span>](https://github.com/ChrisH861), PR [\#27](https://github.com/mikeckennedy/listmonk/issues/27))
 
 
 # v0.3.9
@@ -121,7 +121,7 @@ This update aligns the SDK with the Listmonk API and UI by making the `name` fie
 
 ### Added
 
-- Add add_subscribers_to_lists function (thanks [<span class="citation" cites="MochaSteve256">@MochaSteve256</span>](https://github.com/MochaSteve256))
+- Add add_subscribers_to_lists function (thanks [<span class="citation" data-cites="MochaSteve256">@MochaSteve256</span>](https://github.com/MochaSteve256))
 
 
 ### Changed
@@ -160,7 +160,7 @@ This update aligns the SDK with the Listmonk API and UI by making the `name` fie
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-Thanks [<span class="citation" cites="neilime">@neilime</span>](https://github.com/neilime) and [<span class="citation" cites="obrizan">@obrizan</span>](https://github.com/obrizan) for the PRs.
+Thanks [<span class="citation" data-cites="neilime">@neilime</span>](https://github.com/neilime) and [<span class="citation" data-cites="obrizan">@obrizan</span>](https://github.com/obrizan) for the PRs.
 
 
 # v0.3.7
@@ -212,7 +212,7 @@ Adds two new features:
 - 📨 Manage campaign (bulk) emails from the API.
 - 🎨 Edit and create templates to control the over all look and feel of campaigns.
 
-Thank you [<span class="citation" cites="pastorhudson">@pastorhudson</span>](https://github.com/pastorhudson) for the PRs.
+Thank you [<span class="citation" data-cites="pastorhudson">@pastorhudson</span>](https://github.com/pastorhudson) for the PRs.
 
 
 # v0.2.1

@@ -20,6 +20,26 @@ class SubscriberStatuses(LowercaseStrEnum):
     blocklisted = 'blocklisted'
 
 
+class CampaignStatuses(LowercaseStrEnum):
+    """The lifecycle status of a campaign.
+
+    Attributes:
+        draft: Created but not queued; safe to edit.
+        scheduled: Will start automatically at the campaign's send_at time.
+        running: Actively sending to the target lists.
+        paused: Sending has been halted and can be resumed.
+        cancelled: Sending was stopped and will not resume.
+        finished: All messages have been sent.
+    """
+
+    draft = 'draft'
+    scheduled = 'scheduled'
+    running = 'running'
+    paused = 'paused'
+    cancelled = 'cancelled'
+    finished = 'finished'
+
+
 class SubscriberStatus(BaseModel):
     """A breakdown of subscriber counts by subscription status for a mailing list.
 

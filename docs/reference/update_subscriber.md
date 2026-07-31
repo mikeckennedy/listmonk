@@ -32,7 +32,7 @@ List IDs to add this subscriber to. Defaults to None (treated as an empty set).
 `remove_from_lists: Optional[set[int]] = None`  
 List IDs to remove this subscriber from. Defaults to None (treated as an empty set).
 
-`status: SubscriberStatuses = SubscriberStatuses.enabled`    
+`status: SubscriberStatuses = SubscriberStatuses.enabled`\  
 The subscriber's status, one of SubscriberStatuses.enabled, .disabled, or .blocklisted. Defaults to SubscriberStatuses.enabled.
 
 `timeout_config: Optional[httpx2.Timeout] = None`  

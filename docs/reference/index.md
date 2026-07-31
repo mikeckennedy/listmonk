@@ -94,7 +94,7 @@ Completely delete a subscriber from your system (as if they were never there).
 ## Campaigns
 
 
-Create, preview, update, and delete email campaigns.
+Create, preview, update, test, send, and delete email campaigns.
 
 
 [campaigns()](campaigns.md#listmonk.campaigns)  
@@ -111,6 +111,21 @@ Create a new campaign with the given parameters.
 
 [update_campaign()](update_campaign.md#listmonk.update_campaign)  
 Update an existing campaign with the provided campaign information.
+
+[test_campaign()](test_campaign.md#listmonk.test_campaign)  
+Send a one-off test copy of a campaign to specific addresses.
+
+[set_campaign_status()](set_campaign_status.md#listmonk.set_campaign_status)  
+Move a campaign to a new lifecycle status.
+
+[start_campaign()](start_campaign.md#listmonk.start_campaign)  
+Start sending a campaign.
+
+[pause_campaign()](pause_campaign.md#listmonk.pause_campaign)  
+Pause a campaign that is currently sending.
+
+[cancel_campaign()](cancel_campaign.md#listmonk.cancel_campaign)  
+Stop a campaign for good.
 
 [delete_campaign()](delete_campaign.md#listmonk.delete_campaign)  
 Completely delete a campaign from your system.
@@ -187,6 +202,9 @@ The payload used to create a new subscriber.
 
 [models.Campaign](models.Campaign.md#listmonk.models.Campaign)  
 An email campaign on the Listmonk instance.
+
+[models.CampaignStatuses](models.CampaignStatuses.md#listmonk.models.CampaignStatuses)  
+The lifecycle status of a campaign.
 
 [models.CreateCampaignModel](models.CreateCampaignModel.md#listmonk.models.CreateCampaignModel)  
 The payload used to create a new campaign.

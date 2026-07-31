@@ -1675,6 +1675,256 @@ def update_campaign(
 
 # endregion
 
+# region def set_campaign_status(campaign_id: int, status: models.CampaignStatuses, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
+
+
+def set_campaign_status(
+    campaign_id: int,
+    status: models.CampaignStatuses,
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> Optional[models.Campaign]:
+    """
+    Move a campaign to a new lifecycle status.
+
+    This is how a campaign is actually sent: a draft only begins delivering once its
+    status becomes ``running``. Setting ``paused`` halts an in-flight send and
+    ``cancelled`` stops it for good. Note that ``update_campaign()`` cannot do this;
+    the server exposes status changes on a separate endpoint.
+
+    Args:
+        campaign_id: The numeric ID of the campaign to transition.
+        status: The new status. Use the CampaignStatuses enum.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+    Returns:
+        The updated Campaign as returned by the server, or None if no campaign with
+        the given ID exists.
+
+    Raises:
+        ValueError: If ``campaign_id`` is falsy (e.g. 0).
+        OperationNotAllowedError: If the base URL is not set or you have not logged in.
+        httpx2.HTTPStatusError: If the server rejects the transition (for example
+            starting a campaign that has already finished).
+        ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> from listmonk.models import CampaignStatuses
+        >>> listmonk.set_campaign_status(42, CampaignStatuses.running)
+    """
+    # noinspection DuplicatedCode
+    global core_headers
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
+    validate_state(url=True)
+
+    if not campaign_id:
+        raise ValueError('Campaign ID is required')
+
+    campaign = campaign_by_id(campaign_id, timeout_config)
+    if not campaign:
+        return None
+
+    url = f'{url_base}{urls.campaign_id_status.format(campaign_id=campaign_id)}'
+    resp = httpx2.put(
+        url,
+        json={'status': str(models.CampaignStatuses(status))},
+        auth=httpx2.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
+    )
+    raw_data = _validate_and_parse_json_response(resp)
+    campaign_data = raw_data.get('data', {})
+    if not campaign_data:
+        return None
+
+    return models.Campaign(**campaign_data)
+
+
+# endregion
+
+# region def start_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
+
+
+def start_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]:
+    """
+    Start sending a campaign.
+
+    This is a convenience wrapper around set_campaign_status that sets the status to
+    CampaignStatuses.running.
+
+    Args:
+        campaign_id: The numeric ID of the campaign to start.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+    Returns:
+        The updated Campaign as returned by the server, or None if no campaign with
+        the given ID exists.
+
+    Raises:
+        ValueError: If ``campaign_id`` is falsy (e.g. 0).
+        OperationNotAllowedError: If the base URL is not set or you have not logged in.
+        httpx2.HTTPStatusError: If the server rejects the transition (for example
+            starting a campaign that has already finished).
+        ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.start_campaign(42)
+    """
+    return set_campaign_status(campaign_id, models.CampaignStatuses.running, timeout_config=timeout_config)
+
+
+# endregion
+
+# region def pause_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
+
+
+def pause_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]:
+    """
+    Pause a campaign that is currently sending.
+
+    This is a convenience wrapper around set_campaign_status that sets the status to
+    CampaignStatuses.paused. A paused campaign can be resumed with start_campaign().
+
+    Args:
+        campaign_id: The numeric ID of the campaign to pause.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+    Returns:
+        The updated Campaign as returned by the server, or None if no campaign with
+        the given ID exists.
+
+    Raises:
+        ValueError: If ``campaign_id`` is falsy (e.g. 0).
+        OperationNotAllowedError: If the base URL is not set or you have not logged in.
+        httpx2.HTTPStatusError: If the server rejects the transition (for example
+            pausing a campaign that is not running).
+        ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.pause_campaign(42)
+    """
+    return set_campaign_status(campaign_id, models.CampaignStatuses.paused, timeout_config=timeout_config)
+
+
+# endregion
+
+# region def cancel_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]  # noqa: E501
+
+
+def cancel_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Campaign]:
+    """
+    Stop a campaign for good.
+
+    This is a convenience wrapper around set_campaign_status that sets the status to
+    CampaignStatuses.cancelled. Unlike pause_campaign(), a cancelled campaign cannot
+    be resumed.
+
+    Args:
+        campaign_id: The numeric ID of the campaign to cancel.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+    Returns:
+        The updated Campaign as returned by the server, or None if no campaign with
+        the given ID exists.
+
+    Raises:
+        ValueError: If ``campaign_id`` is falsy (e.g. 0).
+        OperationNotAllowedError: If the base URL is not set or you have not logged in.
+        httpx2.HTTPStatusError: If the server rejects the transition (for example
+            cancelling a campaign that has already finished).
+        ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.cancel_campaign(42)
+    """
+    return set_campaign_status(campaign_id, models.CampaignStatuses.cancelled, timeout_config=timeout_config)
+
+
+# endregion
+
+# region def test_campaign(campaign_id: int, emails: list[str], timeout_config: Optional[httpx2.Timeout] = None) -> bool  # noqa: E501
+
+
+def test_campaign(
+    campaign_id: int,
+    emails: list[str],
+    timeout_config: Optional[httpx2.Timeout] = None,
+) -> bool:
+    """
+    Send a one-off test copy of a campaign to specific addresses.
+
+    The campaign is left untouched -- it stays a draft and its stats are unaffected.
+    Each address must already exist as a subscriber on the instance; Listmonk will
+    not create them, and a test to an unknown address silently delivers nothing.
+
+    Args:
+        campaign_id: The numeric ID of the campaign to test.
+        emails: The subscriber email addresses to send the test to. Required.
+        timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+    Returns:
+        True if the server accepted the test send; False if no campaign with the
+        given ID exists.
+
+    Raises:
+        ValueError: If ``campaign_id`` is falsy or ``emails`` is empty.
+        OperationNotAllowedError: If the base URL is not set or you have not logged in.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.test_campaign(42, ['you@example.com'])
+        True
+    """
+    # noinspection DuplicatedCode
+    global core_headers
+    timeout_config = timeout_config or httpx2.Timeout(timeout=10)
+    validate_state(url=True)
+
+    if not campaign_id:
+        raise ValueError('Campaign ID is required')
+    if not emails:
+        raise ValueError('At least one email address is required')
+
+    campaign = campaign_by_id(campaign_id, timeout_config)
+    if not campaign:
+        return False
+
+    # The test endpoint re-validates the whole campaign, so it wants the full body
+    # back rather than just the recipient list.
+    data = {
+        'subscribers': emails,
+        'name': campaign.name,
+        'subject': campaign.subject,
+        'lists': [item['id'] if isinstance(item, dict) else item for item in campaign.lists],
+        'from_email': campaign.from_email,
+        'content_type': campaign.content_type,
+        'messenger': campaign.messenger or 'email',
+        'type': campaign.type or 'regular',
+        'body': campaign.body,
+        'template_id': campaign.template_id,
+    }
+
+    url = f'{url_base}{urls.campaign_id_test.format(campaign_id=campaign_id)}'
+    resp = httpx2.post(
+        url,
+        json=data,
+        auth=httpx2.BasicAuth(username or '', password or ''),
+        headers=core_headers,
+        follow_redirects=True,
+        timeout=timeout_config,
+    )
+    raw_data = _validate_and_parse_json_response(resp)
+    return bool(raw_data.get('data'))
+
+
+# endregion
+
 
 # region def templates(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Template]
 

@@ -500,7 +500,7 @@ Raises:
 
 ## Campaigns
 
-Create, preview, update, and delete email campaigns.
+Create, preview, update, test, send, and delete email campaigns.
 
 
 campaigns(timeout_config: httpx2.Timeout | None = None) -> list[listmonk.models.Campaign]
@@ -629,6 +629,143 @@ Raises:
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+test_campaign(campaign_id: int, emails: list[str], timeout_config: httpx2.Timeout | None = None) -> bool
+
+Send a one-off test copy of a campaign to specific addresses.
+
+The campaign is left untouched -- it stays a draft and its stats are unaffected.
+Each address must already exist as a subscriber on the instance; Listmonk will
+not create them, and a test to an unknown address silently delivers nothing.
+
+Args:
+    campaign_id: The numeric ID of the campaign to test.
+    emails: The subscriber email addresses to send the test to. Required.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+Returns:
+    True if the server accepted the test send; False if no campaign with the
+    given ID exists.
+
+Raises:
+    ValueError: If ``campaign_id`` is falsy or ``emails`` is empty.
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.test_campaign(42, ['you@example.com'])
+    True
+
+set_campaign_status(campaign_id: int, status: listmonk.models.CampaignStatuses, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
+
+Move a campaign to a new lifecycle status.
+
+This is how a campaign is actually sent: a draft only begins delivering once its
+status becomes ``running``. Setting ``paused`` halts an in-flight send and
+``cancelled`` stops it for good. Note that ``update_campaign()`` cannot do this;
+the server exposes status changes on a separate endpoint.
+
+Args:
+    campaign_id: The numeric ID of the campaign to transition.
+    status: The new status. Use the CampaignStatuses enum.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+Returns:
+    The updated Campaign as returned by the server, or None if no campaign with
+    the given ID exists.
+
+Raises:
+    ValueError: If ``campaign_id`` is falsy (e.g. 0).
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx2.HTTPStatusError: If the server rejects the transition (for example
+        starting a campaign that has already finished).
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> from listmonk.models import CampaignStatuses
+    >>> listmonk.set_campaign_status(42, CampaignStatuses.running)
+
+start_campaign(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
+
+Start sending a campaign.
+
+This is a convenience wrapper around set_campaign_status that sets the status to
+CampaignStatuses.running.
+
+Args:
+    campaign_id: The numeric ID of the campaign to start.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+Returns:
+    The updated Campaign as returned by the server, or None if no campaign with
+    the given ID exists.
+
+Raises:
+    ValueError: If ``campaign_id`` is falsy (e.g. 0).
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx2.HTTPStatusError: If the server rejects the transition (for example
+        starting a campaign that has already finished).
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.start_campaign(42)
+
+pause_campaign(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
+
+Pause a campaign that is currently sending.
+
+This is a convenience wrapper around set_campaign_status that sets the status to
+CampaignStatuses.paused. A paused campaign can be resumed with start_campaign().
+
+Args:
+    campaign_id: The numeric ID of the campaign to pause.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+Returns:
+    The updated Campaign as returned by the server, or None if no campaign with
+    the given ID exists.
+
+Raises:
+    ValueError: If ``campaign_id`` is falsy (e.g. 0).
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx2.HTTPStatusError: If the server rejects the transition (for example
+        pausing a campaign that is not running).
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.pause_campaign(42)
+
+cancel_campaign(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
+
+Stop a campaign for good.
+
+This is a convenience wrapper around set_campaign_status that sets the status to
+CampaignStatuses.cancelled. Unlike pause_campaign(), a cancelled campaign cannot
+be resumed.
+
+Args:
+    campaign_id: The numeric ID of the campaign to cancel.
+    timeout_config: Optional per-request timeout; defaults to 10 seconds.
+
+Returns:
+    The updated Campaign as returned by the server, or None if no campaign with
+    the given ID exists.
+
+Raises:
+    ValueError: If ``campaign_id`` is falsy (e.g. 0).
+    OperationNotAllowedError: If the base URL is not set or you have not logged in.
+    httpx2.HTTPStatusError: If the server rejects the transition (for example
+        cancelling a campaign that has already finished).
+    ValidationError: If the server returns an empty body or invalid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.cancel_campaign(42)
 
 delete_campaign(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
@@ -997,6 +1134,18 @@ Attributes:
     headers: Custom email headers to include, each as a single-entry dict.
     media: The media files attached to the campaign, each as a dict describing
         the file (id, filename, and so on), or ``None`` if there are none.
+
+CampaignStatuses(*values)
+
+The lifecycle status of a campaign.
+
+Attributes:
+    draft: Created but not queued; safe to edit.
+    scheduled: Will start automatically at the campaign's send_at time.
+    running: Actively sending to the target lists.
+    paused: Sending has been halted and can be resumed.
+    cancelled: Sending was stopped and will not resume.
+    finished: All messages have been sent.
 
 CreateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>, media: list[int] = <factory>) -> None
 

@@ -41,13 +41,18 @@
 - [delete_subscriber](https://mkennedy.codes/docs/listmonk/reference/delete_subscriber.html): Completely delete a subscriber from your system (as if they were never there)
 
 #### Campaigns
-> Create, preview, update, and delete email campaigns.
+> Create, preview, update, test, send, and delete email campaigns.
 
 - [campaigns](https://mkennedy.codes/docs/listmonk/reference/campaigns.html): Get all campaigns on the server
 - [campaign_by_id](https://mkennedy.codes/docs/listmonk/reference/campaign_by_id.html): Get the full details of a campaign with the given ID
 - [campaign_preview_by_id](https://mkennedy.codes/docs/listmonk/reference/campaign_preview_by_id.html): Get the rendered preview of a campaign with the given ID
 - [create_campaign](https://mkennedy.codes/docs/listmonk/reference/create_campaign.html): Create a new campaign with the given parameters
 - [update_campaign](https://mkennedy.codes/docs/listmonk/reference/update_campaign.html): Update an existing campaign with the provided campaign information
+- [test_campaign](https://mkennedy.codes/docs/listmonk/reference/test_campaign.html): Send a one-off test copy of a campaign to specific addresses
+- [set_campaign_status](https://mkennedy.codes/docs/listmonk/reference/set_campaign_status.html): Move a campaign to a new lifecycle status
+- [start_campaign](https://mkennedy.codes/docs/listmonk/reference/start_campaign.html): Start sending a campaign
+- [pause_campaign](https://mkennedy.codes/docs/listmonk/reference/pause_campaign.html): Pause a campaign that is currently sending
+- [cancel_campaign](https://mkennedy.codes/docs/listmonk/reference/cancel_campaign.html): Stop a campaign for good
 - [delete_campaign](https://mkennedy.codes/docs/listmonk/reference/delete_campaign.html): Completely delete a campaign from your system
 
 #### Media
@@ -80,6 +85,7 @@
 - [models.Subscriber](https://mkennedy.codes/docs/listmonk/reference/models.Subscriber.html)
 - [models.CreateSubscriberModel](https://mkennedy.codes/docs/listmonk/reference/models.CreateSubscriberModel.html)
 - [models.Campaign](https://mkennedy.codes/docs/listmonk/reference/models.Campaign.html)
+- [models.CampaignStatuses](https://mkennedy.codes/docs/listmonk/reference/models.CampaignStatuses.html)
 - [models.CreateCampaignModel](https://mkennedy.codes/docs/listmonk/reference/models.CreateCampaignModel.html)
 - [models.UpdateCampaignModel](https://mkennedy.codes/docs/listmonk/reference/models.UpdateCampaignModel.html)
 - [models.CampaignPreview](https://mkennedy.codes/docs/listmonk/reference/models.CampaignPreview.html)

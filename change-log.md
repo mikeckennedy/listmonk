@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.5.30] - 2026-07-31
+
+### Added
+* Campaign sending support, covering the two endpoints that actually deliver mail: `test_campaign(campaign_id, emails)` sends a one-off test copy to specific subscriber addresses (`POST /api/campaigns/{id}/test`) without touching the campaign or its stats, and `set_campaign_status(campaign_id, status)` moves a campaign through its lifecycle (`PUT /api/campaigns/{id}/status`) — this is how a draft is started, since `update_campaign()` cannot change status
+* `start_campaign()`, `pause_campaign()`, and `cancel_campaign()` convenience wrappers over `set_campaign_status()`, in the spirit of `enable_subscriber()` / `disable_subscriber()` / `block_subscriber()`
+* `models.CampaignStatuses` enum (`draft`, `scheduled`, `running`, `paused`, `cancelled`, `finished`), so an invalid status is caught client-side instead of surfacing as a Postgres enum error in an HTTP 500
+
 ## [0.4.3] - 2026-06-11
 
 ### Added

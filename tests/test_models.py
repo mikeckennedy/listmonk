@@ -25,6 +25,19 @@ def test_mailing_list_maps_the_unconfirmed_count():
     assert lst.subscriber_statuses.unconfirmed_count == 5
 
 
+def test_campaign_statuses_round_trip_through_strings():
+    assert str(models.CampaignStatuses.running) == 'running'
+    assert models.CampaignStatuses('paused') is models.CampaignStatuses.paused
+    assert {str(s) for s in models.CampaignStatuses} == {
+        'draft',
+        'scheduled',
+        'running',
+        'paused',
+        'cancelled',
+        'finished',
+    }
+
+
 def test_update_campaign_model_drops_a_past_send_at():
     past = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
     model = models.UpdateCampaignModel(template_id=1, send_at=past)
