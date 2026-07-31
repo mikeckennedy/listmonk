@@ -1,0 +1,30 @@
+# ty type checker configuration.
+#
+# ty is the authoritative type gate for this repo: `ty check` must report zero
+# diagnostics, and tests/test_type_check.py fails the suite if it doesn't. Fix or
+# justify before committing — never widen to Any, drop annotations, or blanket-ignore
+# a file to make a diagnostic go away.
+#
+# Run it with:  ty check
+
+[environment]
+# Check against the floor of the supported range (pyproject: requires-python = ">=3.10"),
+# not the interpreter in venv/. A library that advertises 3.10 support should be type
+# checked there, so nothing newer than 3.10 quietly slips into the public API.
+python-version = "3.10"
+
+[src]
+exclude = [
+    # Generated static docs site (built by scripts/build_docs.py) and the ephemeral
+    # great-docs build directory, which vendors third-party Quarto extension scripts.
+    "docs",
+    "great-docs",
+    "venv",
+]
+
+[rules]
+# A suppression that no longer suppresses anything is a defect, not a note: it hides
+# the fact that the underlying problem moved or was already fixed. Both forms — the
+# blanket `# type: ignore` and ty's own `# ty: ignore[rule]` — are errors here.
+unused-type-ignore-comment = "error"
+unused-ignore-comment = "error"

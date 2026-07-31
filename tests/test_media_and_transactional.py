@@ -53,7 +53,9 @@ def test_upload_media_path_must_exist(fake_server, tmp_path):
 
 def test_upload_media_rejects_other_types(fake_server):
     with pytest.raises(TypeError):
-        listmonk.upload_media('/tmp/logo.png')  # type: ignore[arg-type]
+        # Deliberately the wrong type: this asserts the runtime TypeError, so the
+        # checker is told to allow the call rather than the call being made valid.
+        listmonk.upload_media('/tmp/logo.png')  # ty: ignore[invalid-argument-type]
     assert fake_server.requests == []
 
 

@@ -61,15 +61,19 @@ print(f'Created subscriber: {subscriber}', flush=True)
 
 subscriber = listmonk.subscriber_by_email(email)
 print(f'Subscriber by email: {subscriber}', flush=True)
+if subscriber is None or not subscriber.uuid:
+    raise SystemExit(f'Subscriber {email} was not found right after being created.')
 
-subscriber = listmonk.subscriber_by_id(subscriber.id)  # type: ignore
-print(f'Subscriber by id: {subscriber}', flush=True)
+# Keep the UUID in a str of its own: the model types it as Optional, while the lookup
+# below and confirm_optin() further down both require a real value.
+subscriber_uuid: str = subscriber.uuid
 
-subscriber = listmonk.subscriber_by_uuid(subscriber.uuid)  # type: ignore
-print(f'Subscriber by uuid: {subscriber}', flush=True)
+# The same subscriber, fetched the other two ways.
+print(f'Subscriber by id: {listmonk.subscriber_by_id(subscriber.id)}', flush=True)
+print(f'Subscriber by uuid: {listmonk.subscriber_by_uuid(subscriber_uuid)}', flush=True)
 
-subscriber.name = 'Mr. ' + subscriber.name.upper()  # type: ignore
-subscriber.attribs['rating'] = 7  # type: ignore
+subscriber.name = 'Mr. ' + (subscriber.name or '').upper()
+subscriber.attribs['rating'] = 7
 
 query = f"subscribers.email = '{email}'"
 print('Searching for user with query: ', query, flush=True)
@@ -79,13 +83,12 @@ print(f'Found {sub2[0].name} with email {sub2[0].email}', flush=True)
 
 
 # TODO: Choose list IDs from your instance (can be seen in the UI or from the listing above)
-to_add = {the_list.id}  # Add all the lists here: {1, 7, 11},  # type: ignore
+to_add = {the_list.id}  # Add all the lists here: {1, 7, 11},
 remove_from = set()  # Same as above
 updated_subscriber = listmonk.update_subscriber(subscriber, to_add, remove_from)
 print(f'Updated subscriber: {updated_subscriber}', flush=True)
 
-if subscriber is not None and the_list is not None:
-    print(f'Subscriber confirmed?: {listmonk.confirm_optin(subscriber.uuid, the_list.uuid)}', flush=True)
+print(f'Subscriber confirmed?: {listmonk.confirm_optin(subscriber_uuid, the_list.uuid)}', flush=True)
 
 if updated_subscriber:
     updated_subscriber.attribs['subscription_note'] = (

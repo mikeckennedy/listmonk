@@ -269,7 +269,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) ->
         if not found:
             raise Exception(f'List with ID {list_id} not found.')
 
-    return models.MailingList(**lst_data)  # type: ignore
+    return models.MailingList(**lst_data)
 
 
 # endregion
@@ -310,15 +310,15 @@ def subscribers(
     raw_results = []
     page_num = 1
     partial_results, more = _fragment_of_subscribers(page_num, list_id, query_text, timeout_config)
-    raw_results.extend(partial_results)  # type: ignore
+    raw_results.extend(partial_results)
     # Logging someday: print(f"subscribers(): Got {len(raw_results)} so far, more? {more}")
     while more:
         page_num += 1
         partial_results, more = _fragment_of_subscribers(page_num, list_id, query_text, timeout_config)
-        raw_results.extend(partial_results)  # type: ignore
+        raw_results.extend(partial_results)
         # Logging someday: print(f"subscribers(): Got {len(raw_results)} so far on page {page_num}, more? {more}")
 
-    subscriber_list = [models.Subscriber(**d) for d in raw_results]  # type: ignore
+    subscriber_list = [models.Subscriber(**d) for d in raw_results]
 
     return subscriber_list
 
@@ -413,7 +413,7 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = N
     if not results:
         return None
 
-    return models.Subscriber(**results[0])  # type: ignore
+    return models.Subscriber(**results[0])
 
 
 # endregion
@@ -830,7 +830,7 @@ def update_subscriber(
     add_to_lists = add_to_lists or set()
     remove_from_lists = remove_from_lists or set()
 
-    existing_lists = {int(lst['id']) for lst in subscriber.lists}  # type: ignore
+    existing_lists = {int(lst['id']) for lst in subscriber.lists}
     final_lists = existing_lists - remove_from_lists
     final_lists.update(add_to_lists)
 
@@ -1632,10 +1632,10 @@ def update_campaign(
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
-    if campaign is None or not campaign.id:  # type: ignore
+    if campaign is None or not campaign.id:
         raise ValueError('Campaign is required')
 
-    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists]  # type: ignore
+    update_lists = [item['id'] if isinstance(item, dict) else item for item in campaign.lists]
 
     if media_ids is None:
         # Listmonk replaces the attachment set on every update, so default to the
@@ -1645,7 +1645,7 @@ def update_campaign(
     update_model = models.UpdateCampaignModel(
         name=campaign.name,
         subject=campaign.subject,
-        lists=list(update_lists),  # Convert to list to ensure type is known # type: ignore
+        lists=list(update_lists),  # Convert to list to ensure type is known
         from_email=campaign.from_email,
         type=campaign.type,
         content_type=campaign.content_type,
@@ -1655,7 +1655,7 @@ def update_campaign(
         messenger=campaign.messenger,
         template_id=campaign.template_id,
         tags=campaign.tags,
-        headers=campaign.headers,  # type: ignore
+        headers=campaign.headers,
         media=media_ids,
     )
 
@@ -2219,7 +2219,7 @@ def update_template(
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
-    if template is None or not template.id:  # type: ignore
+    if template is None or not template.id:
         raise ValueError('Template is required')
 
     update_model = models.CreateTemplateModel(

@@ -24,6 +24,14 @@ ruff check
 ruff format
 ```
 
+### Type Checking — ty is authoritative
+```bash
+ty check
+```
+`ty check` must report **zero** diagnostics, and `tests/test_type_check.py` fails the suite if it doesn't (it skips when ty isn't installed). Configuration is in `ty.toml`. The `dev` extra sets a floor (`ty>=0.0.65`) rather than a pin: ty is pre-1.0, so an upgrade can surface new diagnostics — treat those as findings to fix rather than something to avoid by freezing the version.
+
+Fix diagnostics properly: never widen to `Any`, drop an annotation, or blanket-ignore a file to silence one. A `# ty: ignore[rule]` is acceptable only for a confirmed checker limitation or a deliberate wrong-type test, must name the specific rule, and must carry a one-line justification. Stale suppressions are errors here (both `# type: ignore` and `# ty: ignore`), so a suppression that stops applying gets flagged rather than quietly covering the next problem. ty is checked against Python 3.10, the floor of the supported range, not the newer interpreter in `venv/`.
+
 ### Running the Example Client
 ```bash
 python example_client/client.py

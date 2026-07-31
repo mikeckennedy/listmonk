@@ -279,7 +279,7 @@ class UpdateCampaignModel(CreateCampaignModel):
         Returns:
             The original datetime, or None if it is in the past.
         """
-        if isinstance(fld, datetime.datetime):  # type: ignore
+        if isinstance(fld, datetime.datetime):
             now = datetime.datetime.now(datetime.timezone.utc)
             if fld < now:
                 return None

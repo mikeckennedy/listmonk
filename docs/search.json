@@ -598,7 +598,7 @@
     "href": "package-info.html#dev",
     "title": "Package Info",
     "section": "dev",
-    "text": "dev\n\n\n\nPackage\nVersion Constraint\nEnvironment Marker\nLast Published\nPyPI\n\n\n\n\ngreat-docs\n—\npython_version &gt;= \"3.11\"\n2026-07-27\n\n\n\npytest\n—\n\n2026-06-19"
+    "text": "dev\n\n\n\nPackage\nVersion Constraint\nEnvironment Marker\nLast Published\nPyPI\n\n\n\n\ngreat-docs\n—\npython_version &gt;= \"3.11\"\n2026-07-27\n\n\n\npytest\n—\n\n2026-06-19\n\n\n\nty\n&gt;=0.0.65\n\n2026-07-29"
   },
   {
     "objectID": "reference/block_subscriber.html",

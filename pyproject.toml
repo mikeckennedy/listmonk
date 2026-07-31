@@ -1,6 +1,6 @@
 [project]
 name = "listmonk"
-version = "0.5.30"
+version = "0.5.31"
 description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
@@ -51,6 +51,10 @@ dev = [
     # which great-docs does not support.
     "great-docs; python_version >= '3.11'",
     "pytest",
+    # Authoritative type checker; `tests/test_type_check.py` fails on any diagnostic.
+    # Floor, not a pin: ty is pre-1.0, so a version bump can surface new diagnostics.
+    # That is a real finding to fix, not a build break to avoid.
+    "ty>=0.0.65",
 ]
 
 
