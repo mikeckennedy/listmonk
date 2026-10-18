@@ -3,6 +3,20 @@
 This changelog is generated automatically from [GitHub Releases](https://github.com/mikeckennedy/listmonk/releases).
 
 
+# v0.6.32
+
+*2026-10-18* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.6.32)
+
+
+## \[0.6.32\] - 2026-10-17
+
+
+### Added
+
+- `subscriber_mode` support in [send_transactional_email()](reference/send_transactional_email.html#listmonk.send_transactional_email): pass `'external'` to email people who are not subscribers (no more creating a temporary subscriber, sending, then deleting it) or `'fallback'` to look the recipient up but send anyway if they aren't found. The field is omitted when unset, so requests to older servers are unchanged. In these modes only `{ .Subscriber.Email }` is populated, so pass anything else the template needs via `template_data` and read it as `{ .Tx.Data.* }`. Thank you [\[<span class="citation" data-cites="waza-ari">@waza-ari</span>\](https://github.com/waza-ari)](https://github.com/waza-ari)
+- [send_transactional_email()](reference/send_transactional_email.html#listmonk.send_transactional_email) now takes a list of addresses as its first argument to reach several recipients in one call, e.g. `send_transactional_email(['a@x.com', 'b@x.com'], template_id=3)`. A single string still maps to the server's `subscriber_email` field and a list to `subscriber_emails`, so the two fields the API rejects together cannot both be sent. Thank you [\[<span class="citation" data-cites="waza-ari">@waza-ari</span>\](https://github.com/waza-ari)](https://github.com/waza-ari)
+
+
 # v0.5.31
 
 *2026-07-31* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.5.31)
