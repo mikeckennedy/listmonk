@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `subscriber_mode` support in `send_transactional_email()` — pass `'external'` to email non-subscribers (no more create-a-temp-subscriber-then-delete-it dance) or `'fallback'` to look the recipient up but send anyway if they aren't found. Omitted by default, so requests to older servers are unchanged. Note that in these modes only `{{ .Subscriber.Email }}` is populated; pass anything else the template needs via `template_data` and read it as `{{ .Tx.Data.* }}`. Thank you [@waza-ari](https://github.com/waza-ari)
+* `send_transactional_email()` now accepts a list of addresses for its first argument to send to several recipients in one call, e.g. `send_transactional_email(['a@x.com', 'b@x.com'], template_id=3)`. Thank you [@waza-ari](https://github.com/waza-ari)
+
 ### Changed
 
 ### Deprecated

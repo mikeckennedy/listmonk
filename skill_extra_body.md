@@ -62,6 +62,31 @@ listmonk.create_template(name='Welcome', body=body, type='campaign')
 
 There are two template types: `'campaign'` and `'tx'` (transactional). Merge data you pass to `send_transactional_email(template_data=...)` is available in a `tx` template as `{{ .Tx.Data.<key> }}`; subscriber fields are `{{ .Subscriber.<Field> }}`.
 
+## Transactional recipients: subscribers, non-subscribers, and lists of them
+
+By default `/api/tx` only accepts an address that already exists as a subscriber. On servers that support `subscriber_mode`, you can relax that instead of creating a throwaway subscriber and deleting it afterward.
+
+```python
+# Default: recipient must already be a subscriber.
+listmonk.send_transactional_email('user@example.com', template_id=3)
+
+# 'external': no lookup at all, so any address works — password resets, receipts, invites.
+listmonk.send_transactional_email('stranger@example.com', template_id=3,
+                                  subscriber_mode='external',
+                                  template_data={'name': 'Sam', 'reset_url': '...'})
+
+# 'fallback': looks the subscriber up, but still sends if they aren't found.
+listmonk.send_transactional_email('maybe@example.com', template_id=3, subscriber_mode='fallback')
+
+# Several recipients in one call: pass a list instead of a single address.
+listmonk.send_transactional_email(['a@example.com', 'b@example.com'], template_id=3,
+                                  subscriber_mode='external')
+```
+
+The single address and the list map to two different server fields (`subscriber_email` and `subscriber_emails`), which the API rejects if sent together — passing one parameter that accepts either keeps that from being expressible.
+
+The catch with `fallback` and `external`: only `{{ .Subscriber.Email }}` is populated. Every other subscriber field is empty because there may be no subscriber record to read, so anything the template needs must travel in `template_data` and be read as `{{ .Tx.Data.* }}`. Omit `subscriber_mode` entirely and the field is left off the request, so behavior is unchanged on older servers.
+
 ## Media vs. transactional attachments — two different mechanisms
 
 Attaching a file to a **campaign** is a two-step flow: upload to the media library, then reference the returned `id`. Attaching to a **transactional** email is inline via `Path` objects — no upload step.
