@@ -1,6 +1,6 @@
 [project]
 name = "listmonk"
-version = "0.5.31"
+version = "0.6.32"
 description = "Listmonk Email API Client for Python"
 readme = "README.md"
 license = "MIT"
