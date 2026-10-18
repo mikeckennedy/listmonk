@@ -176,7 +176,7 @@ Send one-off transactional messages.
 
 
 [send_transactional_email()](send_transactional_email.md#listmonk.send_transactional_email)  
-Send a transactional email through Listmonk to a single recipient.
+Send a transactional email through Listmonk to one or more recipients.
 
 
 ## Data Models

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-57fcef4540861f7ec0a20b328c4addee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -122,7 +122,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
   <link rel="alternate" type="text/markdown" href="send_transactional_email.md">
   <link rel="canonical" href="https://mkennedy.codes/docs/listmonk/reference/send_transactional_email.html">
-  <meta name="description" content="Send a transactional email through Listmonk to a single recipient.">
+  <meta name="description" content="Send a transactional email through Listmonk to one or more recipients.">
   <script type="application/ld+json">
 [
   {
@@ -152,12 +152,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="send_transactional_email() – Listmonk | Listmonk">
-  <meta property="og:description" content="Send a transactional email through Listmonk to a single recipient.">
+  <meta property="og:description" content="Send a transactional email through Listmonk to one or more recipients.">
   <meta property="og:url" content="https://mkennedy.codes/docs/listmonk/reference/send_transactional_email.html">
   <meta property="og:site_name" content="Listmonk">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="send_transactional_email() – Listmonk | Listmonk">
-  <meta name="twitter:description" content="Send a transactional email through Listmonk to a single recipient.">
+  <meta name="twitter:description" content="Send a transactional email through Listmonk to one or more recipients.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -168,7 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../index.html">
-    <span class="navbar-title">Listmonk <span class="version-badge" title="Released 2026-06-10">v0.4.2</span></span>
+    <span class="navbar-title">Listmonk <span class="version-badge" title="Released 2026-07-31">v0.5.31</span></span>
     </a>
   </div>
             <div id="quarto-search" class=""></div>
@@ -189,7 +189,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
     <span class="nav-link">
-<div id="github-widget" data-owner="mikeckennedy" data-repo="listmonk" data-stars="63" data-forks="13"></div>
+<div id="github-widget" data-owner="mikeckennedy" data-repo="listmonk" data-stars="66" data-forks="11"></div>
     </span>
   </li>  
 </ul>
@@ -687,11 +687,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="doc-subject">
-<p>Send a transactional email through Listmonk to a single recipient.</p>
+<p>Send a transactional email through Listmonk to one or more recipients.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L953-L1080" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L953-L1117" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">send_transactional_email</span>(</span>
@@ -704,23 +704,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">altbody</span><span class="op">=</span><span class="cn-none">None</span>,</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="va">attachments</span><span class="op">=</span><span class="cn-none">None</span>,</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="va">email_headers</span><span class="op">=</span><span class="cn-none">None</span>,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">timeout_config</span><span class="op">=</span><span class="cn-none">None</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="va">subscriber_mode</span><span class="op">=</span><span class="cn-none">None</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>The recipient must already be a subscriber on at least one list. Delivery errors may surface in the logs section of your Listmonk dashboard rather than as exceptions here. The subscriber_email is lowercased and stripped before sending.</p>
+<p>By default the recipient must already be a subscriber on at least one list (see subscriber_mode to relax this). Delivery errors may surface in the logs section of your Listmonk dashboard rather than as exceptions here. Recipient addresses are lowercased and stripped before sending.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
 <div class="doc-definition-items">
 <dl>
-<dt><code><span class="doc-parameter-name">subscriber_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">str</span></code></dt>
+<dt><code><span class="doc-parameter-name">subscriber_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Union[str, list[str]]</span></code></dt>
 <dd>
-<p>The recipient’s email address. Required; they must be a subscriber of some list on your server.</p>
+<p>The recipient’s email address, or a list of addresses to send to several recipients in one call. By default each recipient must already be a subscriber of some list on your server; see subscriber_mode to relax that. Addresses are lowercased and stripped.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">template_id</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">int</span></code></dt>
 <dd>
-<p>The ID of the template to render. Must be a ‘tx’ (transactional) template, not a campaign template.</p>
+<p>The ID of the template to render. Required. Must be a ‘tx’ (transactional) template, not a campaign template.</p>
 </dd>
 <dt><code><span class="doc-parameter-name">from_email</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[str]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
@@ -752,7 +753,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt><code><span class="doc-parameter-name">timeout_config</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[httpx2.Timeout]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
 <dd>
-Optional per-request timeout; defaults to 10 seconds.
+<p>Optional per-request timeout; defaults to 10 seconds.</p>
+</dd>
+<dt><code><span class="doc-parameter-name">subscriber_mode</span><span class="doc-parameter-annotation-sep">:</span> <span class="doc-parameter-annotation">Optional[Literal[<span class="st">"default"</span>, <span class="st">"fallback"</span>, <span class="st">"external"</span>]]</span> <span class="doc-parameter-default-sep op">=</span> <span class="doc-parameter-default">None</span></code></dt>
+<dd>
+How the server resolves each recipient, on Listmonk servers that support it. One of ‘default’, ‘fallback’, or ‘external’. Omit it (None) and the field is left off the request entirely, so the server keeps its own default behavior of requiring a subscriber. ‘fallback’ looks the recipient up but sends anyway if not found. ‘external’ skips the lookup, so you can send to non-subscribers. In ‘fallback’ and ‘external’ modes, subscriber fields other than the email are unavailable in templates; use {{ .Tx.Data.* }} instead.
 </dd>
 </dl>
 </div>
@@ -774,7 +779,7 @@ True if the server accepted the send, False otherwise.
 <dl>
 <dt><code> <span class="doc-parameter-annotation">ValueError</span></code></dt>
 <dd>
-<p>If subscriber_email is empty.</p>
+<p>If no recipient is given, or if a recipient list is empty or contains only blank addresses.</p>
 </dd>
 <dt><code> <span class="doc-parameter-annotation">ListmonkFileNotFoundError</span></code></dt>
 <dd>
@@ -804,6 +809,13 @@ If the response is empty or is not valid JSON.
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>...     template_data<span class="op">=</span>{<span class="st">'name'</span>: <span class="st">'Sam'</span>},</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>... )</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="va">True</span></span></code></pre></div>
+<p>Send to several people who need not be subscribers:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> listmonk.send_transactional_email(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>...     [<span class="st">'one@example.com'</span>, <span class="st">'two@example.com'</span>],</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>...     template_id<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>...     subscriber_mode<span class="op">=</span><span class="st">'external'</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>... )</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="va">True</span></span></code></pre></div>
 
 
 </section>

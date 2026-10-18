@@ -74,7 +74,7 @@
 #### Transactional Email
 > Send one-off transactional messages.
 
-- [send_transactional_email](https://mkennedy.codes/docs/listmonk/reference/send_transactional_email.html): Send a transactional email through Listmonk to a single recipient
+- [send_transactional_email](https://mkennedy.codes/docs/listmonk/reference/send_transactional_email.html): Send a transactional email through Listmonk to one or more recipients
 
 #### Data Models
 > Pydantic models returned by and passed to the API functions.

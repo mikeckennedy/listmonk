@@ -25,6 +25,8 @@ pip install listmonk
 | Unsubscribe someone but keep their record | `block_subscriber(subscriber)` |
 | Erase a subscriber entirely | `delete_subscriber(email)` |
 | Send a one-off email (reset code, receipt) | `send_transactional_email(email, tx_template_id, template_data={...})` |
+| Email someone who is not a subscriber | `send_transactional_email(email, tx_template_id, subscriber_mode='external', template_data={...})` |
+| Send one transactional email to several recipients | `send_transactional_email(['a@x.com', 'b@x.com'], tx_template_id)` |
 | Attach a file to a campaign | `upload_media(path) then create_campaign(..., media_ids=[m.id])` |
 | Schedule a campaign for later | `create_campaign(..., send_at=datetime.now() + timedelta(hours=1))` |
 | Send a test copy of a campaign to yourself | `test_campaign(campaign_id, ['you@example.com'])` |
@@ -108,7 +110,7 @@ Manage email templates and set the default.
 
 Send one-off transactional messages.
 
-- `send_transactional_email`: Send a transactional email through Listmonk to a single recipient
+- `send_transactional_email`: Send a transactional email through Listmonk to one or more recipients
 
 ### Data Models
 
@@ -147,9 +149,10 @@ Errors raised by the client.
 6. update_campaign() cannot change a campaign's status — Listmonk ignores `status` on PUT /api/campaigns/{id}. Use set_campaign_status() (or start/pause/cancel_campaign()), which calls the dedicated /status endpoint.
 7. test_campaign() only delivers to addresses that already exist as subscribers; Listmonk will not create them, and a test to an unknown address silently sends nothing.
 8. subscribers(query_text=...) requires the subscribers:sql_query permission on the user's role, or the server returns HTTP 403.
-9. send_transactional_email() requires the recipient to already be a subscriber, and template_id must reference a 'tx' template, not a 'campaign' template.
-10. Auth is module-level global state: only one instance can be targeted at a time and credential changes are not thread-safe.
-11. Custom email headers are a list of single-entry dicts (e.g. [{'X-Priority': '1'}]), not one dict.
+9. send_transactional_email() requires the recipient to already be a subscriber unless you pass subscriber_mode='fallback' or 'external'; template_id must reference a 'tx' template, not a 'campaign' template.
+10. In subscriber_mode='fallback' or 'external', only {{ .Subscriber.Email }} is populated — every other subscriber field is unavailable, so pass what the template needs via template_data and read it as {{ .Tx.Data.* }}.
+11. Auth is module-level global state: only one instance can be targeted at a time and credential changes are not thread-safe.
+12. Custom email headers are a list of single-entry dicts (e.g. [{'X-Priority': '1'}]), not one dict.
 
 ## Best practices
 
@@ -224,6 +227,31 @@ listmonk.create_template(name='Welcome', body=body, type='campaign')
 ```
 
 There are two template types: `'campaign'` and `'tx'` (transactional). Merge data you pass to `send_transactional_email(template_data=...)` is available in a `tx` template as `{{ .Tx.Data.<key> }}`; subscriber fields are `{{ .Subscriber.<Field> }}`.
+
+## Transactional recipients: subscribers, non-subscribers, and lists of them
+
+By default `/api/tx` only accepts an address that already exists as a subscriber. On servers that support `subscriber_mode`, you can relax that instead of creating a throwaway subscriber and deleting it afterward.
+
+```python
+# Default: recipient must already be a subscriber.
+listmonk.send_transactional_email('user@example.com', template_id=3)
+
+# 'external': no lookup at all, so any address works — password resets, receipts, invites.
+listmonk.send_transactional_email('stranger@example.com', template_id=3,
+                                  subscriber_mode='external',
+                                  template_data={'name': 'Sam', 'reset_url': '...'})
+
+# 'fallback': looks the subscriber up, but still sends if they aren't found.
+listmonk.send_transactional_email('maybe@example.com', template_id=3, subscriber_mode='fallback')
+
+# Several recipients in one call: pass a list instead of a single address.
+listmonk.send_transactional_email(['a@example.com', 'b@example.com'], template_id=3,
+                                  subscriber_mode='external')
+```
+
+The single address and the list map to two different server fields (`subscriber_email` and `subscriber_emails`), which the API rejects if sent together — passing one parameter that accepts either keeps that from being expressible.
+
+The catch with `fallback` and `external`: only `{{ .Subscriber.Email }}` is populated. Every other subscriber field is empty because there may be no subscriber record to read, so anything the template needs must travel in `template_data` and be read as `{{ .Tx.Data.* }}`. Omit `subscriber_mode` entirely and the field is left off the request, so behavior is unchanged on older servers.
 
 ## Media vs. transactional attachments — two different mechanisms
 

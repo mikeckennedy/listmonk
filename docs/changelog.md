@@ -3,6 +3,24 @@
 This changelog is generated automatically from [GitHub Releases](https://github.com/mikeckennedy/listmonk/releases).
 
 
+# v0.5.31
+
+*2026-07-31* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.5.31)
+
+
+## \[0.5.31\] - 2026-07-31
+
+
+### Added
+
+- Type checking with [ty](https://github.com/astral-sh/ty) as the authoritative checker: a `ty.toml` config, a `ty` dev dependency, and `tests/test_type_check.py`, which fails the suite on any diagnostic (and skips when ty isn't installed). The tree is at zero diagnostics, checked against Python 3.10 -- the floor of the supported range -- so nothing newer than 3.10 slips into the public API
+
+
+### Fixed
+
+- Fixed the type errors and removed the 13 stale `# type: ignore` comments that `ty check` reported. Two were real latent crashes in `example_client/client.py`, which used a subscriber and its UUID without checking either for `None`; the example now guards once, up front, instead of suppressing the warnings
+
+
 # v0.4.2
 
 *2026-06-10* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.2)

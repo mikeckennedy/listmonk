@@ -980,18 +980,21 @@ Raises:
 Send one-off transactional messages.
 
 
-send_transactional_email(subscriber_email: str, template_id: int, from_email: str | None = None, template_data: dict[str, Any] | None = None, messenger_channel: str = 'email', content_type: str = 'markdown', altbody: str | None = None, attachments: list[pathlib.Path] | None = None, email_headers: list[dict[str, str | None]] | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
+send_transactional_email(subscriber_email: str | list[str], template_id: int, from_email: str | None = None, template_data: dict[str, Any] | None = None, messenger_channel: str = 'email', content_type: str = 'markdown', altbody: str | None = None, attachments: list[pathlib.Path] | None = None, email_headers: list[dict[str, str | None]] | None = None, timeout_config: httpx2.Timeout | None = None, subscriber_mode: Literal['default', 'fallback', 'external'] | None = None) -> bool
 
-Send a transactional email through Listmonk to a single recipient.
+Send a transactional email through Listmonk to one or more recipients.
 
-The recipient must already be a subscriber on at least one list. Delivery
-errors may surface in the logs section of your Listmonk dashboard rather than
-as exceptions here. The subscriber_email is lowercased and stripped before sending.
+By default the recipient must already be a subscriber on at least one list
+(see subscriber_mode to relax this). Delivery errors may surface in the logs
+section of your Listmonk dashboard rather than as exceptions here. Recipient
+addresses are lowercased and stripped before sending.
 
 Args:
-    subscriber_email: The recipient's email address. Required; they must be a
-        subscriber of some list on your server.
-    template_id: The ID of the template to render. Must be a 'tx'
+    subscriber_email: The recipient's email address, or a list of addresses to
+        send to several recipients in one call. By default each recipient must
+        already be a subscriber of some list on your server; see subscriber_mode
+        to relax that. Addresses are lowercased and stripped.
+    template_id: The ID of the template to render. Required. Must be a 'tx'
         (transactional) template, not a campaign template.
     from_email: The From address. Omit to use the default address at your
         sending provider.
@@ -1007,12 +1010,21 @@ Args:
     email_headers: Optional list of custom headers, each a single-entry dict,
         e.g. [{'X-Custom': 'value'}].
     timeout_config: Optional per-request timeout; defaults to 10 seconds.
+    subscriber_mode: How the server resolves each recipient, on Listmonk
+        servers that support it. One of 'default', 'fallback', or 'external'.
+        Omit it (None) and the field is left off the request entirely, so the
+        server keeps its own default behavior of requiring a subscriber.
+        'fallback' looks the recipient up but sends anyway if not found.
+        'external' skips the lookup, so you can send to non-subscribers. In
+        'fallback' and 'external' modes, subscriber fields other than the email
+        are unavailable in templates; use {{ .Tx.Data.* }} instead.
 
 Returns:
     True if the server accepted the send, False otherwise.
 
 Raises:
-    ValueError: If subscriber_email is empty.
+    ValueError: If no recipient is given, or if a recipient list is empty or
+        contains only blank addresses.
     ListmonkFileNotFoundError: If any attachment path does not exist or is not a file.
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
@@ -1024,6 +1036,15 @@ Examples:
     ...     subscriber_email='person@example.com',
     ...     template_id=3,
     ...     template_data={'name': 'Sam'},
+    ... )
+    True
+
+    Send to several people who need not be subscribers:
+
+    >>> listmonk.send_transactional_email(
+    ...     ['one@example.com', 'two@example.com'],
+    ...     template_id=3,
+    ...     subscriber_mode='external',
     ... )
     True
 

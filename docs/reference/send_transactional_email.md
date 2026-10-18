@@ -1,7 +1,7 @@
 ## send_transactional_email()
 
 
-Send a transactional email through Listmonk to a single recipient.
+Send a transactional email through Listmonk to one or more recipients.
 
 
 Usage
@@ -17,22 +17,23 @@ send_transactional_email(
     altbody=None,
     attachments=None,
     email_headers=None,
-    timeout_config=None
+    timeout_config=None,
+    subscriber_mode=None
 )
 ```
 
 
-The recipient must already be a subscriber on at least one list. Delivery errors may surface in the logs section of your Listmonk dashboard rather than as exceptions here. The subscriber_email is lowercased and stripped before sending.
+By default the recipient must already be a subscriber on at least one list (see subscriber_mode to relax this). Delivery errors may surface in the logs section of your Listmonk dashboard rather than as exceptions here. Recipient addresses are lowercased and stripped before sending.
 
 
 ## Parameters
 
 
-`subscriber_email: str`  
-The recipient's email address. Required; they must be a subscriber of some list on your server.
+`subscriber_email: Union[str, list[str]]`  
+The recipient's email address, or a list of addresses to send to several recipients in one call. By default each recipient must already be a subscriber of some list on your server; see subscriber_mode to relax that. Addresses are lowercased and stripped.
 
 `template_id: int`  
-The ID of the template to render. Must be a 'tx' (transactional) template, not a campaign template.
+The ID of the template to render. Required. Must be a 'tx' (transactional) template, not a campaign template.
 
 `from_email: Optional[str] = None`  
 The From address. Omit to use the default address at your sending provider.
@@ -58,6 +59,9 @@ Optional list of custom headers, each a single-entry dict, e.g. \[{'X-Custom': 
 `timeout_config: Optional[httpx2.Timeout] = None`  
 Optional per-request timeout; defaults to 10 seconds.
 
+`subscriber_mode: Optional[Literal[``"default", `<span class="st">`"fallback"``, ``"external"``]]`</span>` = None`  
+How the server resolves each recipient, on Listmonk servers that support it. One of 'default', 'fallback', or 'external'. Omit it (None) and the field is left off the request entirely, so the server keeps its own default behavior of requiring a subscriber. 'fallback' looks the recipient up but sends anyway if not found. 'external' skips the lookup, so you can send to non-subscribers. In 'fallback' and 'external' modes, subscriber fields other than the email are unavailable in templates; use {{ .Tx.Data.\* }} instead.
+
 
 ## Returns
 
@@ -70,7 +74,7 @@ True if the server accepted the send, False otherwise.
 
 
 `ValueError`  
-If subscriber_email is empty.
+If no recipient is given, or if a recipient list is empty or contains only blank addresses.
 
 `ListmonkFileNotFoundError`  
 If any attachment path does not exist or is not a file.
@@ -93,6 +97,17 @@ If the response is empty or is not valid JSON.
 ...     subscriber_email='person@example.com',
 ...     template_id=3,
 ...     template_data={'name': 'Sam'},
+... )
+True
+```
+
+Send to several people who need not be subscribers:
+
+``` python
+>>> listmonk.send_transactional_email(
+...     ['one@example.com', 'two@example.com'],
+...     template_id=3,
+...     subscriber_mode='external',
 ... )
 True
 ```
