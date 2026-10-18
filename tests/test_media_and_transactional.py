@@ -101,34 +101,53 @@ def test_send_transactional_email_forwards_subscriber_mode(fake_server):
     assert payload['subscriber_mode'] == 'external'
 
 
-def test_send_transactional_email_sends_plural_recipients(fake_server):
+def test_send_transactional_email_sends_a_list_of_recipients(fake_server):
     fake_server.respond('POST', '/api/tx', json={'data': True})
 
     ok = listmonk.send_transactional_email(
-        subscriber_email=None,
+        [' One@Example.COM ', 'two@example.com'],
         template_id=3,
-        subscriber_emails=[' One@Example.COM ', 'two@example.com'],
         subscriber_mode='external',
     )
 
     assert ok is True
     payload = fake_server.last_request.json
+    # A list maps to the plural server field, and never alongside the singular one.
     assert payload['subscriber_emails'] == ['one@example.com', 'two@example.com']
     assert 'subscriber_email' not in payload
 
 
-def test_send_transactional_email_rejects_both_recipient_forms(fake_server):
-    with pytest.raises(ValueError):
-        listmonk.send_transactional_email(
-            'person@example.com',
-            template_id=3,
-            subscriber_emails=['other@example.com'],
-        )
+def test_send_transactional_email_sends_a_single_address_as_the_singular_field(fake_server):
+    fake_server.respond('POST', '/api/tx', json={'data': True})
+
+    listmonk.send_transactional_email('person@example.com', template_id=3)
+
+    payload = fake_server.last_request.json
+    assert payload['subscriber_email'] == 'person@example.com'
+    assert 'subscriber_emails' not in payload
+
+
+def test_send_transactional_email_accepts_a_one_item_list(fake_server):
+    fake_server.respond('POST', '/api/tx', json={'data': True})
+
+    listmonk.send_transactional_email(['solo@example.com'], template_id=3)
+
+    payload = fake_server.last_request.json
+    assert payload['subscriber_emails'] == ['solo@example.com']
+    assert 'subscriber_email' not in payload
 
 
 def test_send_transactional_email_requires_a_recipient(fake_server):
     with pytest.raises(ValueError):
         listmonk.send_transactional_email('   ', template_id=3)
+    assert fake_server.requests == []
+
+
+def test_send_transactional_email_rejects_an_empty_recipient_list(fake_server):
+    with pytest.raises(ValueError):
+        listmonk.send_transactional_email([], template_id=3)
+    with pytest.raises(ValueError):
+        listmonk.send_transactional_email(['  ', ''], template_id=3)
     assert fake_server.requests == []
 
 
