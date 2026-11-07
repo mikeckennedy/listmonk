@@ -33,24 +33,54 @@ def test_subscriber_by_email_handles_plus_addresses(fake_server):
     sub = listmonk.subscriber_by_email('pat+news@example.com')
 
     assert sub is not None
-    # The + must travel as %2b in the raw URL so the server doesn't read it as a space.
-    assert '%2b' in fake_server.last_request.url
+    # The + must travel percent-encoded in the raw URL so the server doesn't read it as a space.
+    assert '%2b' in fake_server.last_request.url.lower()
     assert fake_server.last_request.params['query'] == "subscribers.email='pat+news@example.com'"
 
 
-def test_subscriber_by_id_queries_by_id(fake_server):
-    fake_server.respond('GET', '/api/subscribers', json=page_json([subscriber_json()]))
+def test_subscriber_by_email_escapes_sql_quotes(fake_server):
+    # Listmonk runs the query parameter as raw SQL. A quote in the input must stay inside
+    # the string literal, or "x' OR true --" would match the first subscriber on the server.
+    fake_server.respond('GET', '/api/subscribers', json=page_json([]))
+
+    assert listmonk.subscriber_by_email("x' OR true --@example.com") is None
+
+    assert fake_server.last_request.params['query'] == "subscribers.email='x'' OR true --@example.com'"
+
+
+def test_subscriber_by_email_url_encodes_the_filter(fake_server):
+    fake_server.respond('GET', '/api/subscribers', json=page_json([]))
+
+    listmonk.subscriber_by_email('a&b=c #1@example.com')
+
+    # Everything after query= is percent-encoded, so no character can start a new parameter.
+    raw_query = fake_server.last_request.url.split('query=')[1]
+    assert '&' not in raw_query and '#' not in raw_query and ' ' not in raw_query
+    assert fake_server.last_request.params['query'] == "subscribers.email='a&b=c #1@example.com'"
+
+
+def test_subscriber_by_id_uses_the_direct_endpoint(fake_server):
+    # The direct endpoint needs no subscribers:sql_query permission, unlike a query= filter.
+    fake_server.respond('GET', '/api/subscribers/42', json={'data': subscriber_json()})
 
     sub = listmonk.subscriber_by_id(42)
 
     assert sub is not None
     assert sub.id == 42
-    assert fake_server.last_request.params['query'] == 'subscribers.id=42'
+    assert fake_server.last_request.path == '/api/subscribers/42'
+    assert 'query' not in fake_server.last_request.params
 
 
 def test_subscriber_by_id_returns_none_for_unknown_id(fake_server):
-    fake_server.respond('GET', '/api/subscribers', json=page_json([]))
+    # Listmonk answers a missing ID with 400, not 404.
+    fake_server.respond('GET', '/api/subscribers/999999', status_code=400, json={'message': 'Subscriber not found.'})
     assert listmonk.subscriber_by_id(999_999) is None
+
+
+def test_subscriber_by_id_still_raises_for_other_errors(fake_server):
+    fake_server.respond('GET', '/api/subscribers/42', status_code=403, json={'message': 'Permission denied.'})
+    with pytest.raises(httpx2.HTTPStatusError):
+        listmonk.subscriber_by_id(42)
 
 
 def test_subscriber_by_uuid_queries_by_uuid(fake_server):
@@ -61,6 +91,14 @@ def test_subscriber_by_uuid_queries_by_uuid(fake_server):
     assert sub is not None
     assert sub.uuid == 'c37786af-e6ab-4260-9b49-740a8cd6a7ed'
     assert fake_server.last_request.params['query'] == "subscribers.uuid='c37786af-e6ab-4260-9b49-740a8cd6a7ed'"
+
+
+def test_subscriber_by_uuid_escapes_sql_quotes(fake_server):
+    fake_server.respond('GET', '/api/subscribers', json=page_json([]))
+
+    assert listmonk.subscriber_by_uuid("ab' OR true --") is None
+
+    assert fake_server.last_request.params['query'] == "subscribers.uuid='ab'' OR true --'"
 
 
 def test_subscribers_fetches_all_pages(fake_server):
@@ -151,7 +189,7 @@ def test_delete_subscriber_requires_a_target(fake_server):
 def test_update_subscriber_merges_list_membership(fake_server):
     sub = models.Subscriber(**subscriber_json(lists=[{'id': 1}, {'id': 2}]))
     fake_server.respond('PUT', '/api/subscribers/42', json={'data': True})
-    fake_server.respond('GET', '/api/subscribers', json=page_json([subscriber_json()]))
+    fake_server.respond('GET', '/api/subscribers/42', json={'data': subscriber_json()})
 
     updated = listmonk.update_subscriber(sub, add_to_lists={3}, remove_from_lists={2})
 
@@ -160,6 +198,43 @@ def test_update_subscriber_merges_list_membership(fake_server):
     assert put.json['preconfirm_subscriptions'] is True
     assert updated is not None
     assert updated.id == 42
+
+
+def test_update_subscriber_keeps_the_current_status_by_default(fake_server):
+    # A PUT replaces the whole record, so a name change on a blocklisted subscriber must not
+    # quietly put them back on the mailing lists.
+    sub = models.Subscriber(**subscriber_json(status='blocklisted'))
+    sub.name = 'Still Blocked'
+    fake_server.respond('PUT', '/api/subscribers/42', json={'data': True})
+    fake_server.respond('GET', '/api/subscribers/42', json={'data': subscriber_json(status='blocklisted')})
+
+    listmonk.update_subscriber(sub)
+
+    put = next(r for r in fake_server.requests if r.method == 'PUT')
+    assert put.json['status'] == 'blocklisted'
+    assert put.json['name'] == 'Still Blocked'
+
+
+def test_update_subscriber_explicit_status_wins(fake_server):
+    sub = models.Subscriber(**subscriber_json(status='blocklisted'))
+    fake_server.respond('PUT', '/api/subscribers/42', json={'data': True})
+    fake_server.respond('GET', '/api/subscribers/42', json={'data': subscriber_json(status='enabled')})
+
+    listmonk.update_subscriber(sub, status=models.SubscriberStatuses.enabled)
+
+    put = next(r for r in fake_server.requests if r.method == 'PUT')
+    assert put.json['status'] == 'enabled'
+
+
+def test_update_subscriber_defaults_to_enabled_when_the_object_has_no_status(fake_server):
+    sub = models.Subscriber(**subscriber_json(status=None))
+    fake_server.respond('PUT', '/api/subscribers/42', json={'data': True})
+    fake_server.respond('GET', '/api/subscribers/42', json={'data': subscriber_json()})
+
+    listmonk.update_subscriber(sub)
+
+    put = next(r for r in fake_server.requests if r.method == 'PUT')
+    assert put.json['status'] == 'enabled'
 
 
 def test_update_subscriber_requires_a_saved_subscriber(fake_server):
@@ -180,7 +255,7 @@ def test_update_subscriber_requires_a_saved_subscriber(fake_server):
 def test_status_helpers_send_the_right_status(fake_server, change_status, expected):
     sub = models.Subscriber(**subscriber_json())
     fake_server.respond('PUT', '/api/subscribers/42', json={'data': True})
-    fake_server.respond('GET', '/api/subscribers', json=page_json([subscriber_json(status=expected)]))
+    fake_server.respond('GET', '/api/subscribers/42', json={'data': subscriber_json(status=expected)})
 
     updated = change_status(sub)
 

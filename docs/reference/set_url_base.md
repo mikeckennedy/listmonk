@@ -11,7 +11,7 @@ set_url_base(url)
 ```
 
 
-Each Listmonk instance lives at its own address, for example https://listmonk.somedomain.tech. This must be called before login() and any other API operation. A trailing slash, if present, is removed.
+Each Listmonk instance lives at its own address, for example https://listmonk.somedomain.tech. This must be called before login() and any other API operation. Surrounding whitespace and any trailing slashes are removed.
 
 
 ## Parameters

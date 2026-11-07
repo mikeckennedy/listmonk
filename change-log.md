@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+* `update_subscriber()` keeps the subscriber's current status unless you pass `status=`. It used to default to `enabled`, so passing back a disabled or blocklisted subscriber to change their name quietly put them back on the mailing lists. `enable_subscriber()`, `disable_subscriber()`, and `block_subscriber()` pass their status explicitly and behave as before. If you relied on the implicit re-enable, pass `status=SubscriberStatuses.enabled`
+* `subscriber_by_id()` now calls Listmonk's direct `GET /api/subscribers/{id}` endpoint instead of a SQL `query=` filter, so it no longer needs the `subscribers:sql_query` permission. Listmonk answers an unknown ID with HTTP 400, which the function still reports as `None`; any other 4xx/5xx raises `httpx2.HTTPStatusError` as before
+* `create_campaign()` no longer lowercases `from_email`, so a display name such as `Newsletter <news@example.com>` is sent as written (surrounding whitespace is still stripped). `update_campaign()` already passed the address through untouched
+* `list_by_id()` raises `listmonk.errors.ValidationError` instead of a bare `Exception` when the server's result set does not contain the requested list (the listmonk#2117 workaround path). `ValidationError` subclasses `Exception`, so existing `except Exception` handlers still catch it
+
 ### Fixed
+* `subscriber_by_email()` and `subscriber_by_uuid()` now send the lookup value as a quoted SQL literal with embedded quotes escaped, and URL-encode the whole filter. Listmonk runs the `query` parameter as a raw SQL expression, so an attacker-controlled address such as `x' OR true --` used to match the first subscriber on the server instead of nobody, and `delete_subscriber(email)` would then have deleted that subscriber
+* `send_transactional_email()` reads attachment bytes up front instead of handing open file objects to httpx2, which were never closed
+* `test_campaign()` now sends the campaign's `altbody` and custom `headers` with the test request. Listmonk copies both from the request onto the test message, so the test copy used to arrive without the plain-text twin and without the custom headers the real send carries. Media IDs are deliberately not sent: the server keeps the stored attachments and would append duplicates
+* `set_url_base()` strips surrounding whitespace before removing the trailing slash, so `'https://example.com/ '` no longer keeps its slash
 * `tests/test_type_check.py` now passes the running interpreter's environment to `ty check --python`, so the type gate finds the project's `venv/` (ty only auto-discovers `.venv`) instead of reporting every third-party import as unresolved when the venv is not activated
 * `scripts/build_docs.py` refuses to mirror a site that is missing `llms.txt`, `llms-full.txt`, `skill.md`, the `.well-known/agent-skills` files, `robots.txt`, or `sitemap.xml`, since Great Docs reports success even when it skips them
 

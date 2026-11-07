@@ -14,7 +14,8 @@ Set the base URL of your Listmonk instance for all subsequent calls.
 
 Each Listmonk instance lives at its own address, for example
 https://listmonk.somedomain.tech. This must be called before login() and
-any other API operation. A trailing slash, if present, is removed.
+any other API operation. Surrounding whitespace and any trailing slashes
+are removed.
 
 Args:
     url: The base URL of your instance, including the http:// or https://
@@ -166,7 +167,7 @@ Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
     ValidationError: If the server returns an empty or invalid JSON response.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
-    Exception: If the server returns a result set that does not contain the
+    ValidationError: If the server returns a result set that does not contain the
         requested list_id (a workaround for a known Listmonk server quirk).
 
 Examples:
@@ -310,8 +311,9 @@ subscriber_by_email(email: str, timeout_config: httpx2.Timeout | None = None) ->
 
 Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm").
 
-The email is matched exactly against ``subscribers.email`` on the server (a ``+`` in the
-address is URL-encoded automatically), and the first matching subscriber is returned.
+The email is matched exactly against ``subscribers.email`` on the server and the first
+matching subscriber is returned. The address is sent as a quoted SQL literal (embedded
+quotes escaped, the whole filter URL-encoded), so untrusted input cannot widen the match.
 
 Args:
     email: Email address of the subscriber to look up (e.g. "some_user@talkpython.fm").
@@ -335,8 +337,10 @@ subscriber_by_id(subscriber_id: int, timeout_config: httpx2.Timeout | None = Non
 
 Retrieve a single subscriber by their numeric Listmonk ID (e.g. 201).
 
-The ID is matched against ``subscribers.id`` on the server and the first matching
-subscriber is returned.
+This uses Listmonk's direct ``GET /api/subscribers/{id}`` endpoint, so unlike
+subscriber_by_email() and subscriber_by_uuid() it does not need the
+``subscribers:sql_query`` permission. Listmonk answers an unknown ID with HTTP 400,
+which is reported here as None rather than raised.
 
 Args:
     subscriber_id: Numeric ID of the subscriber to look up (e.g. 201).
@@ -348,7 +352,9 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
-    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status other than
+        the 400 it uses for an unknown ID (for example a 403 when the API user may not
+        read that subscriber's lists).
 
 Examples:
     >>> import listmonk
@@ -361,7 +367,8 @@ subscriber_by_uuid(subscriber_uuid: str, timeout_config: httpx2.Timeout | None =
 Retrieve a single subscriber by their UUID (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
 
 The UUID is matched against ``subscribers.uuid`` on the server and the first matching
-subscriber is returned.
+subscriber is returned. The value is sent as a quoted SQL literal, so a malformed UUID
+matches nothing rather than widening the filter.
 
 Args:
     subscriber_uuid: UUID of the subscriber to look up (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
@@ -420,21 +427,24 @@ Examples:
     >>> sub.id
     201
 
-update_subscriber(subscriber: listmonk.models.Subscriber, add_to_lists: set[int] | None = None, remove_from_lists: set[int] | None = None, status: listmonk.models.SubscriberStatuses = <SubscriberStatuses.enabled: 'enabled'>, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
+update_subscriber(subscriber: listmonk.models.Subscriber, add_to_lists: set[int] | None = None, remove_from_lists: set[int] | None = None, status: listmonk.models.SubscriberStatuses | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
 Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status.
 
 Final list membership is computed from the subscriber's existing lists minus ``remove_from_lists`` plus
-``add_to_lists``, and the affected subscriptions are preconfirmed. You can enable, disable, or block a subscriber
-here, but if that is all you want to do there are dedicated, simpler functions (enable_subscriber,
-disable_subscriber, block_subscriber).
+``add_to_lists``, and the affected subscriptions are preconfirmed. The subscriber keeps whatever global
+status they already have unless you pass ``status``; a disabled or blocklisted subscriber stays that way
+after a name or attribute change. You can enable, disable, or block a subscriber here, but if that is all
+you want to do there are dedicated, simpler functions (enable_subscriber, disable_subscriber,
+block_subscriber).
 
 Args:
     subscriber: The full subscriber object to update, with the changed fields already set. Must have a valid id.
     add_to_lists: List IDs to add this subscriber to. Defaults to None (treated as an empty set).
     remove_from_lists: List IDs to remove this subscriber from. Defaults to None (treated as an empty set).
-    status: The subscriber's status, one of SubscriberStatuses.enabled, .disabled, or .blocklisted.
-        Defaults to SubscriberStatuses.enabled.
+    status: The subscriber's new status, one of SubscriberStatuses.enabled, .disabled, or .blocklisted.
+        Defaults to None, which keeps the status already on ``subscriber`` (or ``enabled`` if the
+        object carries no status at all).
     timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
 Returns:
@@ -700,8 +710,9 @@ Args:
     name: The internal name of the campaign. Required.
     subject: The email subject line. Required.
     list_ids: A set of list IDs to send the campaign to. Defaults to {1}.
-    from_email: The 'From' address for campaign emails. Defaults to the
-        instance setting when not provided.
+    from_email: The 'From' address for campaign emails, either a bare address
+        or the ``Name <address>`` form; sent as written apart from surrounding
+        whitespace. Defaults to the instance setting when not provided.
     campaign_type: The campaign type, 'regular' or 'optin'.
     content_type: The body format: 'richtext', 'html', 'markdown', or 'plain'.
     body: The campaign body in the configured content type.
@@ -776,7 +787,9 @@ test_campaign(campaign_id: int, emails: list[str], timeout_config: httpx2.Timeou
 
 Send a one-off test copy of a campaign to specific addresses.
 
-The campaign is left untouched -- it stays a draft and its stats are unaffected.
+The campaign is left untouched -- it stays a draft and its stats are unaffected. The
+test copy carries the campaign's subject, body, alternate body, custom headers,
+template, and From address as saved on the server; attachments stay as stored.
 Each address must already exist as a subscriber on the instance. Listmonk does not
 create them: unknown addresses are skipped, and when none of the addresses are known
 the server rejects the request with HTTP 400 ("No known subscribers to test."), which

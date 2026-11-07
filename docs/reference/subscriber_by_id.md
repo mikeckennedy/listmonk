@@ -14,7 +14,7 @@ subscriber_by_id(
 ```
 
 
-The ID is matched against `subscribers.id` on the server and the first matching subscriber is returned.
+This uses Listmonk's direct `GET /api/subscribers/{id}` endpoint, so unlike subscriber_by_email() and subscriber_by_uuid() it does not need the `subscribers:sql_query` permission. Listmonk answers an unknown ID with HTTP 400, which is reported here as None rather than raised.
 
 
 ## Parameters
@@ -44,7 +44,7 @@ If the base URL has not been set or you have not logged in.
 If the server returns an empty body or invalid JSON.
 
 `httpx2.HTTPStatusError`  
-If the server responds with a 4xx or 5xx status.
+If the server responds with a 4xx or 5xx status other than the 400 it uses for an unknown ID (for example a 403 when the API user may not read that subscriber's lists).
 
 
 ## Examples

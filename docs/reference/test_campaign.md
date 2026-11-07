@@ -15,7 +15,7 @@ test_campaign(
 ```
 
 
-The campaign is left untouched - it stays a draft and its stats are unaffected. Each address must already exist as a subscriber on the instance. Listmonk does not create them: unknown addresses are skipped, and when none of the addresses are known the server rejects the request with HTTP 400 ("No known subscribers to test."), which surfaces here as httpx2.HTTPStatusError.
+The campaign is left untouched - it stays a draft and its stats are unaffected. The test copy carries the campaign's subject, body, alternate body, custom headers, template, and From address as saved on the server; attachments stay as stored. Each address must already exist as a subscriber on the instance. Listmonk does not create them: unknown addresses are skipped, and when none of the addresses are known the server rejects the request with HTTP 400 ("No known subscribers to test."), which surfaces here as httpx2.HTTPStatusError.
 
 
 ## Parameters

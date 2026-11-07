@@ -12,6 +12,12 @@ def test_set_url_base_stores_and_strips_trailing_slash():
     assert listmonk.get_base_url() == 'https://lm.example.com'
 
 
+def test_set_url_base_strips_whitespace_before_the_trailing_slash():
+    # Whitespace used to be stripped after the slash check, leaving the slash in place.
+    listmonk.set_url_base('  https://lm.example.com/  ')
+    assert listmonk.get_base_url() == 'https://lm.example.com'
+
+
 @pytest.mark.parametrize('bad_url', ['', '   '])
 def test_set_url_base_rejects_empty_urls(bad_url):
     with pytest.raises(errors.ValidationError):

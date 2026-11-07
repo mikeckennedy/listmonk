@@ -43,7 +43,7 @@ If the server returns an empty or invalid JSON response.
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
 
-`Exception`  
+`ValidationError`  
 If the server returns a result set that does not contain the requested list_id (a workaround for a known Listmonk server quirk).
 
 

@@ -14,7 +14,7 @@ subscriber_by_uuid(
 ```
 
 
-The UUID is matched against `subscribers.uuid` on the server and the first matching subscriber is returned.
+The UUID is matched against `subscribers.uuid` on the server and the first matching subscriber is returned. The value is sent as a quoted SQL literal, so a malformed UUID matches nothing rather than widening the filter.
 
 
 ## Parameters

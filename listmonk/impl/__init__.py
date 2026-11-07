@@ -62,6 +62,26 @@ def _validate_and_parse_json_response(resp: httpx2.Response) -> dict[str, Any]:
         raise ValidationError(f'Invalid JSON response from server: {e}')
 
 
+def _subscriber_filter(column: str, value: str) -> str:
+    """
+    Build the ``query=`` parameter for an exact match on one subscribers column.
+
+    Listmonk runs the ``query`` parameter as a raw SQL expression, so the value is
+    quoted as a SQL string literal (embedded single quotes doubled) and the whole
+    expression is URL-encoded. Without that, a value like ``x' OR true --`` would
+    match the first subscriber on the server instead of nobody.
+
+    Args:
+        column: The column to compare, e.g. ``'email'`` or ``'uuid'``.
+        value: The exact value to match.
+
+    Returns:
+        A ``query=...`` string ready to append to the subscribers URL.
+    """
+    literal = value.replace("'", "''")
+    return urllib.parse.urlencode({'query': f"subscribers.{column}='{literal}'"})
+
+
 # region def get_base_url() -> Optional[str]
 
 
@@ -98,7 +118,8 @@ def set_url_base(url: str) -> None:
 
     Each Listmonk instance lives at its own address, for example
     https://listmonk.somedomain.tech. This must be called before login() and
-    any other API operation. A trailing slash, if present, is removed.
+    any other API operation. Surrounding whitespace and any trailing slashes
+    are removed.
 
     Args:
         url: The base URL of your instance, including the http:// or https://
@@ -114,7 +135,8 @@ def set_url_base(url: str) -> None:
         >>> listmonk.login('admin', 'super-secret')
         True
     """
-    if not url or not url.strip():
+    url = (url or '').strip()
+    if not url:
         raise ValidationError('URL must not be empty.')
 
     # noinspection HttpUrlsUsage
@@ -122,11 +144,8 @@ def set_url_base(url: str) -> None:
         # noinspection HttpUrlsUsage
         raise ValidationError('The url must start with the HTTP scheme (http:// or https://).')
 
-    if url.endswith('/'):
-        url = url.rstrip('/')
-
     global url_base
-    url_base = url.strip()
+    url_base = url.rstrip('/')
 
 
 # endregion
@@ -252,7 +271,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) ->
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         ValidationError: If the server returns an empty or invalid JSON response.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
-        Exception: If the server returns a result set that does not contain the
+        ValidationError: If the server returns a result set that does not contain the
             requested list_id (a workaround for a known Listmonk server quirk).
 
     Examples:
@@ -291,7 +310,7 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) ->
                 break
 
         if not found:
-            raise Exception(f'List with ID {list_id} not found.')
+            raise ValidationError(f'List with ID {list_id} not found.')
 
     return models.MailingList(**lst_data)
 
@@ -408,8 +427,9 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = N
     """
     Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm").
 
-    The email is matched exactly against ``subscribers.email`` on the server (a ``+`` in the
-    address is URL-encoded automatically), and the first matching subscriber is returned.
+    The email is matched exactly against ``subscribers.email`` on the server and the first
+    matching subscriber is returned. The address is sent as a quoted SQL literal (embedded
+    quotes escaped, the whole filter URL-encoded), so untrusted input cannot widen the match.
 
     Args:
         email: Email address of the subscriber to look up (e.g. "some_user@talkpython.fm").
@@ -433,9 +453,8 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = N
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
-    encoded_email = email.replace('+', '%2b')
     # noinspection DuplicatedCode
-    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.email='{encoded_email}'"
+    url = f'{url_base}{urls.subscribers}?page=1&per_page=100&{_subscriber_filter("email", email)}'
 
     resp = httpx2.get(
         url,
@@ -464,8 +483,10 @@ def subscriber_by_id(
     """
     Retrieve a single subscriber by their numeric Listmonk ID (e.g. 201).
 
-    The ID is matched against ``subscribers.id`` on the server and the first matching
-    subscriber is returned.
+    This uses Listmonk's direct ``GET /api/subscribers/{id}`` endpoint, so unlike
+    subscriber_by_email() and subscriber_by_uuid() it does not need the
+    ``subscribers:sql_query`` permission. Listmonk answers an unknown ID with HTTP 400,
+    which is reported here as None rather than raised.
 
     Args:
         subscriber_id: Numeric ID of the subscriber to look up (e.g. 201).
@@ -477,7 +498,9 @@ def subscriber_by_id(
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
-        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status other than
+            the 400 it uses for an unknown ID (for example a 403 when the API user may not
+            read that subscriber's lists).
 
     Examples:
         >>> import listmonk
@@ -489,7 +512,7 @@ def subscriber_by_id(
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
 
-    url = f'{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.id={subscriber_id}'
+    url = f'{url_base}{urls.subscriber.format(subscriber_id=subscriber_id)}'
 
     # noinspection DuplicatedCode
     resp = httpx2.get(
@@ -499,13 +522,16 @@ def subscriber_by_id(
         follow_redirects=True,
         timeout=timeout_config,
     )
-    raw_data = _validate_and_parse_json_response(resp)
-    results: list[dict[str, Any]] = raw_data['data']['results']
-
-    if not results:
+    if resp.status_code == 400:
+        # Listmonk reports an unknown subscriber ID as 400 Bad Request, not 404.
         return None
 
-    return models.Subscriber(**results[0])
+    raw_data = _validate_and_parse_json_response(resp)
+    sub_data = raw_data.get('data')
+    if not sub_data:
+        return None
+
+    return models.Subscriber(**sub_data)
 
 
 # endregion
@@ -520,7 +546,8 @@ def subscriber_by_uuid(
     Retrieve a single subscriber by their UUID (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
 
     The UUID is matched against ``subscribers.uuid`` on the server and the first matching
-    subscriber is returned.
+    subscriber is returned. The value is sent as a quoted SQL literal, so a malformed UUID
+    matches nothing rather than widening the filter.
 
     Args:
         subscriber_uuid: UUID of the subscriber to look up (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
@@ -545,7 +572,7 @@ def subscriber_by_uuid(
     validate_state(url=True)
 
     # noinspection DuplicatedCode
-    url = f"{url_base}{urls.subscribers}?page=1&per_page=100&query=subscribers.uuid='{subscriber_uuid}'"
+    url = f'{url_base}{urls.subscribers}?page=1&per_page=100&{_subscriber_filter("uuid", subscriber_uuid)}'
 
     resp = httpx2.get(
         url,
@@ -853,30 +880,33 @@ def add_subscribers_to_lists(
 
 # endregion
 
-# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: Optional[set[int]] = None, remove_from_lists: Optional[set[int]] = None, status: SubscriberStatuses = SubscriberStatuses.enabled, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
+# region def update_subscriber(subscriber: models.Subscriber, add_to_lists: Optional[set[int]] = None, remove_from_lists: Optional[set[int]] = None, status: Optional[SubscriberStatuses] = None, timeout_config: Optional[httpx2.Timeout] = None) -> Optional[models.Subscriber]  # noqa: E501
 
 
 def update_subscriber(
     subscriber: models.Subscriber,
     add_to_lists: Optional[set[int]] = None,
     remove_from_lists: Optional[set[int]] = None,
-    status: SubscriberStatuses = SubscriberStatuses.enabled,
+    status: Optional[SubscriberStatuses] = None,
     timeout_config: Optional[httpx2.Timeout] = None,
 ) -> Optional[models.Subscriber]:
     """
     Update many aspects of a subscriber: email and name, custom attribute data, list membership, and status.
 
     Final list membership is computed from the subscriber's existing lists minus ``remove_from_lists`` plus
-    ``add_to_lists``, and the affected subscriptions are preconfirmed. You can enable, disable, or block a subscriber
-    here, but if that is all you want to do there are dedicated, simpler functions (enable_subscriber,
-    disable_subscriber, block_subscriber).
+    ``add_to_lists``, and the affected subscriptions are preconfirmed. The subscriber keeps whatever global
+    status they already have unless you pass ``status``; a disabled or blocklisted subscriber stays that way
+    after a name or attribute change. You can enable, disable, or block a subscriber here, but if that is all
+    you want to do there are dedicated, simpler functions (enable_subscriber, disable_subscriber,
+    block_subscriber).
 
     Args:
         subscriber: The full subscriber object to update, with the changed fields already set. Must have a valid id.
         add_to_lists: List IDs to add this subscriber to. Defaults to None (treated as an empty set).
         remove_from_lists: List IDs to remove this subscriber from. Defaults to None (treated as an empty set).
-        status: The subscriber's status, one of SubscriberStatuses.enabled, .disabled, or .blocklisted.
-            Defaults to SubscriberStatuses.enabled.
+        status: The subscriber's new status, one of SubscriberStatuses.enabled, .disabled, or .blocklisted.
+            Defaults to None, which keeps the status already on ``subscriber`` (or ``enabled`` if the
+            object carries no status at all).
         timeout_config: Optional per-request timeout; defaults to 10 seconds.
 
     Returns:
@@ -910,6 +940,11 @@ def update_subscriber(
     existing_lists = {int(lst['id']) for lst in subscriber.lists}
     final_lists = existing_lists - remove_from_lists
     final_lists.update(add_to_lists)
+
+    if status is None:
+        # Listmonk's PUT replaces the whole record, so re-send the status the caller already
+        # has rather than silently re-enabling a disabled or blocklisted subscriber.
+        status = SubscriberStatuses(subscriber.status) if subscriber.status else SubscriberStatuses.enabled
 
     update_model = models.CreateSubscriberModel(
         email=subscriber.email,
@@ -1175,7 +1210,9 @@ def send_transactional_email(
         if attachments:
             # Multiple files can be uploaded in one go as per the advanced httpx docs
             # https://www.python-httpx.org/advanced/clients/#multipart-file-encoding
-            files = [('file', (attachment.name, open(attachment, 'rb'))) for attachment in attachments]
+            # Read the bytes up front rather than handing open file objects to httpx2, so
+            # nothing is left open after the request (or after an exception).
+            files = [('file', (attachment.name, attachment.read_bytes())) for attachment in attachments]
             # Data has to be sent as form field named data as per the listmonk API docs
             # https://listmonk.app/docs/apis/transactional/#file-attachments
             data = {
@@ -1625,8 +1662,9 @@ def create_campaign(
         name: The internal name of the campaign. Required.
         subject: The email subject line. Required.
         list_ids: A set of list IDs to send the campaign to. Defaults to {1}.
-        from_email: The 'From' address for campaign emails. Defaults to the
-            instance setting when not provided.
+        from_email: The 'From' address for campaign emails, either a bare address
+            or the ``Name <address>`` form; sent as written apart from surrounding
+            whitespace. Defaults to the instance setting when not provided.
         campaign_type: The campaign type, 'regular' or 'optin'.
         content_type: The body format: 'richtext', 'html', 'markdown', or 'plain'.
         body: The campaign body in the configured content type.
@@ -1668,7 +1706,8 @@ def create_campaign(
 
     validate_state(url=True)
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
-    from_email = (from_email or '').lower().strip()
+    # Only strip: a display-name form like 'Newsletter <news@example.com>' keeps its case.
+    from_email = (from_email or '').strip()
     name = (name or '').strip()
     if not name:
         raise ValueError('Name is required')
@@ -2036,7 +2075,9 @@ def test_campaign(
     """
     Send a one-off test copy of a campaign to specific addresses.
 
-    The campaign is left untouched -- it stays a draft and its stats are unaffected.
+    The campaign is left untouched -- it stays a draft and its stats are unaffected. The
+    test copy carries the campaign's subject, body, alternate body, custom headers,
+    template, and From address as saved on the server; attachments stay as stored.
     Each address must already exist as a subscriber on the instance. Listmonk does not
     create them: unknown addresses are skipped, and when none of the addresses are known
     the server rejects the request with HTTP 400 ("No known subscribers to test."), which
@@ -2078,7 +2119,11 @@ def test_campaign(
         return False
 
     # The test endpoint re-validates the whole campaign, so it wants the full body
-    # back rather than just the recipient list.
+    # back rather than just the recipient list. Listmonk copies subject, body, altbody,
+    # headers, from_email, messenger, content_type, and template_id from this request
+    # onto the test message; anything omitted would make the test differ from the real
+    # send. Media IDs are deliberately not sent: the server appends them to the stored
+    # attachments, so re-sending them would attach every file twice.
     data = {
         'subscribers': emails,
         'name': campaign.name,
@@ -2089,6 +2134,8 @@ def test_campaign(
         'messenger': campaign.messenger or 'email',
         'type': campaign.type or 'regular',
         'body': campaign.body,
+        'altbody': campaign.altbody,
+        'headers': campaign.headers,
         'template_id': campaign.template_id,
     }
 

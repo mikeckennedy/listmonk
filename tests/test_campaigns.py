@@ -70,6 +70,14 @@ def test_create_campaign_serializes_the_scheduled_send_time(fake_server):
     assert datetime.datetime.fromisoformat(sent) == send_at
 
 
+def test_create_campaign_keeps_the_from_address_as_written(fake_server):
+    fake_server.respond('POST', '/api/campaigns', json={'data': campaign_json()})
+
+    listmonk.create_campaign('Launch', 'Live', from_email='  Talk Python <News@TalkPython.fm> ')
+
+    assert fake_server.last_request.json['from_email'] == 'Talk Python <News@TalkPython.fm>'
+
+
 @pytest.mark.parametrize('name, subject', [('', 'Subject'), ('   ', 'Subject'), ('Name', '')])
 def test_create_campaign_requires_name_and_subject(fake_server, name, subject):
     with pytest.raises(ValueError):
@@ -145,7 +153,13 @@ def test_update_campaign_requires_a_saved_campaign(fake_server):
 
 
 def test_test_campaign_posts_the_campaign_body_with_the_recipients(fake_server):
-    fake_server.respond('GET', '/api/campaigns/7', json={'data': campaign_json(lists=[{'id': 1}, {'id': 2}])})
+    stored = campaign_json(
+        lists=[{'id': 1}, {'id': 2}],
+        altbody='Plain text twin',
+        headers=[{'X-Campaign': 'june'}],
+        media=[{'id': 5, 'filename': 'deck.pdf'}],
+    )
+    fake_server.respond('GET', '/api/campaigns/7', json={'data': stored})
     fake_server.respond('POST', '/api/campaigns/7/test', json={'data': True})
 
     assert listmonk.test_campaign(7, ['pat@example.com', 'sam@example.com']) is True
@@ -160,6 +174,11 @@ def test_test_campaign_posts_the_campaign_body_with_the_recipients(fake_server):
     assert payload['subject'] == 'Our June Update'
     assert payload['body'] == '# Big news\n\nHello there!'
     assert payload['template_id'] == 1
+    # The test copy must match the real send: altbody and headers travel with it.
+    assert payload['altbody'] == 'Plain text twin'
+    assert payload['headers'] == [{'X-Campaign': 'june'}]
+    # Media IDs stay out: the server keeps stored attachments and would append duplicates.
+    assert 'media' not in payload
 
 
 def test_test_campaign_surfaces_unknown_recipients_as_an_http_error(fake_server):

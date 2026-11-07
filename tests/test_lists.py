@@ -4,7 +4,7 @@ import pytest
 from factories import mailing_list_json, page_json
 
 import listmonk
-from listmonk import models
+from listmonk import errors, models
 
 pytestmark = pytest.mark.usefixtures('logged_in')
 
@@ -49,7 +49,7 @@ def test_list_by_id_picks_the_requested_list_from_results(fake_server):
 
 def test_list_by_id_raises_when_the_list_is_missing(fake_server):
     fake_server.respond('GET', '/api/lists/99', json={'data': {'results': [mailing_list_json()]}})
-    with pytest.raises(Exception, match='99 not found'):
+    with pytest.raises(errors.ValidationError, match='99 not found'):
         listmonk.list_by_id(99)
 
 

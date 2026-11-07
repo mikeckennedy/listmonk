@@ -14,7 +14,7 @@ subscriber_by_email(
 ```
 
 
-The email is matched exactly against `subscribers.email` on the server (a `+` in the address is URL-encoded automatically), and the first matching subscriber is returned.
+The email is matched exactly against `subscribers.email` on the server and the first matching subscriber is returned. The address is sent as a quoted SQL literal (embedded quotes escaped, the whole filter URL-encoded), so untrusted input cannot widen the match.
 
 
 ## Parameters

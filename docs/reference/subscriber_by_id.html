@@ -692,7 +692,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L461-L508" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/mikeckennedy/listmonk/blob/main/listmonk/impl/__init__.py#L480-L534" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">subscriber_by_id</span>(
@@ -701,7 +701,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 )</span></code></pre></div>
 </div>
 <div class="doc-text">
-<p>The ID is matched against <code>subscribers.id</code> on the server and the first matching subscriber is returned.</p>
+<p>This uses Listmonk’s direct <code>GET /api/subscribers/{id}</code> endpoint, so unlike subscriber_by_email() and subscriber_by_uuid() it does not need the <code>subscribers:sql_query</code> permission. Listmonk answers an unknown ID with HTTP 400, which is reported here as None rather than raised.</p>
 </div>
 <section id="parameters" class="level2 doc-parameters">
 <h2 class="doc-parameters">Parameters</h2>
@@ -743,7 +743,7 @@ The matching models.Subscriber, or None if no subscriber has that ID.
 </dd>
 <dt><code> <span class="doc-parameter-annotation">httpx2.HTTPStatusError</span></code></dt>
 <dd>
-If the server responds with a 4xx or 5xx status.
+If the server responds with a 4xx or 5xx status other than the 400 it uses for an unknown ID (for example a 403 when the API user may not read that subscriber’s lists).
 </dd>
 </dl>
 </div>

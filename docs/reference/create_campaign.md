@@ -43,7 +43,7 @@ The email subject line. Required.
 A set of list IDs to send the campaign to. Defaults to {1}.
 
 `from_email: Optional[str] = None`  
-The 'From' address for campaign emails. Defaults to the instance setting when not provided.
+The 'From' address for campaign emails, either a bare address or the `Name <address>` form; sent as written apart from surrounding whitespace. Defaults to the instance setting when not provided.
 
 `campaign_type: Optional[str] = None`  
 The campaign type, 'regular' or 'optin'.

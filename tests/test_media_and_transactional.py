@@ -170,7 +170,9 @@ def test_send_transactional_email_with_attachment_switches_to_multipart(fake_ser
     message = json.loads(request.data['data'])
     assert message['subscriber_email'] == 'person@example.com'
     assert message['template_id'] == 3
-    field_name, (sent_name, _file_obj) = request.files[0]
+    field_name, (sent_name, sent_bytes) = request.files[0]
     assert field_name == 'file'
     assert sent_name == 'report.pdf'
+    # Bytes, not an open file handle, so nothing stays open after the request.
+    assert sent_bytes == b'%PDF fake report'
     assert 'Content-Type' not in request.headers

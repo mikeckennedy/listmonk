@@ -273,7 +273,7 @@ httpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.l
 
 It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.
 
-**Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)] The single-subscriber lookups (`subscriber_by_email()` and friends) use this same query mechanism, so they need the permission too. Filtering with `subscribers(list_id=...)` alone does not.
+**Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)] `subscriber_by_email()` and `subscriber_by_uuid()` use this same query mechanism, so they need the permission too. `subscriber_by_id()` and `subscribers(list_id=...)` do not.
 
 ### test_campaign() raised 400 Bad Request: No known subscribers to test
 
