@@ -33,6 +33,16 @@ Sending was stopped and will not resume.
 All messages have been sent.
 
 
+## Examples
+
+``` python
+>>> import listmonk
+>>> from listmonk.models import CampaignStatuses
+>>> listmonk.set_campaign_status(7, CampaignStatuses.running).status
+'running'
+```
+
+
 ## Attributes
 
 | Name | Description |
@@ -58,6 +68,10 @@ The lifecycle status of a campaign.
 
 Attributes: draft: Created but not queued; safe to edit. scheduled: Will start automatically at the campaign's send_at time. running: Actively sending to the target lists. paused: Sending has been halted and can be resumed. cancelled: Sending was stopped and will not resume. finished: All messages have been sent.
 
+##### Examples
+
+\`\`\`python \>\>\> import listmonk \>\>\> from listmonk.models import CampaignStatuses \>\>\> listmonk.set_campaign_status(7, CampaignStatuses.running).status
+
 
 ------------------------------------------------------------------------
 
@@ -72,6 +86,10 @@ The lifecycle status of a campaign.
 
 
 Attributes: draft: Created but not queued; safe to edit. scheduled: Will start automatically at the campaign's send_at time. running: Actively sending to the target lists. paused: Sending has been halted and can be resumed. cancelled: Sending was stopped and will not resume. finished: All messages have been sent.
+
+##### Examples
+
+\`\`\`python \>\>\> import listmonk \>\>\> from listmonk.models import CampaignStatuses \>\>\> listmonk.set_campaign_status(7, CampaignStatuses.running).status
 
 
 ------------------------------------------------------------------------
@@ -88,6 +106,10 @@ The lifecycle status of a campaign.
 
 Attributes: draft: Created but not queued; safe to edit. scheduled: Will start automatically at the campaign's send_at time. running: Actively sending to the target lists. paused: Sending has been halted and can be resumed. cancelled: Sending was stopped and will not resume. finished: All messages have been sent.
 
+##### Examples
+
+\`\`\`python \>\>\> import listmonk \>\>\> from listmonk.models import CampaignStatuses \>\>\> listmonk.set_campaign_status(7, CampaignStatuses.running).status
+
 
 ------------------------------------------------------------------------
 
@@ -102,6 +124,10 @@ The lifecycle status of a campaign.
 
 
 Attributes: draft: Created but not queued; safe to edit. scheduled: Will start automatically at the campaign's send_at time. running: Actively sending to the target lists. paused: Sending has been halted and can be resumed. cancelled: Sending was stopped and will not resume. finished: All messages have been sent.
+
+##### Examples
+
+\`\`\`python \>\>\> import listmonk \>\>\> from listmonk.models import CampaignStatuses \>\>\> listmonk.set_campaign_status(7, CampaignStatuses.running).status
 
 
 ------------------------------------------------------------------------
@@ -118,6 +144,10 @@ The lifecycle status of a campaign.
 
 Attributes: draft: Created but not queued; safe to edit. scheduled: Will start automatically at the campaign's send_at time. running: Actively sending to the target lists. paused: Sending has been halted and can be resumed. cancelled: Sending was stopped and will not resume. finished: All messages have been sent.
 
+##### Examples
+
+\`\`\`python \>\>\> import listmonk \>\>\> from listmonk.models import CampaignStatuses \>\>\> listmonk.set_campaign_status(7, CampaignStatuses.running).status
+
 
 ------------------------------------------------------------------------
 
@@ -132,3 +162,7 @@ The lifecycle status of a campaign.
 
 
 Attributes: draft: Created but not queued; safe to edit. scheduled: Will start automatically at the campaign's send_at time. running: Actively sending to the target lists. paused: Sending has been halted and can be resumed. cancelled: Sending was stopped and will not resume. finished: All messages have been sent.
+
+##### Examples
+
+\`\`\`python \>\>\> import listmonk \>\>\> from listmonk.models import CampaignStatuses \>\>\> listmonk.set_campaign_status(7, CampaignStatuses.running).status

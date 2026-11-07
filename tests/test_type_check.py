@@ -10,6 +10,7 @@ skips rather than fails, so the suite still runs on a bare install.
 
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -30,8 +31,15 @@ def test_ty_reports_no_diagnostics():
     if ty is None:
         pytest.skip('ty is not installed; run `pip install -e .[dev]` to enable the type-check gate')
 
+    # Point ty at the environment running this test. ty only auto-discovers a `.venv`
+    # directory (or an active VIRTUAL_ENV); this repo's environment lives in `venv/`,
+    # so without this every third-party import is reported as unresolved.
+    command = [ty, 'check', '--output-format', 'concise']
+    if sys.prefix != sys.base_prefix:
+        command += ['--python', sys.prefix]
+
     result = subprocess.run(
-        [ty, 'check', '--output-format', 'concise'],
+        command,
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

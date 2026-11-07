@@ -14,6 +14,17 @@ models.UpdateCampaignModel()
 Shares all fields with [CreateCampaignModel](models.CreateCampaignModel.md#listmonk.models.CreateCampaignModel). As a safeguard, a `send_at` value that is already in the past is dropped (set to `None`) before sending, so that updating a campaign does not fail on a stale scheduled time.
 
 
+## Examples
+
+``` python
+>>> import datetime
+>>> from listmonk.models import UpdateCampaignModel
+>>> stale = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
+>>> UpdateCampaignModel(template_id=1, send_at=stale).send_at is None
+True
+```
+
+
 ## Methods
 
 | Name | Description |

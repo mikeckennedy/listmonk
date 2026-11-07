@@ -23,6 +23,17 @@ REPO_ROOT = PKG_DIR  # the package lives at the git root, so docs/ is committed 
 SITE = PKG_DIR / 'great-docs' / '_site'
 DEST = REPO_ROOT / 'docs'
 
+# Files the published site must contain for agents and crawlers; see great-docs.yml.
+REQUIRED_OUTPUTS = (
+    'llms.txt',
+    'llms-full.txt',
+    'skill.md',
+    '.well-known/agent-skills/index.json',
+    '.well-known/agent-skills/listmonk/SKILL.md',
+    'robots.txt',
+    'sitemap.xml',
+)
+
 
 def main() -> int:
     # Prefer the great-docs next to the Python running this script (the venv), so the
@@ -34,6 +45,14 @@ def main() -> int:
 
     if not SITE.is_dir():
         print(f'build output missing: {SITE}', file=sys.stderr)
+        return 1
+
+    # Great Docs reports success even when it could not produce the agent-facing files
+    # (for example, llms-full.txt is skipped with a one-line notice if the package fails
+    # to import in the build environment). Refuse to publish a site without them.
+    missing = [name for name in REQUIRED_OUTPUTS if not (SITE / name).is_file()]
+    if missing:
+        print(f'build output is missing required files: {", ".join(missing)}', file=sys.stderr)
         return 1
 
     if DEST.exists():

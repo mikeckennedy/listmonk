@@ -15,7 +15,7 @@ test_campaign(
 ```
 
 
-The campaign is left untouched - it stays a draft and its stats are unaffected. Each address must already exist as a subscriber on the instance; Listmonk will not create them, and a test to an unknown address silently delivers nothing.
+The campaign is left untouched - it stays a draft and its stats are unaffected. Each address must already exist as a subscriber on the instance. Listmonk does not create them: unknown addresses are skipped, and when none of the addresses are known the server rejects the request with HTTP 400 ("No known subscribers to test."), which surfaces here as httpx2.HTTPStatusError.
 
 
 ## Parameters
@@ -50,7 +50,7 @@ If `campaign_id` is falsy or `emails` is empty.
 If the base URL is not set or you have not logged in.
 
 `httpx2.HTTPStatusError`  
-If the server responds with a 4xx or 5xx status.
+If the server responds with a 4xx or 5xx status, including a 400 when none of `emails` belong to an existing subscriber.
 
 `ValidationError`  
 If the server returns an empty body or invalid JSON.

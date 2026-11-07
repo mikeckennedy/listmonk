@@ -43,3 +43,12 @@ error status.
 
 `OperationNotAllowedError`  
 If the base URL is not set or you are not logged in.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.add_subscribers_to_lists([201, 202], [4, 6])
+True
+```

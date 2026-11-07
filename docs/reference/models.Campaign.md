@@ -85,3 +85,13 @@ Custom email headers to include, each as a single-entry dict.
 
 `media: Optional[list[dict[str, Any]]]`  
 The media files attached to the campaign, each as a dict describing the file (id, filename, and so on), or `None` if there are none.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> campaign = listmonk.campaign_by_id(7)
+>>> campaign.status, campaign.sent, campaign.to_send
+('draft', 0, 1500)
+```

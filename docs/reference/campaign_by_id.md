@@ -44,3 +44,13 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the server returns an empty body or invalid JSON.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> campaign = listmonk.campaign_by_id(7)
+>>> campaign.status if campaign else None
+'draft'
+```

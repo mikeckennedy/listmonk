@@ -42,3 +42,12 @@ If the base URL has not been set or you have not logged in.
 
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.template_preview_by_id(3).preview[:15]
+'<!doctype html>'
+```

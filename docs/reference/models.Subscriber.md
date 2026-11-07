@@ -40,3 +40,13 @@ Arbitrary custom attributes stored against the subscriber.
 
 `status: Optional[str]`  
 The subscriber's global status, e.g. [enabled](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.enabled), [disabled](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.disabled), or [blocklisted](models.SubscriberStatuses.md#listmonk.models.SubscriberStatuses.blocklisted).
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+>>> sub.attribs['city'], [lst['id'] for lst in sub.lists]
+('Portland', [1, 4])
+```

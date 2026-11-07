@@ -24,6 +24,12 @@ Raises:
     ValidationError: If url is empty or whitespace, or if it does not
         start with the http:// or https:// scheme.
 
+Examples:
+    >>> import listmonk
+    >>> listmonk.set_url_base('https://listmonk.somedomain.tech')
+    >>> listmonk.login('admin', 'super-secret')
+    True
+
 get_base_url() -> str | None
 
 Return the configured base URL of your Listmonk instance.
@@ -35,6 +41,12 @@ previously stored by set_url_base().
 Returns:
     The base URL of your instance (without a trailing slash), or None if
     set_url_base() has not been called yet.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.set_url_base('https://listmonk.somedomain.tech/')
+    >>> listmonk.get_base_url()
+    'https://listmonk.somedomain.tech'
 
 login(user_name: str, pw: str, timeout_config: httpx2.Timeout | None = None) -> bool
 
@@ -81,6 +93,11 @@ Args:
 Returns:
     True if the stored credentials are still valid, False otherwise.
 
+Examples:
+    >>> import listmonk
+    >>> listmonk.verify_login()
+    True
+
 is_healthy(timeout_config: httpx2.Timeout | None = None) -> bool
 
 Check whether the server is reachable and the stored credentials are valid.
@@ -97,6 +114,11 @@ Args:
 Returns:
     True if the server responded healthy with valid credentials, False
     otherwise.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.is_healthy()
+    True
 
 
 ## Mailing Lists
@@ -123,6 +145,12 @@ Raises:
     ValidationError: If the server returns an empty or invalid JSON response.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
+Examples:
+    >>> import listmonk
+    >>> for lst in listmonk.lists():
+    ...     print(lst.id, lst.name, lst.subscriber_count)
+    1 Main Newsletter 1250
+
 list_by_id(list_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList
 
 Get the full details of a single mailing list by its ID.
@@ -140,6 +168,12 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     Exception: If the server returns a result set that does not contain the
         requested list_id (a workaround for a known Listmonk server quirk).
+
+Examples:
+    >>> import listmonk
+    >>> lst = listmonk.list_by_id(7)
+    >>> lst.name, lst.optin
+    ('Course Announcements', 'double')
 
 create_list(list_name: str, list_type: str = 'public', optin: str = 'single', tags: list[str] | None = None, description: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.MailingList
 
@@ -201,6 +235,12 @@ Raises:
     ValidationError: If the server returns an empty or invalid JSON response.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
+Examples:
+    >>> import listmonk
+    >>> lst = listmonk.update_list(7, list_name='Course News', optin='double')
+    >>> lst.name, lst.optin
+    ('Course News', 'double')
+
 delete_list(list_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Delete a mailing list by its ID.
@@ -223,6 +263,11 @@ Raises:
     ValidationError: If the server returns an empty or invalid JSON response.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status,
         including when the existence check finds no list with the given ID.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.delete_list(7)
+    True
 
 
 ## Subscribers
@@ -254,6 +299,13 @@ Raises:
     ValidationError: If the server returns an empty body or invalid JSON.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
+Examples:
+    >>> import listmonk
+    >>> on_list = listmonk.subscribers(list_id=3)
+    >>> in_portland = listmonk.subscribers(query_text="subscribers.attribs->>'city' = 'Portland'")
+    >>> len(on_list), len(in_portland)
+    (1250, 42)
+
 subscriber_by_email(email: str, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
 Retrieve a single subscriber by their email address (e.g. "some_user@talkpython.fm").
@@ -272,6 +324,12 @@ Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> sub.id if sub else None
+    201
 
 subscriber_by_id(subscriber_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
@@ -292,6 +350,12 @@ Raises:
     ValidationError: If the server returns an empty body or invalid JSON.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
 
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_id(201)
+    >>> sub.email if sub else None
+    'some_user@talkpython.fm'
+
 subscriber_by_uuid(subscriber_uuid: str, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
 Retrieve a single subscriber by their UUID (e.g. "c37786af-e6ab-4260-9b49-740adpcm6ed").
@@ -310,6 +374,12 @@ Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     ValidationError: If the server returns an empty body or invalid JSON.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_uuid('c37786af-e6ab-4260-9b49-740a8cd6a7ed')
+    >>> sub.email if sub else None
+    'some_user@talkpython.fm'
 
 create_subscriber(email: str, name: str | None = None, list_ids: set[int] | None = None, pre_confirm: bool = False, attribs: dict[str, Any] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber
 
@@ -377,6 +447,15 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> sub.name = 'Some User'
+    >>> sub.attribs['rating'] = 7
+    >>> sub = listmonk.update_subscriber(sub, add_to_lists={4}, remove_from_lists={5})
+    >>> sub.attribs['rating']
+    7
+
 add_subscribers_to_lists(subscriber_ids: Iterable[int], list_ids: Iterable[int], timeout_config: httpx2.Timeout | None = None, status: str = 'confirmed') -> bool
 
 Add a number of subscribers to a number of lists in a single bulk operation.
@@ -394,6 +473,11 @@ Returns:
 
 Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.add_subscribers_to_lists([201, 202], [4, 6])
+    True
 
 enable_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
@@ -414,6 +498,12 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> listmonk.enable_subscriber(sub).status
+    'enabled'
+
 disable_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
 Set a subscriber's status to disabled, pausing their subscription so they will not receive campaigns.
@@ -432,6 +522,12 @@ Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> listmonk.disable_subscriber(sub).status
+    'disabled'
 
 block_subscriber(subscriber: listmonk.models.Subscriber, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Subscriber | None
 
@@ -453,6 +549,12 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> listmonk.block_subscriber(sub).status
+    'blocklisted'
+
 confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Confirm a subscriber's opt-in to a list via the API.
@@ -473,6 +575,13 @@ Returns:
 Raises:
     ValueError: If subscriber_uuid or list_uuid is empty.
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
+
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> lst = listmonk.list_by_id(7)
+    >>> listmonk.confirm_optin(sub.uuid, lst.uuid)
+    True
 
 delete_subscriber(email: str | None = None, overriding_subscriber_id: int | None = None, timeout_config: httpx2.Timeout | None = None) -> bool
 
@@ -496,6 +605,13 @@ Raises:
     OperationNotAllowedError: If the base URL is not set or you are not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty or invalid JSON response.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.delete_subscriber('some_user@talkpython.fm')
+    True
+    >>> listmonk.delete_subscriber(overriding_subscriber_id=201)
+    True
 
 
 ## Campaigns
@@ -522,6 +638,12 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> for campaign in listmonk.campaigns():
+    ...     print(campaign.id, campaign.status, campaign.subject)
+    7 draft Our June Update
+
 campaign_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign | None
 
 Get the full details of a campaign with the given ID.
@@ -539,6 +661,12 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> campaign = listmonk.campaign_by_id(7)
+    >>> campaign.status if campaign else None
+    'draft'
+
 campaign_preview_by_id(campaign_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.CampaignPreview
 
 Get the rendered preview of a campaign with the given ID.
@@ -554,6 +682,11 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.campaign_preview_by_id(7).preview[:15]
+    '<!doctype html>'
 
 create_campaign(name: str, subject: str, list_ids: set[int] | None = None, from_email: str | None = None, campaign_type: str | None = None, content_type: str | None = None, body: str | None = None, alt_body: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None = None, tags: list[str] | None = None, headers: list[dict[str, str | None]] | None = None, media_ids: list[int] | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Campaign
 
@@ -609,8 +742,10 @@ Update an existing campaign with the provided campaign information.
 
 The campaign's target lists are normalized to their IDs before sending, and
 a ``send_at`` value already in the past is dropped so the update does not
-fail on a stale scheduled time. After the update succeeds, the campaign is
-re-fetched from the server and returned.
+fail on a stale scheduled time (Listmonk then moves a ``scheduled`` campaign
+back to ``draft``). This call cannot otherwise change the campaign's status;
+use set_campaign_status() for that. After the update succeeds, the campaign
+is re-fetched from the server and returned.
 
 Args:
     campaign: The Campaign object containing the updated information. Must
@@ -630,13 +765,22 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
 
+Examples:
+    >>> import listmonk
+    >>> campaign = listmonk.campaign_by_id(7)
+    >>> campaign.subject = 'An even better subject'
+    >>> listmonk.update_campaign(campaign).subject
+    'An even better subject'
+
 test_campaign(campaign_id: int, emails: list[str], timeout_config: httpx2.Timeout | None = None) -> bool
 
 Send a one-off test copy of a campaign to specific addresses.
 
 The campaign is left untouched -- it stays a draft and its stats are unaffected.
-Each address must already exist as a subscriber on the instance; Listmonk will
-not create them, and a test to an unknown address silently delivers nothing.
+Each address must already exist as a subscriber on the instance. Listmonk does not
+create them: unknown addresses are skipped, and when none of the addresses are known
+the server rejects the request with HTTP 400 ("No known subscribers to test."), which
+surfaces here as httpx2.HTTPStatusError.
 
 Args:
     campaign_id: The numeric ID of the campaign to test.
@@ -650,7 +794,8 @@ Returns:
 Raises:
     ValueError: If ``campaign_id`` is falsy or ``emails`` is empty.
     OperationNotAllowedError: If the base URL is not set or you have not logged in.
-    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+    httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status, including
+        a 400 when none of ``emails`` belong to an existing subscriber.
     ValidationError: If the server returns an empty body or invalid JSON.
 
 Examples:
@@ -788,6 +933,11 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> listmonk.delete_campaign(7)
+    True
+
 
 ## Media
 
@@ -818,6 +968,12 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the server returns an empty body or invalid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> from pathlib import Path
+    >>> media = listmonk.upload_media(Path('/path/to/chart.png'))
+    >>> campaign = listmonk.create_campaign('Report', 'This month in numbers', media_ids=[media.id])
+
 
 ## Templates
 
@@ -843,6 +999,11 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> [(t.id, t.type) for t in listmonk.templates()]
+    [(1, 'campaign'), (3, 'tx')]
+
 template_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template | None
 
 Retrieve a single template by its numeric ID.
@@ -859,6 +1020,12 @@ Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
     ValidationError: If the response is empty or is not valid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> tmpl = listmonk.template_by_id(3)
+    >>> tmpl.type if tmpl else None
+    'tx'
 
 template_preview_by_id(template_id: int, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.TemplatePreview
 
@@ -877,6 +1044,11 @@ Returns:
 Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.template_preview_by_id(3).preview[:15]
+    '<!doctype html>'
 
 create_template(name: str, body: str, type: str | None = None, is_default: bool | None = None, subject: str | None = None, timeout_config: httpx2.Timeout | None = None) -> listmonk.models.Template
 
@@ -932,6 +1104,13 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the re-fetch response is empty or is not valid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> tmpl = listmonk.template_by_id(3)
+    >>> tmpl.name = 'Welcome v2'
+    >>> listmonk.update_template(tmpl).name
+    'Welcome v2'
+
 set_default_template(template_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Mark the given template as the default for its type.
@@ -953,6 +1132,11 @@ Raises:
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
 
+Examples:
+    >>> import listmonk
+    >>> listmonk.set_default_template(3)
+    True
+
 delete_template(template_id: int, timeout_config: httpx2.Timeout | None = None) -> bool
 
 Permanently delete a template from the Listmonk instance.
@@ -973,6 +1157,11 @@ Raises:
     OperationNotAllowedError: If the base URL has not been set or you have not logged in.
     httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
     ValidationError: If the response is empty or is not valid JSON.
+
+Examples:
+    >>> import listmonk
+    >>> listmonk.delete_template(3)
+    True
 
 
 ## Transactional Email
@@ -1071,6 +1260,12 @@ Attributes:
     subscriber_count: The total number of subscribers on the list.
     subscriber_statuses: A breakdown of subscriber counts by subscription status.
 
+Examples:
+    >>> import listmonk
+    >>> lst = listmonk.list_by_id(7)
+    >>> lst.name, lst.optin, lst.subscriber_count
+    ('Course Announcements', 'double', 1250)
+
 SubscriberStatus(*, unconfirmed: int | None = None) -> None
 
 A breakdown of subscriber counts by subscription status for a mailing list.
@@ -1078,6 +1273,12 @@ A breakdown of subscriber counts by subscription status for a mailing list.
 Attributes:
     unconfirmed_count: The number of subscriptions still awaiting double opt-in
         confirmation (read from the API's ``unconfirmed`` field).
+
+Examples:
+    >>> import listmonk
+    >>> lst = listmonk.list_by_id(7)
+    >>> lst.subscriber_statuses.unconfirmed_count
+    5
 
 SubscriberStatuses(*values)
 
@@ -1087,6 +1288,13 @@ Attributes:
     enabled: The subscriber is active and will receive campaigns.
     disabled: The subscriber is paused and will not receive campaigns.
     blocklisted: The subscriber has been blocked and will not receive any mail.
+
+Examples:
+    >>> import listmonk
+    >>> from listmonk.models import SubscriberStatuses
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> listmonk.update_subscriber(sub, status=SubscriberStatuses.disabled).status
+    'disabled'
 
 Subscriber(*, id: int, email: str, name: str | None = None, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, uuid: str | None = None, lists: list[dict[str, typing.Any]] = <factory>, attribs: dict[str, typing.Any] = <factory>, status: str | None = None) -> None
 
@@ -1104,6 +1312,12 @@ Attributes:
         ``model_dump()`` emits plain list IDs.
     attribs: Arbitrary custom attributes stored against the subscriber.
     status: The subscriber's global status, e.g. ``enabled``, ``disabled``, or ``blocklisted``.
+
+Examples:
+    >>> import listmonk
+    >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+    >>> sub.attribs['city'], [lst['id'] for lst in sub.lists]
+    ('Portland', [1, 4])
 
 CreateSubscriberModel(*, email: str, name: str | None = None, status: str, lists: list[int] = <factory>, preconfirm_subscriptions: bool, attribs: dict[str, typing.Any] = <factory>) -> None
 
@@ -1123,6 +1337,14 @@ Attributes:
     preconfirm_subscriptions: Required flag; when ``True``, mark the new subscriptions as
         confirmed immediately (skipping double opt-in confirmation emails).
     attribs: Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
+
+Examples:
+    >>> from listmonk.models import CreateSubscriberModel
+    >>> payload = CreateSubscriberModel(
+    ...     email='some_user@talkpython.fm', status='enabled', preconfirm_subscriptions=True
+    ... )
+    >>> payload.model_dump()['lists']
+    []
 
 Campaign(*, id: int, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, views: int, clicks: int, lists: list[dict[str, typing.Any]] = <factory>, started_at: datetime.datetime | None = None, to_send: int, sent: int, uuid: str, name: str | None = None, type: str | None = None, subject: str | None = None, from_email: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, status: str | None = None, content_type: str | None = None, tags: list[str] = <factory>, template_id: int, messenger: str | None = None, headers: list[dict[str, str | None]] = <factory>, media: list[dict[str, Any]] | None = None) -> None
 
@@ -1156,6 +1378,12 @@ Attributes:
     media: The media files attached to the campaign, each as a dict describing
         the file (id, filename, and so on), or ``None`` if there are none.
 
+Examples:
+    >>> import listmonk
+    >>> campaign = listmonk.campaign_by_id(7)
+    >>> campaign.status, campaign.sent, campaign.to_send
+    ('draft', 0, 1500)
+
 CampaignStatuses(*values)
 
 The lifecycle status of a campaign.
@@ -1167,6 +1395,12 @@ Attributes:
     paused: Sending has been halted and can be resumed.
     cancelled: Sending was stopped and will not resume.
     finished: All messages have been sent.
+
+Examples:
+    >>> import listmonk
+    >>> from listmonk.models import CampaignStatuses
+    >>> listmonk.set_campaign_status(7, CampaignStatuses.running).status
+    'running'
 
 CreateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>, media: list[int] = <factory>) -> None
 
@@ -1194,6 +1428,12 @@ Attributes:
     headers: Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
     media: The IDs of uploaded media files to attach to the campaign. Defaults to an empty list.
 
+Examples:
+    >>> from listmonk.models import CreateCampaignModel
+    >>> payload = CreateCampaignModel(name='June', subject='Our June Update', lists=[1], template_id=None)
+    >>> payload.model_dump()['template_id'] is None
+    True
+
 UpdateCampaignModel(*, name: str | None = None, subject: str | None = None, lists: list[int] = <factory>, from_email: str | None = None, type: str | None = None, content_type: str | None = None, body: str | None = None, altbody: str | None = None, send_at: datetime.datetime | None = None, messenger: str | None = None, template_id: int | None, tags: list[str] = <factory>, headers: list[dict[str, str | None]] = <factory>, media: list[int] = <factory>) -> None
 
 The payload used to update an existing campaign.
@@ -1202,12 +1442,25 @@ Shares all fields with ``CreateCampaignModel``. As a safeguard, a ``send_at``
 value that is already in the past is dropped (set to ``None``) before sending,
 so that updating a campaign does not fail on a stale scheduled time.
 
+Examples:
+    >>> import datetime
+    >>> from listmonk.models import UpdateCampaignModel
+    >>> stale = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
+    >>> UpdateCampaignModel(template_id=1, send_at=stale).send_at is None
+    True
+
 CampaignPreview(*, preview: str | None = None) -> None
 
 A rendered preview of a campaign.
 
 Attributes:
     preview: The rendered HTML preview of the campaign body.
+
+Examples:
+    >>> import listmonk
+    >>> preview = listmonk.campaign_preview_by_id(7)
+    >>> preview.preview[:15]
+    '<!doctype html>'
 
 Template(*, id: int, created_at: datetime.datetime, updated_at: datetime.datetime | None = None, name: str | None = None, subject: str | None = None, body: str | None = None, type: str | None = None, is_default: bool | None = None) -> None
 
@@ -1223,6 +1476,12 @@ Attributes:
     type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
     is_default: Whether this is the default template for its type.
 
+Examples:
+    >>> import listmonk
+    >>> tmpl = listmonk.template_by_id(3)
+    >>> tmpl.type, tmpl.is_default
+    ('tx', False)
+
 CreateTemplateModel(*, name: str | None = None, subject: str | None = None, body: str | None = None, type: str | None = None, is_default: bool | None = False) -> None
 
 The payload used to create a new template.
@@ -1234,12 +1493,24 @@ Attributes:
     type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
     is_default: Whether the new template should become the default for its type. Defaults to ``False``.
 
+Examples:
+    >>> from listmonk.models import CreateTemplateModel
+    >>> payload = CreateTemplateModel(name='Welcome', body='Hi {{ template "content" . }}', type='tx')
+    >>> payload.model_dump()['is_default']
+    False
+
 TemplatePreview(*, preview: str | None = None) -> None
 
 A rendered preview of a template.
 
 Attributes:
     preview: The rendered HTML preview of the template, using lorem-ipsum sample content.
+
+Examples:
+    >>> import listmonk
+    >>> preview = listmonk.template_preview_by_id(3)
+    >>> preview.preview[:15]
+    '<!doctype html>'
 
 Media(*, id: int, uuid: str, filename: str | None = None, content_type: str | None = None, created_at: datetime.datetime | None = None, uri: str | None = None, thumb_uri: str | None = None) -> None
 
@@ -1255,6 +1526,13 @@ Attributes:
     uri: The server path the uploaded file is served from.
     thumb_uri: The server path of the generated thumbnail, if any.
 
+Examples:
+    >>> import listmonk
+    >>> from pathlib import Path
+    >>> media = listmonk.upload_media(Path('/path/to/chart.png'))
+    >>> media.id, media.filename
+    (11, 'chart.png')
+
 
 ## Exceptions
 
@@ -1266,12 +1544,41 @@ ValidationError
 Raised when an argument fails client-side validation before a request is sent,
 or when the server returns an empty or malformed JSON response.
 
+Examples:
+    >>> import listmonk
+    >>> from listmonk.errors import ValidationError
+    >>> try:
+    ...     listmonk.set_url_base('listmonk.somedomain.tech')  # no scheme
+    ... except ValidationError as e:
+    ...     print(e)
+    The url must start with the HTTP scheme (http:// or https://).
+
 OperationNotAllowedError
 
 Raised when an operation is not permitted in the client's current state.
 
 For example, calling an API before the base URL has been set, or before a successful login.
+It subclasses ValidationError, so an ``except ValidationError`` clause catches it too.
+
+Examples:
+    >>> import listmonk
+    >>> from listmonk.errors import OperationNotAllowedError
+    >>> try:
+    ...     listmonk.lists()  # before set_url_base() and login()
+    ... except OperationNotAllowedError as e:
+    ...     print(e)
+    URL Base must be set to proceed.
 
 ListmonkFileNotFoundError
 
 Raised when a local file referenced for upload (e.g. a transactional email attachment) cannot be found.
+
+Examples:
+    >>> import listmonk
+    >>> from pathlib import Path
+    >>> from listmonk.errors import ListmonkFileNotFoundError
+    >>> try:
+    ...     listmonk.upload_media(Path('/no/such/chart.png'))
+    ... except ListmonkFileNotFoundError as e:
+    ...     print(e)
+    File /no/such/chart.png does not exist

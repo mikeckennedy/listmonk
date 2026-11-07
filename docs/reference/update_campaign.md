@@ -15,7 +15,7 @@ update_campaign(
 ```
 
 
-The campaign's target lists are normalized to their IDs before sending, and a `send_at` value already in the past is dropped so the update does not fail on a stale scheduled time. After the update succeeds, the campaign is re-fetched from the server and returned.
+The campaign's target lists are normalized to their IDs before sending, and a `send_at` value already in the past is dropped so the update does not fail on a stale scheduled time (Listmonk then moves a [scheduled](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.scheduled) campaign back to [draft](models.CampaignStatuses.md#listmonk.models.CampaignStatuses.draft)). This call cannot otherwise change the campaign's status; use set_campaign_status() for that. After the update succeeds, the campaign is re-fetched from the server and returned.
 
 
 ## Parameters
@@ -54,3 +54,14 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the follow-up fetch returns an empty or invalid JSON response.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> campaign = listmonk.campaign_by_id(7)
+>>> campaign.subject = 'An even better subject'
+>>> listmonk.update_campaign(campaign).subject
+'An even better subject'
+```

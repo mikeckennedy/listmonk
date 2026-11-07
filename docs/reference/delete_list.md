@@ -50,3 +50,12 @@ If the server returns an empty or invalid JSON response.
 
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status, including when the existence check finds no list with the given ID.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.delete_list(7)
+True
+```

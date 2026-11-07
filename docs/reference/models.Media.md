@@ -34,3 +34,14 @@ The server path the uploaded file is served from.
 
 `thumb_uri: Optional[str]`  
 The server path of the generated thumbnail, if any.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> from pathlib import Path
+>>> media = listmonk.upload_media(Path('/path/to/chart.png'))
+>>> media.id, media.filename
+(11, 'chart.png')
+```

@@ -50,3 +50,12 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the server returns an empty body or invalid JSON.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.delete_campaign(7)
+True
+```

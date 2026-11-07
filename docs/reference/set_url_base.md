@@ -26,3 +26,13 @@ The base URL of your instance, including the http:// or https:// scheme but with
 
 `ValidationError`  
 If url is empty or whitespace, or if it does not start with the http:// or https:// scheme.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.set_url_base('https://listmonk.somedomain.tech')
+>>> listmonk.login('admin', 'super-secret')
+True
+```

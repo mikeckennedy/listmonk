@@ -34,3 +34,15 @@ Required flag; when `True`, mark the new subscriptions as confirmed immediately 
 
 `attribs: dict[str, Any]`  
 Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
+
+
+## Examples
+
+``` python
+>>> from listmonk.models import CreateSubscriberModel
+>>> payload = CreateSubscriberModel(
+...     email='some_user@talkpython.fm', status='enabled', preconfirm_subscriptions=True
+... )
+>>> payload.model_dump()['lists']
+[]
+```

@@ -62,3 +62,16 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the follow-up fetch returns an empty or invalid JSON response.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+>>> sub.name = 'Some User'
+>>> sub.attribs['rating'] = 7
+>>> sub = listmonk.update_subscriber(sub, add_to_lists={4}, remove_from_lists={5})
+>>> sub.attribs['rating']
+7
+```

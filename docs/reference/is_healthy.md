@@ -28,3 +28,12 @@ Optional per-request timeout; defaults to 10 seconds.
 True if the server responded healthy with valid credentials, False
 
 otherwise.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.is_healthy()
+True
+```

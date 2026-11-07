@@ -52,3 +52,14 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the server returns an empty or invalid JSON response.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.delete_subscriber('some_user@talkpython.fm')
+True
+>>> listmonk.delete_subscriber(overriding_subscriber_id=201)
+True
+```

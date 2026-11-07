@@ -41,3 +41,13 @@ If the server returns an empty or invalid JSON response.
 
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> for lst in listmonk.lists():
+...     print(lst.id, lst.name, lst.subscriber_count)
+1 Main Newsletter 1250
+```

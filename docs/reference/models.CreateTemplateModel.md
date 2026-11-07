@@ -28,3 +28,13 @@ The template type, e.g. `campaign` or `tx` (transactional).
 
 `is_default: Optional[bool]`  
 Whether the new template should become the default for its type. Defaults to `False`.
+
+
+## Examples
+
+``` python
+>>> from listmonk.models import CreateTemplateModel
+>>> payload = CreateTemplateModel(name='Welcome', body='Hi {{ template "content" . }}', type='tx')
+>>> payload.model_dump()['is_default']
+False
+```

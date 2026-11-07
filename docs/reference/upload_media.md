@@ -58,3 +58,13 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the server returns an empty body or invalid JSON.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> from pathlib import Path
+>>> media = listmonk.upload_media(Path('/path/to/chart.png'))
+>>> campaign = listmonk.create_campaign('Report', 'This month in numbers', media_ids=[media.id])
+```

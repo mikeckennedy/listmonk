@@ -45,3 +45,13 @@ If the server returns an empty body or invalid JSON.
 
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> sub = listmonk.subscriber_by_id(201)
+>>> sub.email if sub else None
+'some_user@talkpython.fm'
+```

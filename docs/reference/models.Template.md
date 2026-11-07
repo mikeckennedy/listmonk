@@ -37,3 +37,13 @@ The template type, e.g. `campaign` or `tx` (transactional).
 
 `is_default: Optional[bool]`  
 Whether this is the default template for its type.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> tmpl = listmonk.template_by_id(3)
+>>> tmpl.type, tmpl.is_default
+('tx', False)
+```

@@ -41,3 +41,12 @@ If the base URL is not set or you have not logged in.
 
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.campaign_preview_by_id(7).preview[:15]
+'<!doctype html>'
+```

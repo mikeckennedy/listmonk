@@ -48,3 +48,14 @@ If the server responds with a 4xx or 5xx status.
 
 `ValidationError`  
 If the re-fetch response is empty or is not valid JSON.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> tmpl = listmonk.template_by_id(3)
+>>> tmpl.name = 'Welcome v2'
+>>> listmonk.update_template(tmpl).name
+'Welcome v2'
+```

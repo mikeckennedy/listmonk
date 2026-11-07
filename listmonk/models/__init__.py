@@ -13,6 +13,13 @@ class SubscriberStatuses(LowercaseStrEnum):
         enabled: The subscriber is active and will receive campaigns.
         disabled: The subscriber is paused and will not receive campaigns.
         blocklisted: The subscriber has been blocked and will not receive any mail.
+
+    Examples:
+        >>> import listmonk
+        >>> from listmonk.models import SubscriberStatuses
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> listmonk.update_subscriber(sub, status=SubscriberStatuses.disabled).status
+        'disabled'
     """
 
     enabled = 'enabled'
@@ -30,6 +37,12 @@ class CampaignStatuses(LowercaseStrEnum):
         paused: Sending has been halted and can be resumed.
         cancelled: Sending was stopped and will not resume.
         finished: All messages have been sent.
+
+    Examples:
+        >>> import listmonk
+        >>> from listmonk.models import CampaignStatuses
+        >>> listmonk.set_campaign_status(7, CampaignStatuses.running).status
+        'running'
     """
 
     draft = 'draft'
@@ -46,6 +59,12 @@ class SubscriberStatus(BaseModel):
     Attributes:
         unconfirmed_count: The number of subscriptions still awaiting double opt-in
             confirmation (read from the API's ``unconfirmed`` field).
+
+    Examples:
+        >>> import listmonk
+        >>> lst = listmonk.list_by_id(7)
+        >>> lst.subscriber_statuses.unconfirmed_count
+        5
     """
 
     unconfirmed_count: Optional[int] = pydantic.Field(alias='unconfirmed', default=None)
@@ -66,6 +85,12 @@ class MailingList(BaseModel):
         description: A free-text description of the list.
         subscriber_count: The total number of subscribers on the list.
         subscriber_statuses: A breakdown of subscriber counts by subscription status.
+
+    Examples:
+        >>> import listmonk
+        >>> lst = listmonk.list_by_id(7)
+        >>> lst.name, lst.optin, lst.subscriber_count
+        ('Course Announcements', 'double', 1250)
     """
 
     id: int
@@ -96,6 +121,12 @@ class Subscriber(BaseModel):
             ``model_dump()`` emits plain list IDs.
         attribs: Arbitrary custom attributes stored against the subscriber.
         status: The subscriber's global status, e.g. ``enabled``, ``disabled``, or ``blocklisted``.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> sub.attribs['city'], [lst['id'] for lst in sub.lists]
+        ('Portland', [1, 4])
     """
 
     id: int
@@ -138,6 +169,14 @@ class CreateSubscriberModel(BaseModel):
         preconfirm_subscriptions: Required flag; when ``True``, mark the new subscriptions as
             confirmed immediately (skipping double opt-in confirmation emails).
         attribs: Arbitrary custom attributes to store against the subscriber. Defaults to an empty dict.
+
+    Examples:
+        >>> from listmonk.models import CreateSubscriberModel
+        >>> payload = CreateSubscriberModel(
+        ...     email='some_user@talkpython.fm', status='enabled', preconfirm_subscriptions=True
+        ... )
+        >>> payload.model_dump()['lists']
+        []
     """
 
     email: str
@@ -178,6 +217,12 @@ class Campaign(BaseModel):
         headers: Custom email headers to include, each as a single-entry dict.
         media: The media files attached to the campaign, each as a dict describing
             the file (id, filename, and so on), or ``None`` if there are none.
+
+    Examples:
+        >>> import listmonk
+        >>> campaign = listmonk.campaign_by_id(7)
+        >>> campaign.status, campaign.sent, campaign.to_send
+        ('draft', 0, 1500)
     """
 
     id: int
@@ -231,6 +276,12 @@ class CreateCampaignModel(BaseModel):
         tags: Arbitrary labels to attach to the campaign. Defaults to an empty list.
         headers: Custom email headers to include, each as a single-entry dict. Defaults to an empty list.
         media: The IDs of uploaded media files to attach to the campaign. Defaults to an empty list.
+
+    Examples:
+        >>> from listmonk.models import CreateCampaignModel
+        >>> payload = CreateCampaignModel(name='June', subject='Our June Update', lists=[1], template_id=None)
+        >>> payload.model_dump()['template_id'] is None
+        True
     """
 
     name: Optional[str] = None
@@ -262,6 +313,13 @@ class UpdateCampaignModel(CreateCampaignModel):
     Shares all fields with ``CreateCampaignModel``. As a safeguard, a ``send_at``
     value that is already in the past is dropped (set to ``None``) before sending,
     so that updating a campaign does not fail on a stale scheduled time.
+
+    Examples:
+        >>> import datetime
+        >>> from listmonk.models import UpdateCampaignModel
+        >>> stale = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
+        >>> UpdateCampaignModel(template_id=1, send_at=stale).send_at is None
+        True
     """
 
     # noinspection PyMethodParameters
@@ -291,6 +349,12 @@ class CampaignPreview(BaseModel):
 
     Attributes:
         preview: The rendered HTML preview of the campaign body.
+
+    Examples:
+        >>> import listmonk
+        >>> preview = listmonk.campaign_preview_by_id(7)
+        >>> preview.preview[:15]
+        '<!doctype html>'
     """
 
     preview: Optional[str] = None
@@ -308,6 +372,12 @@ class Template(BaseModel):
         body: The template body markup.
         type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
         is_default: Whether this is the default template for its type.
+
+    Examples:
+        >>> import listmonk
+        >>> tmpl = listmonk.template_by_id(3)
+        >>> tmpl.type, tmpl.is_default
+        ('tx', False)
     """
 
     id: int
@@ -330,6 +400,12 @@ class CreateTemplateModel(BaseModel):
         body: The template body markup.
         type: The template type, e.g. ``campaign`` or ``tx`` (transactional).
         is_default: Whether the new template should become the default for its type. Defaults to ``False``.
+
+    Examples:
+        >>> from listmonk.models import CreateTemplateModel
+        >>> payload = CreateTemplateModel(name='Welcome', body='Hi {{ template "content" . }}', type='tx')
+        >>> payload.model_dump()['is_default']
+        False
     """
 
     name: Optional[str] = None
@@ -344,6 +420,12 @@ class TemplatePreview(BaseModel):
 
     Attributes:
         preview: The rendered HTML preview of the template, using lorem-ipsum sample content.
+
+    Examples:
+        >>> import listmonk
+        >>> preview = listmonk.template_preview_by_id(3)
+        >>> preview.preview[:15]
+        '<!doctype html>'
     """
 
     preview: Optional[str] = None
@@ -361,6 +443,13 @@ class Media(BaseModel):
         created_at: When the file was uploaded.
         uri: The server path the uploaded file is served from.
         thumb_uri: The server path of the generated thumbnail, if any.
+
+    Examples:
+        >>> import listmonk
+        >>> from pathlib import Path
+        >>> media = listmonk.upload_media(Path('/path/to/chart.png'))
+        >>> media.id, media.filename
+        (11, 'chart.png')
     """
 
     id: int

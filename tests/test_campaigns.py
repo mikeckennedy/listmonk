@@ -2,6 +2,7 @@
 
 import datetime
 
+import httpx2
 import pytest
 from factories import campaign_json, page_json
 
@@ -159,6 +160,20 @@ def test_test_campaign_posts_the_campaign_body_with_the_recipients(fake_server):
     assert payload['subject'] == 'Our June Update'
     assert payload['body'] == '# Big news\n\nHello there!'
     assert payload['template_id'] == 1
+
+
+def test_test_campaign_surfaces_unknown_recipients_as_an_http_error(fake_server):
+    # Listmonk only tests to existing subscribers; when none of the addresses are known it
+    # answers 400 rather than quietly sending nothing, and the client lets that propagate.
+    fake_server.respond('GET', '/api/campaigns/7', json={'data': campaign_json()})
+    fake_server.respond(
+        'POST', '/api/campaigns/7/test', status_code=400, json={'message': 'No known subscribers to test.'}
+    )
+
+    with pytest.raises(httpx2.HTTPStatusError) as excinfo:
+        listmonk.test_campaign(7, ['nobody@example.com'])
+
+    assert excinfo.value.response.status_code == 400
 
 
 def test_test_campaign_returns_false_when_the_campaign_is_missing(fake_server):

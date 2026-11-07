@@ -26,3 +26,12 @@ Optional per-request timeout; defaults to 10 seconds.
 
 `bool`  
 True if the stored credentials are still valid, False otherwise.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.verify_login()
+True
+```

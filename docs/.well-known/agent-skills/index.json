@@ -2,7 +2,7 @@
   "skills": [
     {
       "name": "listmonk",
-      "description": "Listmonk Email API Client for Python. Use when writing Python code that uses the listmonk package.",
+      "description": "Python client for a self-hosted Listmonk email server: subscribers, mailing lists, campaigns, templates, media, and transactional email, built on httpx2 and Pydantic. Use when adding listmonk to a Python app, writing code that calls listmonk.* functions, choosing between transactional subscriber modes or campaign status calls, or when a call raises OperationNotAllowedError, httpx2.HTTPStatusError (403 Forbidden, 400 No known subscribers to test), or listmonk.errors.ValidationError.",
       "files": [
         "SKILL.md"
       ]

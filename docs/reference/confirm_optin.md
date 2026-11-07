@@ -46,3 +46,14 @@ If subscriber_uuid or list_uuid is empty.
 
 `OperationNotAllowedError`  
 If the base URL is not set or you are not logged in.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+>>> lst = listmonk.list_by_id(7)
+>>> listmonk.confirm_optin(sub.uuid, lst.uuid)
+True
+```

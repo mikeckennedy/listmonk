@@ -76,6 +76,12 @@ def get_base_url() -> Optional[str]:
     Returns:
         The base URL of your instance (without a trailing slash), or None if
         set_url_base() has not been called yet.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.set_url_base('https://listmonk.somedomain.tech/')
+        >>> listmonk.get_base_url()
+        'https://listmonk.somedomain.tech'
     """
     return url_base
 
@@ -101,6 +107,12 @@ def set_url_base(url: str) -> None:
     Raises:
         ValidationError: If url is empty or whitespace, or if it does not
             start with the http:// or https:// scheme.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.set_url_base('https://listmonk.somedomain.tech')
+        >>> listmonk.login('admin', 'super-secret')
+        True
     """
     if not url or not url.strip():
         raise ValidationError('URL must not be empty.')
@@ -195,6 +207,12 @@ def lists(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Mailin
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         ValidationError: If the server returns an empty or invalid JSON response.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> for lst in listmonk.lists():
+        ...     print(lst.id, lst.name, lst.subscriber_count)
+        1 Main Newsletter 1250
     """
     # noinspection DuplicatedCode
     validate_state(url=True)
@@ -236,6 +254,12 @@ def list_by_id(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) ->
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         Exception: If the server returns a result set that does not contain the
             requested list_id (a workaround for a known Listmonk server quirk).
+
+    Examples:
+        >>> import listmonk
+        >>> lst = listmonk.list_by_id(7)
+        >>> lst.name, lst.optin
+        ('Course Announcements', 'double')
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -302,6 +326,13 @@ def subscribers(
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> on_list = listmonk.subscribers(list_id=3)
+        >>> in_portland = listmonk.subscribers(query_text="subscribers.attribs->>'city' = 'Portland'")
+        >>> len(on_list), len(in_portland)
+        (1250, 42)
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -391,6 +422,12 @@ def subscriber_by_email(email: str, timeout_config: Optional[httpx2.Timeout] = N
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> sub.id if sub else None
+        201
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -441,6 +478,12 @@ def subscriber_by_id(
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_id(201)
+        >>> sub.email if sub else None
+        'some_user@talkpython.fm'
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -490,6 +533,12 @@ def subscriber_by_uuid(
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         ValidationError: If the server returns an empty body or invalid JSON.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_uuid('c37786af-e6ab-4260-9b49-740a8cd6a7ed')
+        >>> sub.email if sub else None
+        'some_user@talkpython.fm'
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -630,6 +679,13 @@ def delete_subscriber(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty or invalid JSON response.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.delete_subscriber('some_user@talkpython.fm')
+        True
+        >>> listmonk.delete_subscriber(overriding_subscriber_id=201)
+        True
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -683,6 +739,13 @@ def confirm_optin(subscriber_uuid: str, list_uuid: str, timeout_config: Optional
     Raises:
         ValueError: If subscriber_uuid or list_uuid is empty.
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> lst = listmonk.list_by_id(7)
+        >>> listmonk.confirm_optin(sub.uuid, lst.uuid)
+        True
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -743,6 +806,11 @@ def add_subscribers_to_lists(
 
     Raises:
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.add_subscribers_to_lists([201, 202], [4, 6])
+        True
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -820,6 +888,15 @@ def update_subscriber(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> sub.name = 'Some User'
+        >>> sub.attribs['rating'] = 7
+        >>> sub = listmonk.update_subscriber(sub, add_to_lists={4}, remove_from_lists={5})
+        >>> sub.attribs['rating']
+        7
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -882,6 +959,12 @@ def disable_subscriber(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> listmonk.disable_subscriber(sub).status
+        'disabled'
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.disabled, timeout_config=timeout_config)
 
@@ -911,6 +994,12 @@ def enable_subscriber(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> listmonk.enable_subscriber(sub).status
+        'enabled'
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.enabled, timeout_config=timeout_config)
 
@@ -941,6 +1030,12 @@ def block_subscriber(
         OperationNotAllowedError: If the base URL is not set or you are not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+    Examples:
+        >>> import listmonk
+        >>> sub = listmonk.subscriber_by_email('some_user@talkpython.fm')
+        >>> listmonk.block_subscriber(sub).status
+        'blocklisted'
     """
     return update_subscriber(subscriber, status=SubscriberStatuses.blocklisted, timeout_config=timeout_config)
 
@@ -1149,6 +1244,12 @@ def upload_media(
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> from pathlib import Path
+        >>> media = listmonk.upload_media(Path('/path/to/chart.png'))
+        >>> campaign = listmonk.create_campaign('Report', 'This month in numbers', media_ids=[media.id])
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -1206,6 +1307,11 @@ def is_healthy(timeout_config: Optional[httpx2.Timeout] = None) -> bool:
     Returns:
         True if the server responded healthy with valid credentials, False
         otherwise.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.is_healthy()
+        True
     """
     # noinspection PyBroadException
     try:
@@ -1244,6 +1350,11 @@ def verify_login(timeout_config: Optional[httpx2.Timeout] = None) -> bool:
 
     Returns:
         True if the stored credentials are still valid, False otherwise.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.verify_login()
+        True
     """
     return is_healthy(timeout_config=timeout_config)
 
@@ -1359,6 +1470,12 @@ def campaigns(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Ca
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> for campaign in listmonk.campaigns():
+        ...     print(campaign.id, campaign.status, campaign.subject)
+        7 draft Our June Update
     """
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
     validate_state(url=True)
@@ -1397,6 +1514,12 @@ def campaign_by_id(campaign_id: int, timeout_config: Optional[httpx2.Timeout] = 
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> campaign = listmonk.campaign_by_id(7)
+        >>> campaign.status if campaign else None
+        'draft'
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -1442,6 +1565,11 @@ def campaign_preview_by_id(campaign_id: int, timeout_config: Optional[httpx2.Tim
     Raises:
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.campaign_preview_by_id(7).preview[:15]
+        '<!doctype html>'
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -1605,6 +1733,11 @@ def delete_campaign(campaign_id: int, timeout_config: Optional[httpx2.Timeout] =
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the server returns an empty body or invalid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.delete_campaign(7)
+        True
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -1645,8 +1778,10 @@ def update_campaign(
 
     The campaign's target lists are normalized to their IDs before sending, and
     a ``send_at`` value already in the past is dropped so the update does not
-    fail on a stale scheduled time. After the update succeeds, the campaign is
-    re-fetched from the server and returned.
+    fail on a stale scheduled time (Listmonk then moves a ``scheduled`` campaign
+    back to ``draft``). This call cannot otherwise change the campaign's status;
+    use set_campaign_status() for that. After the update succeeds, the campaign
+    is re-fetched from the server and returned.
 
     Args:
         campaign: The Campaign object containing the updated information. Must
@@ -1665,6 +1800,13 @@ def update_campaign(
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the follow-up fetch returns an empty or invalid JSON response.
+
+    Examples:
+        >>> import listmonk
+        >>> campaign = listmonk.campaign_by_id(7)
+        >>> campaign.subject = 'An even better subject'
+        >>> listmonk.update_campaign(campaign).subject
+        'An even better subject'
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -1895,8 +2037,10 @@ def test_campaign(
     Send a one-off test copy of a campaign to specific addresses.
 
     The campaign is left untouched -- it stays a draft and its stats are unaffected.
-    Each address must already exist as a subscriber on the instance; Listmonk will
-    not create them, and a test to an unknown address silently delivers nothing.
+    Each address must already exist as a subscriber on the instance. Listmonk does not
+    create them: unknown addresses are skipped, and when none of the addresses are known
+    the server rejects the request with HTTP 400 ("No known subscribers to test."), which
+    surfaces here as httpx2.HTTPStatusError.
 
     Args:
         campaign_id: The numeric ID of the campaign to test.
@@ -1910,7 +2054,8 @@ def test_campaign(
     Raises:
         ValueError: If ``campaign_id`` is falsy or ``emails`` is empty.
         OperationNotAllowedError: If the base URL is not set or you have not logged in.
-        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+        httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status, including
+            a 400 when none of ``emails`` belong to an existing subscriber.
         ValidationError: If the server returns an empty body or invalid JSON.
 
     Examples:
@@ -1984,6 +2129,11 @@ def templates(timeout_config: Optional[httpx2.Timeout] = None) -> list[models.Te
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> [(t.id, t.type) for t in listmonk.templates()]
+        [(1, 'campaign'), (3, 'tx')]
     """
     # noinspection DuplicatedCode
     validate_state(url=True)
@@ -2104,6 +2254,12 @@ def template_by_id(template_id: int, timeout_config: Optional[httpx2.Timeout] = 
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
         ValidationError: If the response is empty or is not valid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> tmpl = listmonk.template_by_id(3)
+        >>> tmpl.type if tmpl else None
+        'tx'
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -2150,6 +2306,11 @@ def template_preview_by_id(template_id: int, timeout_config: Optional[httpx2.Tim
     Raises:
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status (e.g. an unknown template ID).
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.template_preview_by_id(3).preview[:15]
+        '<!doctype html>'
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -2198,6 +2359,11 @@ def delete_template(template_id: int, timeout_config: Optional[httpx2.Timeout] =
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.delete_template(3)
+        True
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -2252,6 +2418,13 @@ def update_template(
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the re-fetch response is empty or is not valid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> tmpl = listmonk.template_by_id(3)
+        >>> tmpl.name = 'Welcome v2'
+        >>> listmonk.update_template(tmpl).name
+        'Welcome v2'
     """
     global core_headers
     timeout_config = timeout_config or httpx2.Timeout(timeout=10)
@@ -2306,6 +2479,11 @@ def set_default_template(template_id: int, timeout_config: Optional[httpx2.Timeo
         OperationNotAllowedError: If the base URL has not been set or you have not logged in.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
         ValidationError: If the response is empty or is not valid JSON.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.set_default_template(3)
+        True
     """
     # noinspection DuplicatedCode
     global core_headers
@@ -2448,6 +2626,11 @@ def delete_list(list_id: int, timeout_config: Optional[httpx2.Timeout] = None) -
         ValidationError: If the server returns an empty or invalid JSON response.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status,
             including when the existence check finds no list with the given ID.
+
+    Examples:
+        >>> import listmonk
+        >>> listmonk.delete_list(7)
+        True
     """
 
     global core_headers
@@ -2518,6 +2701,12 @@ def update_list(
             one of its accepted values.
         ValidationError: If the server returns an empty or invalid JSON response.
         httpx2.HTTPStatusError: If the server responds with a 4xx or 5xx status.
+
+    Examples:
+        >>> import listmonk
+        >>> lst = listmonk.update_list(7, list_name='Course News', optin='double')
+        >>> lst.name, lst.optin
+        ('Course News', 'double')
     """
     global core_headers
 

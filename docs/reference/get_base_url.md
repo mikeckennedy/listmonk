@@ -21,3 +21,13 @@ Each Listmonk instance lives at its own address, for example https://listmonk.so
 The base URL of your instance (without a trailing slash), or None if
 
 set_url_base() has not been called yet.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> listmonk.set_url_base('https://listmonk.somedomain.tech/')
+>>> listmonk.get_base_url()
+'https://listmonk.somedomain.tech'
+```

@@ -58,3 +58,13 @@ Custom email headers to include, each as a single-entry dict. Defaults to an emp
 
 `media: list[int]`  
 The IDs of uploaded media files to attach to the campaign. Defaults to an empty list.
+
+
+## Examples
+
+``` python
+>>> from listmonk.models import CreateCampaignModel
+>>> payload = CreateCampaignModel(name='June', subject='Our June Update', lists=[1], template_id=None)
+>>> payload.model_dump()['template_id'] is None
+True
+```

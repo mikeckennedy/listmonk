@@ -46,3 +46,13 @@ The total number of subscribers on the list.
 
 `subscriber_statuses: Optional[SubscriberStatus]`  
 A breakdown of subscriber counts by subscription status.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> lst = listmonk.list_by_id(7)
+>>> lst.name, lst.optin, lst.subscriber_count
+('Course Announcements', 'double', 1250)
+```

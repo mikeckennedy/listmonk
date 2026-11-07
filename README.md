@@ -13,6 +13,8 @@ So while it doesn't currently cover every endpoint (for example campaign analyti
 
 📚 Full documentation lives at **[mkennedy.codes/docs/listmonk](https://mkennedy.codes/docs/listmonk/)**, including the complete [API Reference](https://mkennedy.codes/docs/listmonk/reference/) for every function, model, and exception in the library.
 
+🤖 Using a coding agent? Point it at the [Agent Skill](https://mkennedy.codes/docs/listmonk/skills.html) (a cheat sheet of the rules of this package) or at [llms-full.txt](https://mkennedy.codes/docs/listmonk/llms-full.txt), which holds every signature and docstring in one file.
+
 ## Core Features
 
 - ➕**Add a subscriber** to your subscribed users.
@@ -23,8 +25,8 @@ So while it doesn't currently cover every endpoint (for example campaign analyti
 - 👥 Retrieve your **segmentation lists**, list details, and subscribers.
 - 🙅 Unsubscribe and block users who don't want to be contacted further.
 - 💥 Completely delete a subscriber from your instance.
-- 📧 Send transactional email with template data (e.g. password reset emails).
-- 📨 Manage campaign (bulk) emails from the API.
+- 📧 Send transactional email with template data (e.g. password reset emails), including to people who are not subscribers.
+- 📨 Manage campaign (bulk) emails from the API: create, preview, test, send, pause, and cancel them.
 - 📎 Upload media and attach files to campaigns.
 - 🎨 Edit and create templates to control the overall look and feel of campaigns.
 - 📝 Create, edit and delete lists.
@@ -129,6 +131,18 @@ status: bool = listmonk.send_transactional_email(
     altbody='Plaintext fallback body'
 )
 
+# By default the recipient must already be a subscriber. To email anyone at all
+# (password resets, invites, receipts) use subscriber_mode='external'; in that mode
+# only {{ .Subscriber.Email }} is available in the template, so pass everything
+# else via template_data and read it as {{ .Tx.Data.<key> }}.
+listmonk.send_transactional_email(
+    'stranger@some.domain', template_id,
+    subscriber_mode='external', template_data={'name': 'Sam', 'reset_code': 'abc123'})
+
+# Several recipients in one call: pass a list of addresses instead of one string.
+listmonk.send_transactional_email(
+    ['one@some.domain', 'two@some.domain'], template_id, subscriber_mode='external')
+
 # Access existing campaigns
 from listmonk.models import Campaign
 from datetime import datetime, timedelta
@@ -136,9 +150,10 @@ from datetime import datetime, timedelta
 campaigns: list[Campaign] = listmonk.campaigns()
 campaign: Optional[Campaign] = listmonk.campaign_by_id(15)
 
-# Upload media and create a campaign with attachments
-media = listmonk.upload_media(pathlib.Path("/path/to/report.pdf"))
-# Or upload from bytes: media = listmonk.upload_media(pdf_bytes, filename="report.pdf")
+# Upload media and create a campaign with attachments. A default Listmonk install only
+# accepts image extensions here; widen Settings > Media > Upload extensions for others.
+media = listmonk.upload_media(pathlib.Path("/path/to/chart.png"))
+# Or upload from bytes: media = listmonk.upload_media(png_bytes, filename="chart.png")
 
 listmonk.create_campaign(name='This is my Great Campaign!',
                          subject="You won't believe this!",
@@ -163,12 +178,20 @@ campaign_to_update.lists = [3, 4]
 # (or media_ids=[] to remove them all).
 listmonk.update_campaign(campaign_to_update)
 
-# Delete a Campaign (by its numeric ID)
-listmonk.delete_campaign(15)
-
 # Preview Campaign
 preview = listmonk.campaign_preview_by_id(15)
 print(preview.preview)
+
+# Creating a campaign does not send it. Send a test copy to yourself first (each
+# address must already be a subscriber), then start it. update_campaign() cannot
+# change the status; these calls use Listmonk's dedicated status endpoint.
+listmonk.test_campaign(15, ['you@your.domain'])
+listmonk.start_campaign(15)   # draft -> running; the same as set_campaign_status(15, CampaignStatuses.running)
+listmonk.pause_campaign(15)   # running -> paused; resume with start_campaign()
+listmonk.cancel_campaign(15)  # stop for good
+
+# Delete a Campaign (by its numeric ID)
+listmonk.delete_campaign(15)
 
 # Access existing Templates
 from listmonk.models import Template
@@ -206,7 +229,39 @@ new_tx_template = listmonk.create_template(
 )
 ```
 
+## Error handling
+
+The library has two ways of reporting failure, and it pays to know which one a call uses before wrapping it in `try/except`.
+
+**Calls that raise.** Every data call first checks the client state and raises `listmonk.errors.OperationNotAllowedError` if `set_url_base()` or a successful `login()` has not happened yet. Bad arguments (an empty email, a template body without the `{{ template "content" . }}` placeholder, an unknown list type) raise `ValueError` before any request is sent. A 4xx or 5xx response raises `httpx2.HTTPStatusError`, and an empty or non-JSON response body raises `listmonk.errors.ValidationError`. Note the module name: this library uses [httpx2](https://github.com/pydantic/httpx2), so catch `httpx2.HTTPStatusError`, not `httpx.HTTPStatusError`.
+
+**Calls that return a value instead.** `login()`, `is_healthy()`, and `verify_login()` return `False` when the credentials are rejected or the server cannot be reached; they never raise for those cases. `confirm_optin()` and `add_subscribers_to_lists()` return `False` on a non-2xx response. The single-item lookups (`subscriber_by_email()`, `subscriber_by_id()`, `subscriber_by_uuid()`, `campaign_by_id()`, `template_by_id()`) return `None` when nothing matches, as do `set_campaign_status()` and its `start`/`pause`/`cancel` wrappers for an unknown campaign ID. `delete_subscriber()`, `delete_campaign()`, `delete_template()`, and `test_campaign()` return `False` when the target does not exist.
+
+```python
+import httpx2
+import listmonk
+from listmonk.errors import OperationNotAllowedError, ValidationError
+
+try:
+    subscriber = listmonk.subscriber_by_email('someone@some.domain')
+except OperationNotAllowedError:
+    ...  # call set_url_base() and login() first
+except httpx2.HTTPStatusError as e:
+    ...  # e.response.status_code, e.response.text
+except ValidationError:
+    ...  # the server answered with something that is not JSON (a proxy error page, say)
+
+if subscriber is None:
+    ...  # no such subscriber; not an error
+```
+
+Every network call accepts an optional `timeout_config`, an `httpx2.Timeout`, and defaults to 10 seconds. Pass a longer one for slow or self-hosted instances, for example `listmonk.subscribers(timeout_config=httpx2.Timeout(timeout=60))`.
+
 ## F.A.Q.
+
+### I got OperationNotAllowedError: You must login before proceeding
+
+Authentication is module-level state. Call `listmonk.set_url_base(url)` and then `listmonk.login(user, password)` once at startup, before any other function, and check that `login()` returned `True`. A `False` return means the server rejected the credentials or could not be reached; no exception is raised in that case.
 
 ### I got httpx2.HTTPStatusError: Client error '403 Forbidden'
 
@@ -218,7 +273,11 @@ httpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.l
 
 It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.
 
-**Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)]
+**Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)] The single-subscriber lookups (`subscriber_by_email()` and friends) use this same query mechanism, so they need the permission too. Filtering with `subscribers(list_id=...)` alone does not.
+
+### test_campaign() raised 400 Bad Request: No known subscribers to test
+
+Listmonk only sends campaign tests to addresses that already exist as subscribers. It does not create them, and when none of the addresses you passed are known it rejects the request with HTTP 400, which the client raises as `httpx2.HTTPStatusError`. Create the subscriber first (`create_subscriber(email, pre_confirm=True)`) or use an address that is already on a list.
 
 ### I got an SSL certificate verification error against my self-hosted Listmonk
 

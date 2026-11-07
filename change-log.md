@@ -7,17 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
+* `tests/test_type_check.py` now passes the running interpreter's environment to `ty check --python`, so the type gate finds the project's `venv/` (ty only auto-discovers `.venv`) instead of reporting every third-party import as unresolved when the venv is not activated
+* `scripts/build_docs.py` refuses to mirror a site that is missing `llms.txt`, `llms-full.txt`, `skill.md`, the `.well-known/agent-skills` files, `robots.txt`, or `sitemap.xml`, since Great Docs reports success even when it skips them
 
-### Security
+### Documentation
+* Replaced the generated agent skill with a hand-written `skills/listmonk/SKILL.md` (wired through `skill.file` in `great-docs.yml`) that covers the rules of the package: call order, the raises-versus-returns-False error model, transactional subscriber modes, campaign status transitions, Go template syntax, and the permission behind the 403. `skill_extra_body.md` and the gotcha/decision-table lists in `great-docs.yml` folded into it
+* Corrected the `test_campaign()` docs: Listmonk answers HTTP 400 "No known subscribers to test." when none of the addresses are subscribers, which the client raises as `httpx2.HTTPStatusError`; it does not silently send nothing. A test pins the behaviour
+* README: documented `test_campaign()`, `start/pause/cancel_campaign()`, `subscriber_mode`, and multi-recipient transactional sends, which had only been in the changelog; added an Error handling section (what raises, what returns `False` or `None`, timeouts) and FAQ entries for `OperationNotAllowedError` and the campaign-test 400; switched the media example to an image, which is all a default server accepts
+* Every public function, model, and exception now has an Examples section, so the reference pages and `llms-full.txt` show canonical usage; `update_campaign()` notes that dropping a past `send_at` returns a scheduled campaign to draft
+* Package docstring lists the entry points (functions, `models`, `errors`, `timeout_config`, `SSL_CERT_FILE`/`SSL_CERT_DIR`); changelog compare links added for 0.5.31 and 0.6.32
 
 ## [0.6.32] - 2026-10-17
 
@@ -131,7 +130,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.4.3...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.6.32...HEAD
+[0.6.32]: https://github.com/mikeckennedy/listmonk/compare/v0.5.31...v0.6.32
+[0.5.31]: https://github.com/mikeckennedy/listmonk/compare/v0.4.3...v0.5.31
 [0.4.3]: https://github.com/mikeckennedy/listmonk/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/mikeckennedy/listmonk/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/mikeckennedy/listmonk/compare/v0.4.0...v0.4.1

@@ -11,6 +11,16 @@ Typical usage:
     True
     >>> sub = listmonk.subscriber_by_email('some_user@example.com')
 
+Entry points:
+
+- Functions live directly on this module (``listmonk.subscribers()``, ``listmonk.create_campaign()``).
+  Call ``set_url_base()`` and then ``login()`` once before any of them; auth is module-level state.
+- ``listmonk.models`` holds the Pydantic models and the ``SubscriberStatuses`` / ``CampaignStatuses`` enums.
+- ``listmonk.errors`` holds ``ValidationError``, ``OperationNotAllowedError``, and
+  ``ListmonkFileNotFoundError``. HTTP failures raise ``httpx2.HTTPStatusError``.
+- Every network call accepts ``timeout_config=httpx2.Timeout(...)`` (default 10 seconds).
+- TLS trust follows the ``SSL_CERT_FILE`` / ``SSL_CERT_DIR`` environment variables.
+
 Full documentation: https://mkennedy.codes/docs/listmonk/
 """
 

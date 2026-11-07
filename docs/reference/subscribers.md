@@ -51,3 +51,14 @@ If the server returns an empty body or invalid JSON.
 
 `httpx2.HTTPStatusError`  
 If the server responds with a 4xx or 5xx status.
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> on_list = listmonk.subscribers(list_id=3)
+>>> in_portland = listmonk.subscribers(query_text="subscribers.attribs->>'city' = 'Portland'")
+>>> len(on_list), len(in_portland)
+(1250, 42)
+```

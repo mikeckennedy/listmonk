@@ -45,3 +45,13 @@ If the server responds with a 4xx or 5xx status.
 
 `Exception`  
 If the server returns a result set that does not contain the requested list_id (a workaround for a known Listmonk server quirk).
+
+
+## Examples
+
+``` python
+>>> import listmonk
+>>> lst = listmonk.list_by_id(7)
+>>> lst.name, lst.optin
+('Course Announcements', 'double')
+```
