@@ -1,0 +1,69 @@
+# Lists and segmentation
+
+Lists are how Listmonk decides who gets what. A campaign targets one or more lists; a subscriber belongs to any number of them. Most apps have a handful (the newsletter, the product announcements, the beta testers) and manage membership from code as people sign up, upgrade, and leave.
+
+
+# Reading lists
+
+``` python
+for lst in listmonk.lists():
+    print(lst.id, lst.name, lst.type, lst.optin, lst.subscriber_count)
+
+newsletter = listmonk.list_by_id(7)
+```
+
+[`lists()`](../reference/lists.md) returns every list on the instance in one request. [`list_by_id()`](../reference/list_by_id.md) returns a [`MailingList`](../reference/models.MailingList.md) and, unlike the subscriber lookups, raises rather than returning `None` when the ID is unknown. Each model carries the list's `uuid`, which you will need for opt-in confirmation below, and a `subscriber_statuses` breakdown with the count still awaiting confirmation.
+
+
+# Creating and changing lists
+
+``` python
+beta = listmonk.create_list('Beta testers', list_type='private', optin='single', tags=['product'])
+
+listmonk.update_list(beta.id, description='People trying the new editor')
+listmonk.update_list(beta.id, status='archived')
+
+listmonk.delete_list(beta.id)
+```
+
+[`create_list()`](../reference/create_list.md) needs a name; `list_type` is `public` or `private` (public lists appear on Listmonk's public subscription form) and `optin` is `single` or `double`. Both are validated before the request goes out. [`update_list()`](../reference/update_list.md) sends only the fields you pass, so an update that mentions just `description` leaves everything else alone; `status` can move a list between `active` and `archived`. [`delete_list()`](../reference/delete_list.md) checks that the list exists first and raises if it does not.
+
+
+# Membership
+
+There are three ways to put people on lists, suited to three different moments.
+
+At signup, pass `list_ids` to [`create_subscriber()`](../reference/create_subscriber.md).
+
+For one person later on, use [`update_subscriber()`](../reference/update_subscriber.md) with `add_to_lists` and `remove_from_lists`. The result is the person's current lists, minus the removals, plus the additions.
+
+For many people at once, use [`add_subscribers_to_lists()`](../reference/add_subscribers_to_lists.md):
+
+``` python
+ok = listmonk.add_subscribers_to_lists([201, 202, 203], [7, 9])
+ok = listmonk.add_subscribers_to_lists([201], [7], status='unconfirmed')
+```
+
+It de-duplicates both ID sets, marks the new subscriptions `confirmed` unless you say `unconfirmed`, and returns `False` rather than raising when either set is empty or the server answers with an error. It takes subscriber IDs, not emails, so look people up first; the [sync recipe](recipes.md#sync-your-user-table-into-a-list) does that in bulk.
+
+
+# Single and double opt-in
+
+A single opt-in list accepts a subscription as confirmed the moment it is made. A double opt-in list adds the person as `unconfirmed` and emails them a confirmation link; they receive campaigns only after clicking it.
+
+When your own app has already collected consent (a checkbox on your signup form, say) you can skip the email by passing `pre_confirm=True` to [create_subscriber()](../reference/create_subscriber.md#listmonk.create_subscriber), and [update_subscriber()](../reference/update_subscriber.md#listmonk.update_subscriber) always confirms the memberships it sets. When you want Listmonk to run the confirmation flow, leave `pre_confirm` off.
+
+If you run your own confirmation page and want to confirm a double opt-in from code, use [`confirm_optin()`](../reference/confirm_optin.md) with the subscriber's and the list's UUIDs:
+
+``` python
+sub = listmonk.subscriber_by_email('jane@example.com')
+newsletter = listmonk.list_by_id(7)
+confirmed = listmonk.confirm_optin(sub.uuid, newsletter.uuid)  # True or False
+```
+
+This submits Listmonk's public opt-in form rather than calling a JSON endpoint, so it reports failure as `False` instead of raising. Only call it when the person has genuinely opted in.
+
+
+# Choosing a list to segment on
+
+Lists are the right tool when membership is a decision someone made or a stage they are in: subscribed to the newsletter, enrolled in a course, invited to the beta. For slicing by a property of the person (city, plan, signup date) you do not need a list at all; store the property in `attribs` and filter with `subscribers(query_text=...)`, as shown in [Subscribers](subscribers.md#finding-many). Campaigns can target a list, and Listmonk's own UI can save a query as a segment, so both approaches end up usable from the campaign side.

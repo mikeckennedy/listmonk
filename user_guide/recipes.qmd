@@ -1,0 +1,154 @@
+---
+title: Recipes
+---
+
+Short, copy-ready versions of the jobs most apps need. Each assumes [`set_url_base()`](../reference/set_url_base.qmd) and [`login()`](../reference/login.qmd) already ran at startup, and each links to the guide page that explains the pieces.
+
+## Handle a signup form
+
+Someone ticks "send me the newsletter" on your signup form. They might already be a subscriber (they bought something last year), might be blocklisted (they unsubscribed and came back), or might be new. One function covers all three.
+
+```python
+import listmonk
+from listmonk.models import SubscriberStatuses
+
+NEWSLETTER = 7
+
+
+def subscribe_to_newsletter(email: str, name: str, source: str) -> None:
+    sub = listmonk.subscriber_by_email(email)
+
+    if sub is None:
+        listmonk.create_subscriber(email, name, list_ids={NEWSLETTER}, pre_confirm=True,
+                                   attribs={'signup_source': source})
+        return
+
+    sub.attribs['signup_source'] = source
+    # They asked again, so re-enable them even if they had unsubscribed before.
+    listmonk.update_subscriber(sub, add_to_lists={NEWSLETTER}, status=SubscriberStatuses.enabled)
+```
+
+`pre_confirm=True` because your form collected consent; drop it to let Listmonk run double opt-in instead. The explicit `status=` matters: without it `update_subscriber()` keeps whatever status the person has, which is the right default everywhere except here. See [Subscribers](subscribers.qmd) and [Lists and segmentation](lists.qmd#single-and-double-opt-in).
+
+## Handle an unsubscribe link
+
+Your app has its own unsubscribe page. Decide whether the click means "take me off this one list" or "never email me again"; they are different calls.
+
+```python
+def unsubscribe(email: str, list_id: int | None = None) -> bool:
+    sub = listmonk.subscriber_by_email(email)
+    if sub is None:
+        return False
+
+    if list_id is not None:
+        listmonk.update_subscriber(sub, remove_from_lists={list_id})   # just this list
+    else:
+        listmonk.block_subscriber(sub)                                  # everything, for good
+    return True
+```
+
+`block_subscriber()` keeps the record with a `blocklisted` status, so a later import or sync cannot accidentally resurrect them. Use `delete_subscriber()` only for a genuine "forget me" request. See [Pausing, unsubscribing, and deleting](subscribers.qmd#pausing-unsubscribing-and-deleting).
+
+## Send a receipt with a PDF
+
+Receipts go to whoever paid, subscriber or not, so use external mode and carry everything the template needs in `template_data`.
+
+```python
+from pathlib import Path
+
+RECEIPT_TEMPLATE = 4  # a 'tx' template
+
+
+def send_receipt(email: str, order_id: int, total: str, pdf_path: Path) -> bool:
+    return listmonk.send_transactional_email(
+        email,
+        RECEIPT_TEMPLATE,
+        subscriber_mode='external',
+        template_data={'order_id': order_id, 'total': total},
+        attachments=[pdf_path],
+        content_type='html',
+        altbody=f'Thanks for order {order_id}. Your receipt is attached.',
+    )
+```
+
+In external mode only `{{ .Subscriber.Email }}` is available, so the template reads the order number as `{{ .Tx.Data.order_id }}`. See [Transactional email](transactional-email.qmd#people-who-are-not-subscribers).
+
+## Send a password reset
+
+Same idea, minus the attachment. Use `fallback` if most of your users are subscribers and you still want their name available when they are:
+
+```python
+RESET_TEMPLATE = 3
+
+
+def send_password_reset(email: str, reset_url: str) -> bool:
+    return listmonk.send_transactional_email(
+        email,
+        RESET_TEMPLATE,
+        subscriber_mode='fallback',
+        template_data={'reset_url': reset_url},
+        content_type='html',
+    )
+```
+
+Remember that in `fallback` mode the subscriber fields other than the email are empty when the lookup fails, so write the template to work with `{{ .Tx.Data.reset_url }}` and a generic greeting.
+
+## Sync your user table into a list
+
+A nightly job that makes sure every active customer is on the "customers" list, creating anyone Listmonk has not seen yet.
+
+```python
+CUSTOMERS = 9
+
+
+def sync_customers(users: list[tuple[str, str]]) -> None:
+    """users is a list of (email, name) pairs from your own database."""
+    ids: list[int] = []
+    for email, name in users:
+        sub = listmonk.subscriber_by_email(email)
+        if sub is None:
+            sub = listmonk.create_subscriber(email, name, pre_confirm=True)
+        ids.append(sub.id)
+
+    for start in range(0, len(ids), 500):
+        listmonk.add_subscribers_to_lists(ids[start:start + 500], [CUSTOMERS])
+```
+
+`add_subscribers_to_lists()` takes IDs, de-duplicates them, and returns `False` rather than raising on an error, so check it if you need to. People already on the list are simply left there. This loop makes one lookup per user; for a very large table, pull everyone with `subscribers()` once and build a dict by email instead. See [Lists and segmentation](lists.qmd#membership).
+
+## Send a newsletter from code
+
+Create, attach, test, then start. Keep yourself on a private staff list so the test send always has a known subscriber to go to.
+
+```python
+from pathlib import Path
+
+NEWSLETTER = 7
+STAFF = ['you@example.com']
+
+
+def send_newsletter(subject: str, markdown_body: str, chart: Path) -> int:
+    media = listmonk.upload_media(chart)
+    campaign = listmonk.create_campaign(
+        name=subject, subject=subject, list_ids={NEWSLETTER},
+        content_type='markdown', body=markdown_body, media_ids=[media.id],
+    )
+    listmonk.test_campaign(campaign.id, STAFF)
+    input(f'Test sent to {STAFF}. Press Enter to send campaign {campaign.id} to the list...')
+    listmonk.start_campaign(campaign.id)
+    return campaign.id
+```
+
+Swap the `input()` for whatever approval step fits your workflow. To schedule instead of sending now, pass `send_at=` to `create_campaign()` and move the campaign to `CampaignStatuses.scheduled` with `set_campaign_status()`. See [Campaigns](campaigns.qmd).
+
+## Add a health check to your app
+
+```python
+import httpx2
+
+
+def listmonk_ok() -> bool:
+    return listmonk.is_healthy(timeout_config=httpx2.Timeout(timeout=3))
+```
+
+`is_healthy()` never raises; it returns `False` for an unreachable server, a rejected credential, or a client that was never configured, so it is safe to call from a readiness probe. The short timeout keeps the probe fast when the mail server is down. See [Errors and troubleshooting](error-handling.qmd#timeouts).

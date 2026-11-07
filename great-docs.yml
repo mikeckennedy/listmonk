@@ -50,6 +50,25 @@ include_in_header:
 skill:
   file: skills/listmonk/SKILL.md
 
+# User guide pages live in user_guide/ at the repo root; this list fixes the sidebar order.
+user_guide:
+  - section: Get started
+    contents:
+      - getting-started.qmd
+      - error-handling.qmd
+  - section: Working with Listmonk
+    contents:
+      - subscribers.qmd
+      - lists.qmd
+      - transactional-email.qmd
+      - campaigns.qmd
+      - templates.qmd
+      - recipes.qmd
+  - section: Under the hood
+    contents:
+      - testing.qmd
+      - how-it-works.qmd
+
 authors:
   - name: Michael Kennedy
     role: Author

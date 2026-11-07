@@ -32,6 +32,7 @@ REQUIRED_OUTPUTS = (
     '.well-known/agent-skills/listmonk/SKILL.md',
     'robots.txt',
     'sitemap.xml',
+    'user-guide/getting-started.html',
 )
 
 

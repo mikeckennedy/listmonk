@@ -1,0 +1,75 @@
+# Getting started
+
+
+# What you are connecting to
+
+[Listmonk](https://listmonk.app) is a self-hosted mail platform: subscribers, mailing lists, campaigns, templates, and a transactional endpoint for the one-off emails your app sends when something happens. It has a thorough [REST API](https://listmonk.app/docs/apis/apis/). This package wraps the part of that API most applications reach for every day, so your Python code can say "subscribe this person", "send them this", and "start that campaign" without hand-building requests.
+
+It is a flat module, not a client class. You configure it once, then call functions on `listmonk` directly. That keeps the common case down to three lines.
+
+
+# Install
+
+``` bash
+pip install listmonk
+```
+
+Or `uv add listmonk`. It needs Python 3.10 or newer and pulls in [httpx2](https://github.com/pydantic/httpx2) for HTTP, [Pydantic](https://pydantic.dev) for the models, and `strenum` for the status enums. The package ships `py.typed`, so mypy and pyright see the real signatures.
+
+
+# Create an API user
+
+Recent Listmonk versions want API access to go through a dedicated API user rather than your own login. In the Listmonk admin, open Users, create a user of type API, and copy the token it shows you; that token is the password you will pass to [login()](../reference/login.md#listmonk.login).
+
+The role you attach to that user decides what the client is allowed to do. For everything in this guide the role needs read and manage rights on subscribers, lists, campaigns, templates, and media, plus `subscribers:sql_query`. That last one is easy to forget and is behind the most common error people hit; see [Errors and troubleshooting](error-handling.md#forbidden-403) for how it shows up.
+
+
+# First contact
+
+``` python
+import listmonk
+
+listmonk.set_url_base('https://listmonk.your.domain')
+
+if not listmonk.login('api_user', 'the-token-from-listmonk'):
+    raise SystemExit('Listmonk rejected the credentials or is unreachable.')
+
+print(listmonk.is_healthy())  # True
+```
+
+Three things are happening here.
+
+[`set_url_base()`](../reference/set_url_base.md) stores the address of your instance. It wants the scheme (`https://`) and nothing after the host, so no `/api` and no trailing path. It strips a trailing slash for you and raises [ValidationError](../reference/errors.ValidationError.md#listmonk.errors.ValidationError) if the scheme is missing.
+
+[`login()`](../reference/login.md) checks the credentials by calling Listmonk's health endpoint with HTTP Basic auth, then stores them at module level. Every later call reuses them, so this is a once-at-startup call. Notice that it returns a bool. A `False` means either the server said no or the server could not be reached at all; it does not raise for either. Check the bool.
+
+[`is_healthy()`](../reference/is_healthy.md) is the same health call, available any time you want to confirm the instance is up and the stored credentials still work. [`verify_login()`](../reference/verify_login.md) is an alias for it.
+
+Until [set_url_base()](../reference/set_url_base.md#listmonk.set_url_base) and a successful [login()](../reference/login.md#listmonk.login) have both happened, every other function raises [listmonk.errors.OperationNotAllowedError](../reference/errors.OperationNotAllowedError.md#listmonk.errors.OperationNotAllowedError). If you see that error, the configuration calls were skipped, ran in a different process, or [login()](../reference/login.md#listmonk.login) returned `False` and nobody checked.
+
+
+# Your first real call
+
+``` python
+sub = listmonk.subscriber_by_email('someone@example.com')
+
+if sub is None:
+    sub = listmonk.create_subscriber('someone@example.com', 'Someone', list_ids={1}, pre_confirm=True)
+
+print(sub.id, sub.status, [lst['id'] for lst in sub.lists])
+```
+
+That is the shape of most work with this library: look something up, get a Pydantic model back (or `None` when there is no match), create or change it, and get the server's fresh copy back. The rest of the guide walks through each area.
+
+
+# Where to go next
+
+- [Subscribers](subscribers.md): create, find, update, pause, unsubscribe, and delete people, and query them by custom attributes.
+- [Lists and segmentation](lists.md): create and reshape lists, bulk membership, and opt-in confirmation.
+- [Transactional email](transactional-email.md): password resets, receipts, and invites, including to people who are not subscribers.
+- [Campaigns](campaigns.md): the campaign life cycle from draft to sent, with media, previews, and test sends.
+- [Templates](templates.md): the frame around every message, and the one rule every template must follow.
+- [Recipes](recipes.md): copy-ready handlers for signup forms, unsubscribe links, receipts, and syncing your user table.
+- [Errors and troubleshooting](error-handling.md): which calls raise, which return `False` or `None`, and what the common errors mean.
+- [Testing your integration](testing.md): fake the server so your app's tests never touch a real Listmonk.
+- [How it works](how-it-works.md): module-level state, httpx2, the models, and what the client does not cover.

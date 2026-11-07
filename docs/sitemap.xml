@@ -7,6 +7,66 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/campaigns.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/error-handling.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/getting-started.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/how-it-works.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/lists.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/recipes.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/subscribers.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/templates.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/testing.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mkennedy.codes/docs/listmonk/user-guide/transactional-email.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://mkennedy.codes/docs/listmonk/reference/</loc>
     <lastmod>2026-11-06</lastmod>
     <changefreq>monthly</changefreq>

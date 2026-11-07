@@ -12,6 +12,8 @@ It does not cover every endpoint yet. Campaign analytics and bulk subscriber del
 
 📚 Full documentation lives at **[mkennedy.codes/docs/listmonk](https://mkennedy.codes/docs/listmonk/)**, including the complete [API Reference](https://mkennedy.codes/docs/listmonk/reference/) for every function, model, and exception in the library.
 
+📖 The [User Guide](https://mkennedy.codes/docs/listmonk/user-guide/getting-started.html) goes deeper than the tour below, one topic per page: [subscribers](https://mkennedy.codes/docs/listmonk/user-guide/subscribers.html), [lists](https://mkennedy.codes/docs/listmonk/user-guide/lists.html), [transactional email](https://mkennedy.codes/docs/listmonk/user-guide/transactional-email.html), [campaigns](https://mkennedy.codes/docs/listmonk/user-guide/campaigns.html), [templates](https://mkennedy.codes/docs/listmonk/user-guide/templates.html), [recipes](https://mkennedy.codes/docs/listmonk/user-guide/recipes.html) for common jobs, [errors and troubleshooting](https://mkennedy.codes/docs/listmonk/user-guide/error-handling.html), [testing your integration](https://mkennedy.codes/docs/listmonk/user-guide/testing.html), and [how it works](https://mkennedy.codes/docs/listmonk/user-guide/how-it-works.html).
+
 🤖 Using a coding agent? Point it at the [Agent Skill](https://mkennedy.codes/docs/listmonk/skills.html) (a cheat sheet of the rules of this package) or at [llms-full.txt](https://mkennedy.codes/docs/listmonk/llms-full.txt), which holds every signature and docstring in one file.
 
 ## Core Features
@@ -287,6 +289,8 @@ new_tx_template = listmonk.create_template(
 That is the whole tour. Jane has been welcomed, segmented, reset, newslettered, and deleted, and you have seen every corner of the library that matters. The rest of this page is about what happens when something goes wrong.
 
 ## Error handling
+
+The short version lives here; the guide's [Errors and troubleshooting](https://mkennedy.codes/docs/listmonk/user-guide/error-handling.html) page has the full list of return contracts and every known error with its fix.
 
 Bad news arrives in two shapes in this library, and it pays to know which shape a call uses before you wrap it in `try/except`. Some calls raise. Others hand you a `False` or a `None` and expect you to look.
 

@@ -1,0 +1,91 @@
+# Transactional email
+
+Campaigns go to lists. Transactional email goes to one person, right now, because something just happened: a password reset, a receipt, an invitation, a "your export is ready". You write a `tx` template in Listmonk once, then send it from code with the data that fills in the blanks.
+
+
+# Sending one
+
+``` python
+ok = listmonk.send_transactional_email(
+    'jane@example.com',
+    template_id=3,
+    template_data={'full_name': 'Jane Doe', 'reset_code': 'abc123'},
+    content_type='html',
+)
+```
+
+[`send_transactional_email()`](../reference/send_transactional_email.md) needs a recipient and a template ID. The template must be a `tx` template, not a campaign template; Listmonk keeps the two kinds apart and the ID of a campaign template will not work here. `template_data` is any JSON-serialisable dict. `content_type` is `html`, `markdown`, or `plain` and defaults to `markdown`. `from_email` is optional and falls back to the sender configured on the server.
+
+The return value is `True` when Listmonk accepted the message. Delivery after that point (SMTP errors, bounces) shows up in the Logs section of the Listmonk admin rather than coming back to you.
+
+
+# Where the data goes
+
+Listmonk renders templates with Go's template engine, not Jinja. Inside a `tx` template your `template_data` is reachable as `.Tx.Data`, and the recipient's record as `.Subscriber`:
+
+``` html
+<p>Hi {{ .Subscriber.FirstName }},</p>
+<p>Your reset code is <strong>{{ .Tx.Data.reset_code }}</strong>.</p>
+```
+
+A `tx` template can carry its own subject line, set when you create it; see [Templates](templates.md#campaign-templates-and-transactional-templates).
+
+
+# Plain-text twin, attachments, headers
+
+``` python
+from pathlib import Path
+
+ok = listmonk.send_transactional_email(
+    'jane@example.com',
+    template_id=4,
+    template_data={'order_id': 1772},
+    content_type='html',
+    altbody='Your order 1772 has shipped.',
+    attachments=[Path('/invoices/1772.pdf')],
+    email_headers=[{'X-Priority': '1'}],
+)
+```
+
+`altbody` is the plain-text alternative for mail clients that prefer text. `attachments` is a list of `Path` objects; the files are read and sent inline as a multipart request, and a path that does not exist raises [ListmonkFileNotFoundError](../reference/errors.ListmonkFileNotFoundError.md#listmonk.errors.ListmonkFileNotFoundError) before anything is sent. Custom `email_headers` are a list of single-entry dicts, one header each, not one dict with many keys.
+
+
+# People who are not subscribers
+
+By default Listmonk will only send a transactional email to an address that already exists as a subscriber. That is fine for someone who signed up, but your app also emails people who have not: the colleague Jane just invited, the guest who bought one thing, the person who requested a password reset before finishing registration. The `subscriber_mode` argument handles this.
+
+``` python
+# 'external': no lookup at all. Any address works.
+listmonk.send_transactional_email(
+    'guest@example.com', template_id=3,
+    subscriber_mode='external',
+    template_data={'name': 'Sam', 'reset_url': 'https://app.example.com/reset/abc'},
+)
+
+# 'fallback': look the subscriber up, but still send if they are not found.
+listmonk.send_transactional_email('maybe@example.com', template_id=3, subscriber_mode='fallback')
+```
+
+The catch with both modes: only `{ .Subscriber.Email }` is populated in the template, because there may be no subscriber record to read from. Anything else the template needs, including the person's name, has to travel in `template_data` and be read as `{{ .Tx.Data.<key> }}`. Templates meant for external sends should be written that way from the start.
+
+Leave `subscriber_mode` out and the field is omitted from the request entirely, so the server keeps its default behaviour. That also means the call works against older Listmonk versions that predate the option.
+
+
+# Several recipients in one call
+
+Pass a list of addresses instead of a single string:
+
+``` python
+listmonk.send_transactional_email(
+    ['one@example.com', 'two@example.com'],
+    template_id=3,
+    subscriber_mode='external',
+)
+```
+
+A single string is sent as Listmonk's `subscriber_email` field and a list as `subscriber_emails`. The server rejects a request that carries both, which is why the client takes one argument that accepts either: the invalid combination cannot be expressed. Blank addresses in the list are dropped, and a list with nothing left raises `ValueError` before any request is made.
+
+
+# Choosing between transactional and campaign
+
+Reach for transactional email when the trigger is an event in your app and the audience is one person, or a short list of specific people. Reach for a [campaign](campaigns.md) when the audience is a list and the content is the same for everyone. Transactional messages do not appear in campaign statistics and are not subject to a campaign's lifecycle; they are sent as soon as Listmonk accepts them.

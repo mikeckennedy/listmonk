@@ -97,7 +97,9 @@ The `query=` in the URL means a SQL-filtered lookup, so the 403 is the missing `
 
 - Documentation: <https://mkennedy.codes/docs/listmonk/>
 - API reference: <https://mkennedy.codes/docs/listmonk/reference/> (append `.md` instead of `.html` to any page for plain Markdown)
-- Error handling and FAQ: <https://mkennedy.codes/docs/listmonk/#error-handling>
+- User guide: <https://mkennedy.codes/docs/listmonk/user-guide/getting-started.html> (getting started, subscribers, lists, transactional email, campaigns, templates, recipes, testing, how it works)
+- Errors and troubleshooting: <https://mkennedy.codes/docs/listmonk/user-guide/error-handling.html>
+- Recipes (signup form, unsubscribe link, receipt with PDF, user sync, newsletter): <https://mkennedy.codes/docs/listmonk/user-guide/recipes.html>
 - llms.txt: <https://mkennedy.codes/docs/listmonk/llms.txt>
 - llms-full.txt: <https://mkennedy.codes/docs/listmonk/llms-full.txt>
 - Source: <https://github.com/mikeckennedy/listmonk>

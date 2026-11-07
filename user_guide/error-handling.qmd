@@ -1,0 +1,108 @@
+---
+title: Errors and troubleshooting
+---
+
+Bad news arrives in two shapes in this library. Some calls raise. Others hand you a `False` or a `None` and expect you to look. Knowing which shape a call uses is the difference between a `try/except` that works and one that never fires.
+
+## Calls that raise
+
+Every data call checks the client state first and raises `listmonk.errors.OperationNotAllowedError` if [`set_url_base()`](../reference/set_url_base.qmd) or a successful [`login()`](../reference/login.qmd) has not happened yet.
+
+Bad arguments raise `ValueError` before any request is sent: an empty email in `create_subscriber()`, a template body without the `{{ template "content" . }}` placeholder, a list type that is not `public` or `private`, a campaign with no name or subject.
+
+A 4xx or 5xx response from the server raises `httpx2.HTTPStatusError`. The exception carries the response, so `e.response.status_code` and `e.response.text` tell you what Listmonk said. Note the module name: this library uses [httpx2](https://github.com/pydantic/httpx2), the Pydantic-maintained fork of httpx, so catch `httpx2.HTTPStatusError`. An `httpx.HTTPStatusError` handler will not match.
+
+An empty response body, or one that is not JSON (a proxy's HTML error page, say), raises `listmonk.errors.ValidationError`. `OperationNotAllowedError` is a subclass of it, so one `except ValidationError` clause catches both.
+
+A missing attachment path in `send_transactional_email()` or `upload_media()` raises `listmonk.errors.ListmonkFileNotFoundError`, a subclass of the built-in `FileNotFoundError`.
+
+## Calls that return a value instead
+
+| Call | Returns | When |
+| ---- | ------- | ---- |
+| `login()`, `is_healthy()`, `verify_login()` | `False` | Credentials rejected, or the server unreachable. Never raises for these. |
+| `confirm_optin()`, `add_subscribers_to_lists()` | `False` | Any non-2xx response. `add_subscribers_to_lists()` also returns `False` for empty inputs. |
+| `subscriber_by_email()`, `subscriber_by_id()`, `subscriber_by_uuid()`, `campaign_by_id()`, `template_by_id()` | `None` | Nothing matches. |
+| `set_campaign_status()`, `start_campaign()`, `pause_campaign()`, `cancel_campaign()` | `None` | No campaign has that ID. |
+| `delete_subscriber()`, `delete_campaign()`, `delete_template()`, `test_campaign()` | `False` | The target does not exist. |
+| `update_subscriber()`, `update_campaign()`, `update_template()` | `None` | The follow-up fetch after a successful update finds nothing. Rare. |
+
+The odd one out is [`list_by_id()`](../reference/list_by_id.qmd), which returns a `MailingList` rather than an optional and raises if the list is missing.
+
+```python
+import httpx2
+import listmonk
+from listmonk.errors import OperationNotAllowedError, ValidationError
+
+try:
+    subscriber = listmonk.subscriber_by_email('someone@some.domain')
+except OperationNotAllowedError:
+    ...  # call set_url_base() and login() first
+except httpx2.HTTPStatusError as e:
+    ...  # e.response.status_code, e.response.text
+except ValidationError:
+    ...  # the server answered with something that is not JSON
+
+if subscriber is None:
+    ...  # no such subscriber; not an error
+```
+
+## Timeouts
+
+Every network call accepts `timeout_config`, an `httpx2.Timeout`, and defaults to 10 seconds. A slow or far-away instance, or a `subscribers()` call that pages through a large list, may need more:
+
+```python
+import httpx2
+
+everyone = listmonk.subscribers(timeout_config=httpx2.Timeout(timeout=60))
+```
+
+A timeout surfaces as an `httpx2.TimeoutException` from the underlying request.
+
+## OperationNotAllowedError: You must login before proceeding
+
+Authentication is module-level state. Call `set_url_base(url)` and then `login(user, password)` once at startup, before any other function, and check that `login()` returned `True`. A `False` return means the server rejected the credentials or could not be reached; no exception is raised in that case, which is why skipping the check leads here.
+
+If your app runs under several worker processes, each process has its own copy of that state and each needs to log in. A fixture or startup hook is the usual place.
+
+## Forbidden (403)
+
+```text
+httpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''
+```
+
+Your password was fine; a bad one makes `login()` return `False` much earlier. The `query=` in the URL is the clue: this is a SQL-filtered subscriber lookup, and the API user's role lacks the `subscribers:sql_query` permission. Listmonk requires it whenever a `query` parameter is sent. Add the permission to the role in Users and Roles and retry. The [Listmonk roles documentation](https://listmonk.app/docs/roles-and-permissions/#user-roles) has the details.
+
+Which calls need it: [`subscribers(query_text=...)`](../reference/subscribers.qmd), [`subscriber_by_email()`](../reference/subscriber_by_email.qmd), and [`subscriber_by_uuid()`](../reference/subscriber_by_uuid.qmd). Which do not: [`subscriber_by_id()`](../reference/subscriber_by_id.qmd), which uses Listmonk's direct per-subscriber endpoint, and `subscribers(list_id=...)` without a query.
+
+A 403 from any other call means the role is missing the read or manage permission for that resource, or that the subscriber belongs to a list the API user may not see.
+
+## test_campaign() raised 400: No known subscribers to test
+
+Listmonk only sends campaign tests to addresses that already exist as subscribers. It does not create them, and when none of the addresses you passed are known it rejects the request with HTTP 400, which the client raises as `httpx2.HTTPStatusError`. Create the subscriber first (`create_subscriber(email, pre_confirm=True)`) or use an address that is already on a list. See [Campaigns](campaigns.qmd#test-before-you-send).
+
+## Campaign status change rejected (400)
+
+`start_campaign()`, `pause_campaign()`, and `cancel_campaign()` ask the server for a specific transition, and Listmonk only allows some: draft to scheduled or running, scheduled to draft, running to paused or cancelled, paused to running. Starting a finished campaign or pausing a draft comes back as a 400. Read the campaign's `status` first if you are unsure where it is.
+
+## HTTP 409 on create_subscriber()
+
+The email already exists on the instance. Look the subscriber up with `subscriber_by_email()` and update them instead; the [signup form recipe](recipes.qmd#handle-a-signup-form) shows the pattern.
+
+## SSL certificate verification failed
+
+httpx2 validates TLS certificates against the bundled `certifi` CA list by default. If you self-host Listmonk behind a custom or corporate Certificate Authority you may see:
+
+```text
+ssl.SSLCertVerificationError: certificate verify failed: unable to get local issuer certificate
+```
+
+Point the client at your CA bundle through the standard environment variables before the library makes its first request:
+
+```bash
+export SSL_CERT_FILE=/path/to/your-ca-bundle.pem   # or SSL_CERT_DIR=/path/to/ca-dir
+```
+
+## A transactional email returned True but never arrived
+
+`send_transactional_email()` returns `True` when Listmonk accepted the message for delivery. What happens after that (SMTP rejection, bounce, a messenger that is down) is reported in the Logs section of the Listmonk admin, not back to the client. Check there first, then the recipient's spam folder.

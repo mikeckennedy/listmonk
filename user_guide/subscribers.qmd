@@ -1,0 +1,83 @@
+---
+title: Subscribers
+---
+
+A subscriber is a person: an email address, an optional name, a global status, a bag of custom attributes, and the lists they are on. Almost everything your app does with Listmonk starts here.
+
+## Creating one
+
+```python
+sub = listmonk.create_subscriber(
+    'jane@example.com',
+    'Jane Doe',
+    list_ids={1, 7},
+    pre_confirm=True,
+    attribs={'plan': 'pro', 'signup_source': 'webinar'},
+)
+print(sub.id, sub.uuid)
+```
+
+[`create_subscriber()`](../reference/create_subscriber.qmd) lowercases and strips the email, strips the name, and always creates the person with a global status of `enabled`. The `list_ids` set is optional. `pre_confirm=True` tells Listmonk that your app already obtained consent, so it marks the subscriptions confirmed and sends no double opt-in email; leave it off for a double opt-in list and Listmonk will ask the person to confirm. `attribs` is any JSON-serialisable dict and is stored as-is.
+
+If the email already exists, Listmonk answers 409 and the client raises `httpx2.HTTPStatusError`. Look the person up first when that is a possibility; the [signup recipe](recipes.qmd#handle-a-signup-form) does exactly that.
+
+## Finding one
+
+```python
+by_email = listmonk.subscriber_by_email('jane@example.com')
+by_id = listmonk.subscriber_by_id(201)
+by_uuid = listmonk.subscriber_by_uuid('c37786af-e6ab-4260-9b49-740a8cd6a7ed')
+```
+
+All three return a [`Subscriber`](../reference/models.Subscriber.qmd) or `None`. They never raise just because nobody matched.
+
+Two of them have a permission requirement worth knowing about. [`subscriber_by_email()`](../reference/subscriber_by_email.qmd) and [`subscriber_by_uuid()`](../reference/subscriber_by_uuid.qmd) send a server-side SQL filter, so the API user's role needs `subscribers:sql_query` or the server answers 403. [`subscriber_by_id()`](../reference/subscriber_by_id.qmd) uses Listmonk's direct per-subscriber endpoint and needs only ordinary read permission. The value you pass to the email and UUID lookups is sent as a quoted SQL literal with embedded quotes escaped, so user-supplied input cannot widen the match.
+
+## Finding many
+
+```python
+on_the_list = listmonk.subscribers(list_id=7)
+in_portland = listmonk.subscribers(query_text="subscribers.attribs->>'city' = 'Portland'")
+both = listmonk.subscribers(query_text="subscribers.status = 'enabled'", list_id=7)
+```
+
+[`subscribers()`](../reference/subscribers.qmd) fetches every match, 500 per page, and joins the pages, ordered by `updated_at` descending. With no arguments it returns the whole instance, so give it a long `timeout_config` on a big one. The `query_text` is Listmonk's SQL-like filter over the `subscribers` table; custom attributes live in a JSONB column and are reached with `->>`. The [Listmonk querying docs](https://listmonk.app/docs/querying-and-segmentation/) cover the syntax. Filtering by `list_id` alone needs no special permission; passing `query_text` needs `subscribers:sql_query`.
+
+Values you interpolate into `query_text` yourself are your responsibility. Quote them as SQL literals and never splice raw user input into the filter.
+
+## Changing one
+
+Updates follow one pattern across the whole library: fetch the model, change what you like, pass it back. The client sends the whole record to the server and returns the server's fresh copy.
+
+```python
+sub = listmonk.subscriber_by_email('jane@example.com')
+sub.name = 'Jane A. Doe'
+sub.attribs['plan'] = 'enterprise'
+sub = listmonk.update_subscriber(sub, add_to_lists={4}, remove_from_lists={7})
+```
+
+[`update_subscriber()`](../reference/update_subscriber.qmd) works out list membership as "the lists she is on now, minus `remove_from_lists`, plus `add_to_lists`", and marks those subscriptions confirmed. Her global status is kept as it is unless you pass `status=`, so changing a blocklisted person's name does not put them back on your lists. The return value is the subscriber re-fetched from the server, or `None` in the unlikely case that the re-fetch finds nothing.
+
+Because the whole record is sent, two callers updating the same subscriber at the same time will overwrite each other. Fetch, change, and update in one short sequence.
+
+## Pausing, unsubscribing, and deleting
+
+People pause, people leave, and sometimes people ask to be forgotten. Those are three different operations.
+
+```python
+sub = listmonk.disable_subscriber(sub)   # status 'disabled': delivery paused, reversible
+sub = listmonk.enable_subscriber(sub)    # status 'enabled': back on
+
+sub = listmonk.block_subscriber(sub)     # status 'blocklisted': the real unsubscribe
+
+listmonk.delete_subscriber('jane@example.com')            # gone, by email
+listmonk.delete_subscriber(overriding_subscriber_id=201)  # gone, by ID, no lookup first
+```
+
+[`disable_subscriber()`](../reference/disable_subscriber.qmd) and [`enable_subscriber()`](../reference/enable_subscriber.qmd) toggle delivery without touching anything else. [`block_subscriber()`](../reference/block_subscriber.qmd) is the proper unsubscribe: the record stays, so a later import cannot accidentally resurrect the person, but nothing is sent to them again. [`delete_subscriber()`](../reference/delete_subscriber.qmd) removes the record entirely and returns `False` if the email matched nobody.
+
+If you only want to take someone off one list while leaving the others alone, that is not a status change at all; use `update_subscriber(sub, remove_from_lists={list_id})`. The [unsubscribe recipe](recipes.qmd#handle-an-unsubscribe-link) shows both paths side by side.
+
+## Reading the model
+
+A [`Subscriber`](../reference/models.Subscriber.qmd) carries `id`, `uuid`, `email`, `name`, `status`, `attribs`, `created_at`, `updated_at`, and `lists`. The `lists` field is a list of dicts straight from the server, each with the list `id`, `name`, and the `subscription_status` (`confirmed`, `unconfirmed`, or `unsubscribed`) for that membership. Calling `model_dump()` on a subscriber reduces `lists` to plain IDs and formats the timestamps the way the API expects, which is what `update_subscriber()` relies on.
