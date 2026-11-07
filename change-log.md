@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.7.33] - 2026-11-06
+
 ### Changed
 * `update_subscriber()` keeps the subscriber's current status unless you pass `status=`. It used to default to `enabled`, so passing back a disabled or blocklisted subscriber to change their name quietly put them back on the mailing lists. `enable_subscriber()`, `disable_subscriber()`, and `block_subscriber()` pass their status explicitly and behave as before. If you relied on the implicit re-enable, pass `status=SubscriberStatuses.enabled`
 * `subscriber_by_id()` now calls Listmonk's direct `GET /api/subscribers/{id}` endpoint instead of a SQL `query=` filter, so it no longer needs the `subscribers:sql_query` permission. Listmonk answers an unknown ID with HTTP 400, which the function still reports as `None`; any other 4xx/5xx raises `httpx2.HTTPStatusError` as before
@@ -140,7 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-string to string types in `__all__` exports
 - Type inference error in code fragments
 
-[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.6.32...HEAD
+[unreleased]: https://github.com/mikeckennedy/listmonk/compare/v0.7.33...HEAD
+[0.7.33]: https://github.com/mikeckennedy/listmonk/compare/v0.6.32...v0.7.33
 [0.6.32]: https://github.com/mikeckennedy/listmonk/compare/v0.5.31...v0.6.32
 [0.5.31]: https://github.com/mikeckennedy/listmonk/compare/v0.4.3...v0.5.31
 [0.4.3]: https://github.com/mikeckennedy/listmonk/compare/v0.4.2...v0.4.3
