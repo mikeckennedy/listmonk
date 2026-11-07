@@ -241,10 +241,10 @@ section.level2:first-of-type > h2:first-child,
 </section>
 </div></div><section id="listmonk-email-api-client-for-python" class="level1">
 <h1>Listmonk Email API Client for Python</h1>
-<p>Client for the open source, self-hosted <a href="https://listmonk.app">Listmonk email platform</a> based on <a href="https://github.com/pydantic/httpx2">httpx2</a> and <a href="https://pydantic.dev">pydantic</a>.</p>
-<p><code>listmonk</code> is intended for integrating your Listmonk instance into your web app. The <a href="https://listmonk.app/docs/apis/apis/">Listmonk API is extensive</a> but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segment users (into separate lists).</p>
-<p>So while it doesn’t currently cover every endpoint (for example campaign analytics and bulk subscriber deletion are not yet implemented) it will likely work for you. That said, PRs are welcome.</p>
-<p>🔀 Async is currently planned but not yet implemented. With the httpx2-base, it should be trivial if needed.</p>
+<p>Somewhere in your app, a person just clicked “Sign up”. A welcome email has to leave the building, a newsletter needs them on the right list, and next Tuesday they will forget their password. <a href="https://listmonk.app">Listmonk</a> is the open source, self-hosted mail platform that handles all of that. This package is how your Python code talks to it.</p>
+<p><code>listmonk</code> is built on <a href="https://github.com/pydantic/httpx2">httpx2</a> and <a href="https://pydantic.dev">pydantic</a> and is meant for wiring a Listmonk instance into your web app. The <a href="https://listmonk.app/docs/apis/apis/">Listmonk API is extensive</a>; this client deliberately covers the subset most apps need day to day: subscribe, unsubscribe, segment people into lists, send the one-off emails your app depends on, and run campaigns.</p>
+<p>It does not cover every endpoint yet. Campaign analytics and bulk subscriber deletion, for example, are not implemented. If you need one of those, open an issue first and then send a PR; they are welcome.</p>
+<p>🔀 Async is planned but not yet implemented. With httpx2 underneath, it should be a small step when the time comes.</p>
 <section id="documentation" class="level2">
 <h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
 <p>📚 Full documentation lives at <strong><a href="https://mkennedy.codes/docs/listmonk/">mkennedy.codes/docs/listmonk</a></strong>, including the complete <a href="https://mkennedy.codes/docs/listmonk/reference/">API Reference</a> for every function, model, and exception in the library.</p>
@@ -253,7 +253,7 @@ section.level2:first-of-type > h2:first-child,
 <section id="core-features" class="level2">
 <h2 class="anchored" data-anchor-id="core-features">Core Features</h2>
 <ul>
-<li>➕<strong>Add a subscriber</strong> to your subscribed users.</li>
+<li>➕ <strong>Add a subscriber</strong> to your subscribed users.</li>
 <li>🙎 Get <strong>subscriber details</strong> by email, ID, UUID, and more.</li>
 <li>📝 <strong>Modify subscriber details</strong> (including custom attribute collection).</li>
 <li>🔍 <strong>Search</strong> your users based on app and custom attributes.</li>
@@ -271,10 +271,14 @@ section.level2:first-of-type > h2:first-child,
 </section>
 <section id="installation" class="level2">
 <h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<p>Just <code>pip install listmonk</code></p>
+<p>Just <code>pip install listmonk</code> (or <code>uv add listmonk</code>). You need two things from your Listmonk instance: its address, and an API user. Recent Listmonk versions want you to create a dedicated API user with a token under Users rather than reusing your own login, and the role you give that user decides what the calls below are allowed to do.</p>
 </section>
-<section id="usage" class="level2">
-<h2 class="anchored" data-anchor-id="usage">Usage</h2>
+<section id="usage-a-tour-in-seven-scenes" class="level2">
+<h2 class="anchored" data-anchor-id="usage-a-tour-in-seven-scenes">Usage: a tour in seven scenes</h2>
+<p>Meet Jane. She has just signed up for your app. Over the next few scenes she will get onto a couple of lists, receive a password reset, be sent a newsletter, and eventually (sorry, Jane) be deleted. Each scene builds on the one before, and by the end you will have touched most of the library.</p>
+<section id="scene-1-knock-on-the-door" class="level3">
+<h3 class="anchored" data-anchor-id="scene-1-knock-on-the-door">Scene 1: Knock on the door</h3>
+<p>Everything starts with two calls: where the server is, and who you are. Authentication is stored at module level, so you do this once at startup and every later call reuses it. Note that <a href="reference/login.html#listmonk.login" class="gdls-link gdls-code">login()</a> answers with a bool rather than an exception; a <code>False</code> means the server said no, or could not be reached at all.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> listmonk</span>
@@ -287,203 +291,224 @@ section.level2:first-of-type > h2:first-child,
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>valid: <span class="bu">bool</span> <span class="op">=</span> listmonk.verify_login()</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Is it alive and working?</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>up: <span class="bu">bool</span> <span class="op">=</span> listmonk.is_healthy()</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Create, update, and delete lists</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>new_list: MailingList <span class="op">=</span> listmonk.create_list(list_name<span class="op">=</span><span class="st">"my_new_list"</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>listmonk.update_list(list_id<span class="op">=</span>new_list.<span class="bu">id</span>, description<span class="op">=</span><span class="st">'Updated description'</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>listmonk.delete_list(new_list.<span class="bu">id</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Read data about your lists</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>lists: <span class="bu">list</span>[MailingList] <span class="op">=</span> listmonk.lists()</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>the_list: MailingList <span class="op">=</span> listmonk.list_by_id(list_id<span class="op">=</span><span class="dv">7</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Various ways to access existing subscribers</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>subscribers: <span class="bu">list</span>[Subscriber] <span class="op">=</span> listmonk.subscribers(list_id<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>subscriber: Optional[Subscriber] <span class="op">=</span> listmonk.subscriber_by_email(<span class="st">'testuser@some.domain'</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>subscriber: Optional[Subscriber] <span class="op">=</span> listmonk.subscriber_by_id(<span class="dv">2001</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>subscriber: Optional[Subscriber] <span class="op">=</span> listmonk.subscriber_by_uuid(<span class="st">'f6668cf0-1c...'</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new subscriber</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>new_subscriber <span class="op">=</span> listmonk.create_subscriber(</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'testuser@some.domain'</span>, <span class="st">'Jane Doe'</span>,</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    {<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">9</span>}, pre_confirm<span class="op">=</span><span class="va">True</span>, attribs<span class="op">=</span>{...})</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Change the email, custom rating, and add to lists 4 &amp; 6, remove from 5.</span></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>subscriber.email <span class="op">=</span> <span class="st">'newemail@some.domain'</span></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>subscriber.attribs[<span class="st">'rating'</span>] <span class="op">=</span> <span class="dv">7</span></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>subscriber <span class="op">=</span> listmonk.update_subscriber(subscriber, {<span class="dv">4</span>, <span class="dv">6</span>}, {<span class="dv">5</span>})</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Bulk-add existing subscribers to lists in one call</span></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>listmonk.add_subscribers_to_lists([<span class="dv">2001</span>, <span class="dv">2002</span>], [<span class="dv">4</span>, <span class="dv">6</span>])</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm single-opt-ins via the API (e.g. for when you manage that on your platform)</span></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>listmonk.confirm_optin(subscriber.uuid, the_list.uuid)</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Disable then re-enable a subscriber</span></span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>subscriber <span class="op">=</span> listmonk.disable_subscriber(subscriber)</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>subscriber <span class="op">=</span> listmonk.enable_subscriber(subscriber)</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Block (unsubscribe) them</span></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>listmonk.block_subscriber(subscriber)</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Fully delete them from your system</span></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>listmonk.delete_subscriber(subscriber.email)</span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Send an individual, transactional email (e.g. password reset)</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>to_email <span class="op">=</span> <span class="st">'testuser@some.domain'</span></span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>from_email <span class="op">=</span> <span class="st">'app@your.domain'</span></span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>template_id <span class="op">=</span> <span class="dv">3</span>  <span class="co"># *TX* template ID from listmonk</span></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>template_data <span class="op">=</span> {<span class="st">'full_name'</span>: <span class="st">'Test User'</span>, <span class="st">'reset_code'</span>: <span class="st">'abc123'</span>}</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>status: <span class="bu">bool</span> <span class="op">=</span> listmonk.send_transactional_email(</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    to_email, template_id, from_email<span class="op">=</span>from_email,</span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    template_data<span class="op">=</span>template_data, content_type<span class="op">=</span><span class="st">'html'</span>)</span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Optional plaintext fallback for multipart HTML emails.</span></span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>status <span class="op">=</span> listmonk.send_transactional_email(</span>
-<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    to_email,</span>
-<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    template_id,</span>
-<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>    from_email<span class="op">=</span>from_email,</span>
-<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>    template_data<span class="op">=</span>template_data,</span>
-<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>    content_type<span class="op">=</span><span class="st">'html'</span>,</span>
-<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    altbody<span class="op">=</span><span class="st">'Plaintext order summary for mail clients that prefer text.'</span></span>
-<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="co"># You can also add one or multiple attachments with transactional mails</span></span>
-<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>attachments <span class="op">=</span> [</span>
-<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>    pathlib.Path(<span class="st">"/path/to/your/file1.pdf"</span>),</span>
-<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>    pathlib.Path(<span class="st">"/path/to/your/file2.png"</span>)</span>
-<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>status: <span class="bu">bool</span> <span class="op">=</span> listmonk.send_transactional_email(</span>
-<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>    to_email,</span>
-<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>    template_id,</span>
-<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>    from_email<span class="op">=</span>from_email,</span>
-<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>    template_data<span class="op">=</span>template_data,</span>
-<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>    attachments<span class="op">=</span>attachments,</span>
-<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>    content_type<span class="op">=</span><span class="st">'html'</span>,</span>
-<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>    altbody<span class="op">=</span><span class="st">'Plaintext fallback body'</span></span>
-<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="co"># By default the recipient must already be a subscriber. To email anyone at all</span></span>
-<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="co"># (password resets, invites, receipts) use subscriber_mode='external'; in that mode</span></span>
-<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a><span class="co"># only {{ .Subscriber.Email }} is available in the template, so pass everything</span></span>
-<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="co"># else via template_data and read it as {{ .Tx.Data.&lt;key&gt; }}.</span></span>
-<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>listmonk.send_transactional_email(</span>
-<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>    <span class="st">'stranger@some.domain'</span>, template_id,</span>
-<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>    subscriber_mode<span class="op">=</span><span class="st">'external'</span>, template_data<span class="op">=</span>{<span class="st">'name'</span>: <span class="st">'Sam'</span>, <span class="st">'reset_code'</span>: <span class="st">'abc123'</span>})</span>
-<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a><span class="co"># Several recipients in one call: pass a list of addresses instead of one string.</span></span>
-<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>listmonk.send_transactional_email(</span>
-<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'one@some.domain'</span>, <span class="st">'two@some.domain'</span>], template_id, subscriber_mode<span class="op">=</span><span class="st">'external'</span>)</span>
-<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a><span class="co"># Access existing campaigns</span></span>
-<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.models <span class="im">import</span> Campaign</span>
-<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime, timedelta</span>
-<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>campaigns: <span class="bu">list</span>[Campaign] <span class="op">=</span> listmonk.campaigns()</span>
-<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>campaign: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
-<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a><span class="co"># Upload media and create a campaign with attachments. A default Listmonk install only</span></span>
-<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a><span class="co"># accepts image extensions here; widen Settings &gt; Media &gt; Upload extensions for others.</span></span>
-<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>media <span class="op">=</span> listmonk.upload_media(pathlib.Path(<span class="st">"/path/to/chart.png"</span>))</span>
-<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a><span class="co"># Or upload from bytes: media = listmonk.upload_media(png_bytes, filename="chart.png")</span></span>
-<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>listmonk.create_campaign(name<span class="op">=</span><span class="st">'This is my Great Campaign!'</span>,</span>
-<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>                         subject<span class="op">=</span><span class="st">"You won't believe this!"</span>,</span>
-<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>                         body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML!&lt;/p&gt;'</span>,  <span class="co"># Optional</span></span>
-<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>                         alt_body<span class="op">=</span><span class="st">'Some Insane TXT!'</span>,  <span class="co"># Optional</span></span>
-<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>                         send_at<span class="op">=</span>datetime.now() <span class="op">+</span> timedelta(hours<span class="op">=</span><span class="dv">1</span>),  <span class="co"># Optional</span></span>
-<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>                         template_id<span class="op">=</span><span class="dv">5</span>,  <span class="co"># Optional; defaults to None (server uses its default template)</span></span>
-<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>                         list_ids<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">2</span>},  <span class="co"># Optional Defaults to 1</span></span>
-<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>                         tags<span class="op">=</span>[<span class="st">'good'</span>, <span class="st">'better'</span>, <span class="st">'best'</span>],  <span class="co"># Optional</span></span>
-<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>                         media_ids<span class="op">=</span>[media.<span class="bu">id</span>],  <span class="co"># Optional, attach uploaded media</span></span>
-<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a>                         )</span>
-<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="co"># Update A Campaign</span></span>
-<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>campaign_to_update: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
-<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>campaign_to_update.name <span class="op">=</span> <span class="st">"More Elegant Name"</span></span>
-<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>campaign_to_update.subject <span class="op">=</span> <span class="st">"Even More Clickbait!!"</span></span>
-<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>campaign_to_update.body <span class="op">=</span> <span class="st">"&lt;p&gt;There's a lot more we need to say so we're updating this programmatically!"</span></span>
-<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>campaign_to_update.altbody <span class="op">=</span> <span class="st">"There's a lot more we need to say so we're updating this programmatically!"</span></span>
-<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>campaign_to_update.lists <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">4</span>]</span>
-<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a><span class="co"># Existing attachments are kept on update; pass media_ids=[...] to change them</span></span>
-<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="co"># (or media_ids=[] to remove them all).</span></span>
-<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>listmonk.update_campaign(campaign_to_update)</span>
-<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview Campaign</span></span>
-<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.campaign_preview_by_id(<span class="dv">15</span>)</span>
-<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
-<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating a campaign does not send it. Send a test copy to yourself first (each</span></span>
-<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a><span class="co"># address must already be a subscriber), then start it. update_campaign() cannot</span></span>
-<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="co"># change the status; these calls use Listmonk's dedicated status endpoint.</span></span>
-<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>listmonk.test_campaign(<span class="dv">15</span>, [<span class="st">'you@your.domain'</span>])</span>
-<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>listmonk.start_campaign(<span class="dv">15</span>)   <span class="co"># draft -&gt; running; the same as set_campaign_status(15, CampaignStatuses.running)</span></span>
-<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>listmonk.pause_campaign(<span class="dv">15</span>)   <span class="co"># running -&gt; paused; resume with start_campaign()</span></span>
-<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>listmonk.cancel_campaign(<span class="dv">15</span>)  <span class="co"># stop for good</span></span>
-<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a><span class="co"># Delete a Campaign (by its numeric ID)</span></span>
-<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a>listmonk.delete_campaign(<span class="dv">15</span>)</span>
-<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a><span class="co"># Access existing Templates</span></span>
-<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.models <span class="im">import</span> Template</span>
-<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a>templates: <span class="bu">list</span>[Template] <span class="op">=</span> listmonk.templates()</span>
-<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a>template: Template <span class="op">=</span> listmonk.template_by_id(<span class="dv">2</span>)</span>
-<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new Template for Campaigns</span></span>
-<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>new_template <span class="op">=</span> listmonk.create_template(</span>
-<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TEMPLATE'</span>,</span>
-<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st"> &lt;/p&gt;'</span>,</span>
-<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'campaign'</span>,</span>
-<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a><span class="co"># Update A Template</span></span>
-<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>new_template.name <span class="op">=</span> <span class="st">"Bob's Great Template"</span></span>
-<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a>listmonk.update_template(new_template)</span>
-<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="co"># Mark a template as the default for its type</span></span>
-<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a>listmonk.set_default_template(new_template.<span class="bu">id</span>)</span>
-<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a><span class="co"># Delete a Template</span></span>
-<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>listmonk.delete_template(<span class="dv">3</span>)</span>
-<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview Template</span></span>
-<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.template_preview_by_id(<span class="dv">3</span>)</span>
-<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
-<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new template for Transactional Emails</span></span>
-<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a><span class="co"># (the {{ template "content" . }} placeholder is required in every template body)</span></span>
-<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>new_tx_template <span class="op">=</span> listmonk.create_template(</span>
-<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TX TEMPLATE'</span>,</span>
-<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a>    subject<span class="op">=</span><span class="st">'Your Transactional Email Subject'</span>,</span>
-<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Hi </span><span class="sc">{{</span><span class="st"> .Subscriber.FirstName </span><span class="sc">}}</span><span class="st">! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st">&lt;/p&gt;'</span>,</span>
-<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'tx'</span>,</span>
-<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>up: <span class="bu">bool</span> <span class="op">=</span> listmonk.is_healthy()</span></code></pre></div>
+</section>
+<section id="scene-2-the-guest-lists" class="level3">
+<h3 class="anchored" data-anchor-id="scene-2-the-guest-lists">Scene 2: The guest lists</h3>
+<p>Lists are how Listmonk segments people: the newsletter, the beta testers, the folks who bought the advanced course. You can create and reshape them from code, or just read the ones already set up in the admin UI.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create, update, and delete lists</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>new_list: MailingList <span class="op">=</span> listmonk.create_list(list_name<span class="op">=</span><span class="st">"my_new_list"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>listmonk.update_list(list_id<span class="op">=</span>new_list.<span class="bu">id</span>, description<span class="op">=</span><span class="st">'Updated description'</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>listmonk.delete_list(new_list.<span class="bu">id</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Read data about your lists</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>lists: <span class="bu">list</span>[MailingList] <span class="op">=</span> listmonk.lists()</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>the_list: MailingList <span class="op">=</span> listmonk.list_by_id(list_id<span class="op">=</span><span class="dv">7</span>)</span></code></pre></div>
+</section>
+<section id="scene-3-jane-signs-up" class="level3">
+<h3 class="anchored" data-anchor-id="scene-3-jane-signs-up">Scene 3: Jane signs up</h3>
+<p>Creating a subscriber is one call. <code>pre_confirm=True</code> tells Listmonk that your app already handled consent, so no double opt-in email goes out. The <code>attribs</code> dict is a free-form bag of custom data (a plan name, a signup source, a rating) that you can query later. Once Jane exists you can find her again by email, ID, or UUID; each of those returns <code>None</code> rather than raising when nobody matches.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Various ways to access existing subscribers</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>subscribers: <span class="bu">list</span>[Subscriber] <span class="op">=</span> listmonk.subscribers(list_id<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>subscriber: Optional[Subscriber] <span class="op">=</span> listmonk.subscriber_by_email(<span class="st">'testuser@some.domain'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>subscriber: Optional[Subscriber] <span class="op">=</span> listmonk.subscriber_by_id(<span class="dv">2001</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>subscriber: Optional[Subscriber] <span class="op">=</span> listmonk.subscriber_by_uuid(<span class="st">'f6668cf0-1c...'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new subscriber</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>new_subscriber <span class="op">=</span> listmonk.create_subscriber(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'testuser@some.domain'</span>, <span class="st">'Jane Doe'</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    {<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">9</span>}, pre_confirm<span class="op">=</span><span class="va">True</span>, attribs<span class="op">=</span>{...})</span></code></pre></div>
+<p>Updates follow one pattern throughout the library: fetch the model, change what you like, pass it back. The client sends the whole record and returns the server’s fresh copy. List membership is worked out as “what she has now, minus the removals, plus the additions”. Her global status (enabled, disabled, or blocklisted) stays whatever it already was unless you say otherwise.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Change the email, custom rating, and add to lists 4 &amp; 6, remove from 5.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>subscriber.email <span class="op">=</span> <span class="st">'newemail@some.domain'</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>subscriber.attribs[<span class="st">'rating'</span>] <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>subscriber <span class="op">=</span> listmonk.update_subscriber(subscriber, {<span class="dv">4</span>, <span class="dv">6</span>}, {<span class="dv">5</span>})</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Bulk-add existing subscribers to lists in one call</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>listmonk.add_subscribers_to_lists([<span class="dv">2001</span>, <span class="dv">2002</span>], [<span class="dv">4</span>, <span class="dv">6</span>])</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm single-opt-ins via the API (e.g. for when you manage that on your platform)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>listmonk.confirm_optin(subscriber.uuid, the_list.uuid)</span></code></pre></div>
+</section>
+<section id="scene-4-jane-changes-her-mind" class="level3">
+<h3 class="anchored" data-anchor-id="scene-4-jane-changes-her-mind">Scene 4: Jane changes her mind</h3>
+<p>People pause, people leave, and occasionally people ask to be forgotten entirely. Those are three different operations and it matters which one you reach for. Disabling pauses delivery and is reversible. Blocking is the proper unsubscribe: Jane’s record stays, so she can never be accidentally re-added by an import, but nothing is ever sent to her again. Deleting erases her as if she had never existed.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Disable then re-enable a subscriber</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>subscriber <span class="op">=</span> listmonk.disable_subscriber(subscriber)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>subscriber <span class="op">=</span> listmonk.enable_subscriber(subscriber)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Block (unsubscribe) them</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>listmonk.block_subscriber(subscriber)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Fully delete them from your system</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>listmonk.delete_subscriber(subscriber.email)</span></code></pre></div>
+</section>
+<section id="scene-5-the-password-reset-that-cannot-wait" class="level3">
+<h3 class="anchored" data-anchor-id="scene-5-the-password-reset-that-cannot-wait">Scene 5: The password reset that cannot wait</h3>
+<p>Campaigns go to lists. Transactional email goes to one person, right now, because something just happened: a reset code, a receipt, an invite. You write a <code>tx</code> template in Listmonk once, then send it with the data that fills in the blanks. Listmonk templates are Go templates, so the merge data shows up in the template as <code>{ .Tx.Data.reset_code }</code>, not Jinja.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Send an individual, transactional email (e.g. password reset)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>to_email <span class="op">=</span> <span class="st">'testuser@some.domain'</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>from_email <span class="op">=</span> <span class="st">'app@your.domain'</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>template_id <span class="op">=</span> <span class="dv">3</span>  <span class="co"># *TX* template ID from listmonk</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>template_data <span class="op">=</span> {<span class="st">'full_name'</span>: <span class="st">'Test User'</span>, <span class="st">'reset_code'</span>: <span class="st">'abc123'</span>}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>status: <span class="bu">bool</span> <span class="op">=</span> listmonk.send_transactional_email(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    to_email, template_id, from_email<span class="op">=</span>from_email,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    template_data<span class="op">=</span>template_data, content_type<span class="op">=</span><span class="st">'html'</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Optional plaintext fallback for multipart HTML emails.</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>status <span class="op">=</span> listmonk.send_transactional_email(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    to_email,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    template_id,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    from_email<span class="op">=</span>from_email,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    template_data<span class="op">=</span>template_data,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    content_type<span class="op">=</span><span class="st">'html'</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    altbody<span class="op">=</span><span class="st">'Plaintext order summary for mail clients that prefer text.'</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co"># You can also add one or multiple attachments with transactional mails</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>attachments <span class="op">=</span> [</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    pathlib.Path(<span class="st">"/path/to/your/file1.pdf"</span>),</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    pathlib.Path(<span class="st">"/path/to/your/file2.png"</span>)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>status: <span class="bu">bool</span> <span class="op">=</span> listmonk.send_transactional_email(</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    to_email,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    template_id,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    from_email<span class="op">=</span>from_email,</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    template_data<span class="op">=</span>template_data,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    attachments<span class="op">=</span>attachments,</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    content_type<span class="op">=</span><span class="st">'html'</span>,</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    altbody<span class="op">=</span><span class="st">'Plaintext fallback body'</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>Here is the twist. By default Listmonk will only send a transactional email to someone who is already a subscriber. That is fine for Jane, but what about the colleague she just invited, who has no account yet? Pass <code>subscriber_mode='external'</code> and Listmonk skips the lookup and sends to anyone. The price is that only <code>{ .Subscriber.Email }</code> is available inside the template, so anything else it needs has to ride along in <code>template_data</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># By default the recipient must already be a subscriber. To email anyone at all</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (password resets, invites, receipts) use subscriber_mode='external'; in that mode</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># only {{ .Subscriber.Email }} is available in the template, so pass everything</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># else via template_data and read it as {{ .Tx.Data.&lt;key&gt; }}.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>listmonk.send_transactional_email(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'stranger@some.domain'</span>, template_id,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    subscriber_mode<span class="op">=</span><span class="st">'external'</span>, template_data<span class="op">=</span>{<span class="st">'name'</span>: <span class="st">'Sam'</span>, <span class="st">'reset_code'</span>: <span class="st">'abc123'</span>})</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Several recipients in one call: pass a list of addresses instead of one string.</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>listmonk.send_transactional_email(</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'one@some.domain'</span>, <span class="st">'two@some.domain'</span>], template_id, subscriber_mode<span class="op">=</span><span class="st">'external'</span>)</span></code></pre></div>
+</section>
+<section id="scene-6-the-newsletter" class="level3">
+<h3 class="anchored" data-anchor-id="scene-6-the-newsletter">Scene 6: The newsletter</h3>
+<p>Now for the bulk send. A campaign is a message aimed at one or more lists, and it has a life cycle: it is born a draft, it can be scheduled, it runs, it can be paused, and it ends up finished or cancelled. The single most useful thing to know is that creating a campaign does not send it. That is a separate, deliberate step, and there is a test send in between so you can read it in your own inbox first.</p>
+<p>Attachments for campaigns are a two-step dance: upload the file to Listmonk’s media library, then reference its ID. A default Listmonk install only accepts image extensions in the media library, which you can widen in its settings.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Access existing campaigns</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.models <span class="im">import</span> Campaign</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime, timedelta</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>campaigns: <span class="bu">list</span>[Campaign] <span class="op">=</span> listmonk.campaigns()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>campaign: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Upload media and create a campaign with attachments. A default Listmonk install only</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># accepts image extensions here; widen Settings &gt; Media &gt; Upload extensions for others.</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>media <span class="op">=</span> listmonk.upload_media(pathlib.Path(<span class="st">"/path/to/chart.png"</span>))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Or upload from bytes: media = listmonk.upload_media(png_bytes, filename="chart.png")</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>listmonk.create_campaign(name<span class="op">=</span><span class="st">'This is my Great Campaign!'</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>                         subject<span class="op">=</span><span class="st">"You won't believe this!"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>                         body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML!&lt;/p&gt;'</span>,  <span class="co"># Optional</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>                         alt_body<span class="op">=</span><span class="st">'Some Insane TXT!'</span>,  <span class="co"># Optional</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                         send_at<span class="op">=</span>datetime.now() <span class="op">+</span> timedelta(hours<span class="op">=</span><span class="dv">1</span>),  <span class="co"># Optional</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>                         template_id<span class="op">=</span><span class="dv">5</span>,  <span class="co"># Optional; defaults to None (server uses its default template)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>                         list_ids<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">2</span>},  <span class="co"># Optional Defaults to 1</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>                         tags<span class="op">=</span>[<span class="st">'good'</span>, <span class="st">'better'</span>, <span class="st">'best'</span>],  <span class="co"># Optional</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                         media_ids<span class="op">=</span>[media.<span class="bu">id</span>],  <span class="co"># Optional, attach uploaded media</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                         )</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Update A Campaign</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>campaign_to_update: Optional[Campaign] <span class="op">=</span> listmonk.campaign_by_id(<span class="dv">15</span>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>campaign_to_update.name <span class="op">=</span> <span class="st">"More Elegant Name"</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>campaign_to_update.subject <span class="op">=</span> <span class="st">"Even More Clickbait!!"</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>campaign_to_update.body <span class="op">=</span> <span class="st">"&lt;p&gt;There's a lot more we need to say so we're updating this programmatically!"</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>campaign_to_update.altbody <span class="op">=</span> <span class="st">"There's a lot more we need to say so we're updating this programmatically!"</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>campaign_to_update.lists <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">4</span>]</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Existing attachments are kept on update; pass media_ids=[...] to change them</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co"># (or media_ids=[] to remove them all).</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>listmonk.update_campaign(campaign_to_update)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview Campaign</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.campaign_preview_by_id(<span class="dv">15</span>)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span></code></pre></div>
+<p>The send itself goes through Listmonk’s dedicated status endpoint, which is why <a href="reference/update_campaign.html#listmonk.update_campaign" class="gdls-link gdls-code">update_campaign()</a> cannot start a campaign no matter what you set <code>status</code> to. Test first (every test address must already be a subscriber, or the server refuses with a 400), then start.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating a campaign does not send it. Send a test copy to yourself first (each</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># address must already be a subscriber), then start it. update_campaign() cannot</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># change the status; these calls use Listmonk's dedicated status endpoint.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>listmonk.test_campaign(<span class="dv">15</span>, [<span class="st">'you@your.domain'</span>])</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>listmonk.start_campaign(<span class="dv">15</span>)   <span class="co"># draft -&gt; running; the same as set_campaign_status(15, CampaignStatuses.running)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>listmonk.pause_campaign(<span class="dv">15</span>)   <span class="co"># running -&gt; paused; resume with start_campaign()</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>listmonk.cancel_campaign(<span class="dv">15</span>)  <span class="co"># stop for good</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Delete a Campaign (by its numeric ID)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>listmonk.delete_campaign(<span class="dv">15</span>)</span></code></pre></div>
+</section>
+<section id="scene-7-dressing-it-up" class="level3">
+<h3 class="anchored" data-anchor-id="scene-7-dressing-it-up">Scene 7: Dressing it up</h3>
+<p>Templates are the frame around every message: the header, the footer, the brand colours. There are two kinds, <code>campaign</code> and <code>tx</code>, and both have one hard rule. The body must contain <code>{ template "content" . }</code> exactly where the message goes, or the client refuses to create it before a single byte reaches the server.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Access existing Templates</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.models <span class="im">import</span> Template</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>templates: <span class="bu">list</span>[Template] <span class="op">=</span> listmonk.templates()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>template: Template <span class="op">=</span> listmonk.template_by_id(<span class="dv">2</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new Template for Campaigns</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>new_template <span class="op">=</span> listmonk.create_template(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TEMPLATE'</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Some Insane HTML! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st"> &lt;/p&gt;'</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'campaign'</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Update A Template</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>new_template.name <span class="op">=</span> <span class="st">"Bob's Great Template"</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>listmonk.update_template(new_template)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Mark a template as the default for its type</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>listmonk.set_default_template(new_template.<span class="bu">id</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Delete a Template</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>listmonk.delete_template(<span class="dv">3</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview Template</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>preview <span class="op">=</span> listmonk.template_preview_by_id(<span class="dv">3</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(preview.preview)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new template for Transactional Emails</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="co"># (the {{ template "content" . }} placeholder is required in every template body)</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>new_tx_template <span class="op">=</span> listmonk.create_template(</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'NEW TX TEMPLATE'</span>,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    subject<span class="op">=</span><span class="st">'Your Transactional Email Subject'</span>,</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    body<span class="op">=</span><span class="st">'&lt;p&gt;Hi </span><span class="sc">{{</span><span class="st"> .Subscriber.FirstName </span><span class="sc">}}</span><span class="st">! </span><span class="sc">{{</span><span class="st"> template "content" . </span><span class="sc">}}</span><span class="st">&lt;/p&gt;'</span>,</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">'tx'</span>,</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>That is the whole tour. Jane has been welcomed, segmented, reset, newslettered, and deleted, and you have seen every corner of the library that matters. The rest of this page is about what happens when something goes wrong.</p>
+</section>
 </section>
 <section id="error-handling" class="level2">
 <h2 class="anchored" data-anchor-id="error-handling">Error handling</h2>
-<p>The library has two ways of reporting failure, and it pays to know which one a call uses before wrapping it in <code>try/except</code>.</p>
+<p>Bad news arrives in two shapes in this library, and it pays to know which shape a call uses before you wrap it in <code>try/except</code>. Some calls raise. Others hand you a <code>False</code> or a <code>None</code> and expect you to look.</p>
 <p><strong>Calls that raise.</strong> Every data call first checks the client state and raises <a href="reference/errors.OperationNotAllowedError.html#listmonk.errors.OperationNotAllowedError" class="gdls-link gdls-code">listmonk.errors.OperationNotAllowedError</a> if <a href="reference/set_url_base.html#listmonk.set_url_base" class="gdls-link gdls-code">set_url_base()</a> or a successful <a href="reference/login.html#listmonk.login" class="gdls-link gdls-code">login()</a> has not happened yet. Bad arguments (an empty email, a template body without the <code>{ template "content" . }</code> placeholder, an unknown list type) raise <code>ValueError</code> before any request is sent. A 4xx or 5xx response raises <code>httpx2.HTTPStatusError</code>, and an empty or non-JSON response body raises <a href="reference/errors.ValidationError.html#listmonk.errors.ValidationError" class="gdls-link gdls-code">listmonk.errors.ValidationError</a>. Note the module name: this library uses <a href="https://github.com/pydantic/httpx2">httpx2</a>, so catch <code>httpx2.HTTPStatusError</code>, not <code>httpx.HTTPStatusError</code>.</p>
 <p><strong>Calls that return a value instead.</strong> <a href="reference/login.html#listmonk.login" class="gdls-link gdls-code">login()</a>, <a href="reference/is_healthy.html#listmonk.is_healthy" class="gdls-link gdls-code">is_healthy()</a>, and <a href="reference/verify_login.html#listmonk.verify_login" class="gdls-link gdls-code">verify_login()</a> return <code>False</code> when the credentials are rejected or the server cannot be reached; they never raise for those cases. <a href="reference/confirm_optin.html#listmonk.confirm_optin" class="gdls-link gdls-code">confirm_optin()</a> and <a href="reference/add_subscribers_to_lists.html#listmonk.add_subscribers_to_lists" class="gdls-link gdls-code">add_subscribers_to_lists()</a> return <code>False</code> on a non-2xx response. The single-item lookups (<a href="reference/subscriber_by_email.html#listmonk.subscriber_by_email" class="gdls-link gdls-code">subscriber_by_email()</a>, <a href="reference/subscriber_by_id.html#listmonk.subscriber_by_id" class="gdls-link gdls-code">subscriber_by_id()</a>, <a href="reference/subscriber_by_uuid.html#listmonk.subscriber_by_uuid" class="gdls-link gdls-code">subscriber_by_uuid()</a>, <a href="reference/campaign_by_id.html#listmonk.campaign_by_id" class="gdls-link gdls-code">campaign_by_id()</a>, <a href="reference/template_by_id.html#listmonk.template_by_id" class="gdls-link gdls-code">template_by_id()</a>) return <code>None</code> when nothing matches, as do <a href="reference/set_campaign_status.html#listmonk.set_campaign_status" class="gdls-link gdls-code">set_campaign_status()</a> and its <code>start</code>/<code>pause</code>/<code>cancel</code> wrappers for an unknown campaign ID. <a href="reference/delete_subscriber.html#listmonk.delete_subscriber" class="gdls-link gdls-code">delete_subscriber()</a>, <a href="reference/delete_campaign.html#listmonk.delete_campaign" class="gdls-link gdls-code">delete_campaign()</a>, <a href="reference/delete_template.html#listmonk.delete_template" class="gdls-link gdls-code">delete_template()</a>, and <a href="reference/test_campaign.html#listmonk.test_campaign" class="gdls-link gdls-code">test_campaign()</a> return <code>False</code> when the target does not exist.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> httpx2</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> listmonk</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.errors <span class="im">import</span> OperationNotAllowedError, ValidationError</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    subscriber <span class="op">=</span> listmonk.subscriber_by_email(<span class="st">'someone@some.domain'</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> OperationNotAllowedError:</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># call set_url_base() and login() first</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> httpx2.HTTPStatusError <span class="im">as</span> e:</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># e.response.status_code, e.response.text</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> ValidationError:</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># the server answered with something that is not JSON (a proxy error page, say)</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> subscriber <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># no such subscriber; not an error</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> httpx2</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> listmonk</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> listmonk.errors <span class="im">import</span> OperationNotAllowedError, ValidationError</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    subscriber <span class="op">=</span> listmonk.subscriber_by_email(<span class="st">'someone@some.domain'</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> OperationNotAllowedError:</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># call set_url_base() and login() first</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> httpx2.HTTPStatusError <span class="im">as</span> e:</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># e.response.status_code, e.response.text</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> ValidationError:</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># the server answered with something that is not JSON (a proxy error page, say)</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> subscriber <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    ...  <span class="co"># no such subscriber; not an error</span></span></code></pre></div>
 <p>Every network call accepts an optional <code>timeout_config</code>, an <code>httpx2.Timeout</code>, and defaults to 10 seconds. Pass a longer one for slow or self-hosted instances, for example <code>listmonk.subscribers(timeout_config=httpx2.Timeout(timeout=60))</code>.</p>
 </section>
 <section id="f.a.q." class="level2">
@@ -496,7 +521,7 @@ section.level2:first-of-type > h2:first-child,
 <h3 class="anchored" data-anchor-id="i-got-httpx2.httpstatuserror-client-error-403-forbidden">I got httpx2.HTTPStatusError: Client error ‘403 Forbidden’</h3>
 <p>If you encounter an error like this in your console:</p>
 <pre class="text"><code>httpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&amp;per_page=100&amp;query=subscribers.email='john@example.com''</code></pre>
-<p>It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.</p>
+<p>It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data. Your password was fine (a bad one makes <a href="reference/login.html#listmonk.login" class="gdls-link gdls-code">login()</a> return <code>False</code> much earlier); it is the role that is missing something.</p>
 <p><strong>Solution:</strong> Check the role assigned to your user. It must include the <code>subscribers:sql_query</code> permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [<a href="https://listmonk.app/docs/roles-and-permissions/#user-roles">Reference</a>] <a href="reference/subscriber_by_email.html#listmonk.subscriber_by_email" class="gdls-link gdls-code">subscriber_by_email()</a> and <a href="reference/subscriber_by_uuid.html#listmonk.subscriber_by_uuid" class="gdls-link gdls-code">subscriber_by_uuid()</a> use this same query mechanism, so they need the permission too. <a href="reference/subscriber_by_id.html#listmonk.subscriber_by_id" class="gdls-link gdls-code">subscriber_by_id()</a> and <code>subscribers(list_id=...)</code> do not.</p>
 </section>
 <section id="test_campaign-raised-400-bad-request-no-known-subscribers-to-test" class="level3">
@@ -508,7 +533,7 @@ section.level2:first-of-type > h2:first-child,
 <p><a href="https://github.com/pydantic/httpx2">httpx2</a> validates TLS certificates against the bundled <code>certifi</code> CA list by default. If you self-host Listmonk behind a custom or corporate Certificate Authority you may see an error like:</p>
 <pre class="text"><code>ssl.SSLCertVerificationError: certificate verify failed: unable to get local issuer certificate</code></pre>
 <p><strong>Solution:</strong> Point the client at your CA bundle via the standard environment variables before using the library:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSL_CERT_FILE</span><span class="op">=</span>/path/to/your-ca-bundle.pem   <span class="co"># or SSL_CERT_DIR=/path/to/ca-dir</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSL_CERT_FILE</span><span class="op">=</span>/path/to/your-ca-bundle.pem   <span class="co"># or SSL_CERT_DIR=/path/to/ca-dir</span></span></code></pre></div>
 </section>
 </section>
 <section id="want-to-contribute" class="level2">

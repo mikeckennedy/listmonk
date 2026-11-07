@@ -1,13 +1,12 @@
 # Listmonk Email API Client for Python
 
-Client for the open source, self-hosted [Listmonk email platform](https://listmonk.app) based on
-[httpx2](https://github.com/pydantic/httpx2) and [pydantic](https://pydantic.dev).
+Somewhere in your app, a person just clicked "Sign up". A welcome email has to leave the building, a newsletter needs them on the right list, and next Tuesday they will forget their password. [Listmonk](https://listmonk.app) is the open source, self-hosted mail platform that handles all of that. This package is how your Python code talks to it.
 
-`listmonk` is intended for integrating your Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/) but this only covers the subset that most developers will need for common SaaS actions such as subscribe, unsubscribe, and segment users (into separate lists).
+`listmonk` is built on [httpx2](https://github.com/pydantic/httpx2) and [pydantic](https://pydantic.dev) and is meant for wiring a Listmonk instance into your web app. The [Listmonk API is extensive](https://listmonk.app/docs/apis/apis/); this client deliberately covers the subset most apps need day to day: subscribe, unsubscribe, segment people into lists, send the one-off emails your app depends on, and run campaigns.
 
-So while it doesn't currently cover every endpoint (for example campaign analytics and bulk subscriber deletion are not yet implemented) it will likely work for you. That said, PRs are welcome.
+It does not cover every endpoint yet. Campaign analytics and bulk subscriber deletion, for example, are not implemented. If you need one of those, open an issue first and then send a PR; they are welcome.
 
-🔀 Async is currently planned but not yet implemented. With the httpx2-base, it should be trivial if needed.
+🔀 Async is planned but not yet implemented. With httpx2 underneath, it should be a small step when the time comes.
 
 ## Documentation
 
@@ -17,7 +16,7 @@ So while it doesn't currently cover every endpoint (for example campaign analyti
 
 ## Core Features
 
-- ➕**Add a subscriber** to your subscribed users.
+- ➕ **Add a subscriber** to your subscribed users.
 - 🙎 Get **subscriber details** by email, ID, UUID, and more.
 - 📝 **Modify subscriber details** (including custom attribute collection).
 - 🔍 **Search** your users based on app and custom attributes.
@@ -34,9 +33,15 @@ So while it doesn't currently cover every endpoint (for example campaign analyti
 
 ## Installation
 
-Just `pip install listmonk`
+Just `pip install listmonk` (or `uv add listmonk`). You need two things from your Listmonk instance: its address, and an API user. Recent Listmonk versions want you to create a dedicated API user with a token under Users rather than reusing your own login, and the role you give that user decides what the calls below are allowed to do.
 
-## Usage
+## Usage: a tour in seven scenes
+
+Meet Jane. She has just signed up for your app. Over the next few scenes she will get onto a couple of lists, receive a password reset, be sent a newsletter, and eventually (sorry, Jane) be deleted. Each scene builds on the one before, and by the end you will have touched most of the library.
+
+### Scene 1: Knock on the door
+
+Everything starts with two calls: where the server is, and who you are. Authentication is stored at module level, so you do this once at startup and every later call reuses it. Note that `login()` answers with a bool rather than an exception; a `False` means the server said no, or could not be reached at all.
 
 ```python
 
@@ -52,7 +57,13 @@ valid: bool = listmonk.verify_login()
 
 # Is it alive and working?
 up: bool = listmonk.is_healthy()
+```
 
+### Scene 2: The guest lists
+
+Lists are how Listmonk segments people: the newsletter, the beta testers, the folks who bought the advanced course. You can create and reshape them from code, or just read the ones already set up in the admin UI.
+
+```python
 # Create, update, and delete lists
 new_list: MailingList = listmonk.create_list(list_name="my_new_list")
 listmonk.update_list(list_id=new_list.id, description='Updated description')
@@ -61,7 +72,13 @@ listmonk.delete_list(new_list.id)
 # Read data about your lists
 lists: list[MailingList] = listmonk.lists()
 the_list: MailingList = listmonk.list_by_id(list_id=7)
+```
 
+### Scene 3: Jane signs up
+
+Creating a subscriber is one call. `pre_confirm=True` tells Listmonk that your app already handled consent, so no double opt-in email goes out. The `attribs` dict is a free-form bag of custom data (a plan name, a signup source, a rating) that you can query later. Once Jane exists you can find her again by email, ID, or UUID; each of those returns `None` rather than raising when nobody matches.
+
+```python
 # Various ways to access existing subscribers
 subscribers: list[Subscriber] = listmonk.subscribers(list_id=9)
 
@@ -73,7 +90,11 @@ subscriber: Optional[Subscriber] = listmonk.subscriber_by_uuid('f6668cf0-1c...')
 new_subscriber = listmonk.create_subscriber(
     'testuser@some.domain', 'Jane Doe',
     {1, 7, 9}, pre_confirm=True, attribs={...})
+```
 
+Updates follow one pattern throughout the library: fetch the model, change what you like, pass it back. The client sends the whole record and returns the server's fresh copy. List membership is worked out as "what she has now, minus the removals, plus the additions". Her global status (enabled, disabled, or blocklisted) stays whatever it already was unless you say otherwise.
+
+```python
 # Change the email, custom rating, and add to lists 4 & 6, remove from 5.
 subscriber.email = 'newemail@some.domain'
 subscriber.attribs['rating'] = 7
@@ -84,7 +105,13 @@ listmonk.add_subscribers_to_lists([2001, 2002], [4, 6])
 
 # Confirm single-opt-ins via the API (e.g. for when you manage that on your platform)
 listmonk.confirm_optin(subscriber.uuid, the_list.uuid)
+```
 
+### Scene 4: Jane changes her mind
+
+People pause, people leave, and occasionally people ask to be forgotten entirely. Those are three different operations and it matters which one you reach for. Disabling pauses delivery and is reversible. Blocking is the proper unsubscribe: Jane's record stays, so she can never be accidentally re-added by an import, but nothing is ever sent to her again. Deleting erases her as if she had never existed.
+
+```python
 # Disable then re-enable a subscriber
 subscriber = listmonk.disable_subscriber(subscriber)
 subscriber = listmonk.enable_subscriber(subscriber)
@@ -94,7 +121,13 @@ listmonk.block_subscriber(subscriber)
 
 # Fully delete them from your system
 listmonk.delete_subscriber(subscriber.email)
+```
 
+### Scene 5: The password reset that cannot wait
+
+Campaigns go to lists. Transactional email goes to one person, right now, because something just happened: a reset code, a receipt, an invite. You write a `tx` template in Listmonk once, then send it with the data that fills in the blanks. Listmonk templates are Go templates, so the merge data shows up in the template as `{{ .Tx.Data.reset_code }}`, not Jinja.
+
+```python
 # Send an individual, transactional email (e.g. password reset)
 to_email = 'testuser@some.domain'
 from_email = 'app@your.domain'
@@ -130,7 +163,11 @@ status: bool = listmonk.send_transactional_email(
     content_type='html',
     altbody='Plaintext fallback body'
 )
+```
 
+Here is the twist. By default Listmonk will only send a transactional email to someone who is already a subscriber. That is fine for Jane, but what about the colleague she just invited, who has no account yet? Pass `subscriber_mode='external'` and Listmonk skips the lookup and sends to anyone. The price is that only `{{ .Subscriber.Email }}` is available inside the template, so anything else it needs has to ride along in `template_data`.
+
+```python
 # By default the recipient must already be a subscriber. To email anyone at all
 # (password resets, invites, receipts) use subscriber_mode='external'; in that mode
 # only {{ .Subscriber.Email }} is available in the template, so pass everything
@@ -142,7 +179,15 @@ listmonk.send_transactional_email(
 # Several recipients in one call: pass a list of addresses instead of one string.
 listmonk.send_transactional_email(
     ['one@some.domain', 'two@some.domain'], template_id, subscriber_mode='external')
+```
 
+### Scene 6: The newsletter
+
+Now for the bulk send. A campaign is a message aimed at one or more lists, and it has a life cycle: it is born a draft, it can be scheduled, it runs, it can be paused, and it ends up finished or cancelled. The single most useful thing to know is that creating a campaign does not send it. That is a separate, deliberate step, and there is a test send in between so you can read it in your own inbox first.
+
+Attachments for campaigns are a two-step dance: upload the file to Listmonk's media library, then reference its ID. A default Listmonk install only accepts image extensions in the media library, which you can widen in its settings.
+
+```python
 # Access existing campaigns
 from listmonk.models import Campaign
 from datetime import datetime, timedelta
@@ -181,7 +226,11 @@ listmonk.update_campaign(campaign_to_update)
 # Preview Campaign
 preview = listmonk.campaign_preview_by_id(15)
 print(preview.preview)
+```
 
+The send itself goes through Listmonk's dedicated status endpoint, which is why `update_campaign()` cannot start a campaign no matter what you set `status` to. Test first (every test address must already be a subscriber, or the server refuses with a 400), then start.
+
+```python
 # Creating a campaign does not send it. Send a test copy to yourself first (each
 # address must already be a subscriber), then start it. update_campaign() cannot
 # change the status; these calls use Listmonk's dedicated status endpoint.
@@ -192,7 +241,13 @@ listmonk.cancel_campaign(15)  # stop for good
 
 # Delete a Campaign (by its numeric ID)
 listmonk.delete_campaign(15)
+```
 
+### Scene 7: Dressing it up
+
+Templates are the frame around every message: the header, the footer, the brand colours. There are two kinds, `campaign` and `tx`, and both have one hard rule. The body must contain `{{ template "content" . }}` exactly where the message goes, or the client refuses to create it before a single byte reaches the server.
+
+```python
 # Access existing Templates
 from listmonk.models import Template
 templates: list[Template] = listmonk.templates()
@@ -229,9 +284,11 @@ new_tx_template = listmonk.create_template(
 )
 ```
 
+That is the whole tour. Jane has been welcomed, segmented, reset, newslettered, and deleted, and you have seen every corner of the library that matters. The rest of this page is about what happens when something goes wrong.
+
 ## Error handling
 
-The library has two ways of reporting failure, and it pays to know which one a call uses before wrapping it in `try/except`.
+Bad news arrives in two shapes in this library, and it pays to know which shape a call uses before you wrap it in `try/except`. Some calls raise. Others hand you a `False` or a `None` and expect you to look.
 
 **Calls that raise.** Every data call first checks the client state and raises `listmonk.errors.OperationNotAllowedError` if `set_url_base()` or a successful `login()` has not happened yet. Bad arguments (an empty email, a template body without the `{{ template "content" . }}` placeholder, an unknown list type) raise `ValueError` before any request is sent. A 4xx or 5xx response raises `httpx2.HTTPStatusError`, and an empty or non-JSON response body raises `listmonk.errors.ValidationError`. Note the module name: this library uses [httpx2](https://github.com/pydantic/httpx2), so catch `httpx2.HTTPStatusError`, not `httpx.HTTPStatusError`.
 
@@ -271,7 +328,7 @@ If you encounter an error like this in your console:
 httpx2.HTTPStatusError: Client error '403 Forbidden' for url 'https://yoursite.local/api/subscribers?page=1&per_page=100&query=subscribers.email='john@example.com''
 ```
 
-It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data.
+It means the authenticated user doesn’t have sufficient permissions to run SQL queries on subscriber data. Your password was fine (a bad one makes `login()` return `False` much earlier); it is the role that is missing something.
 
 **Solution:** Check the role assigned to your user. It must include the `subscribers:sql_query` permission to allow executing SQL queries on subscriber data. You can review and update user roles in your system’s admin panel. [[Reference](https://listmonk.app/docs/roles-and-permissions/#user-roles)] `subscriber_by_email()` and `subscriber_by_uuid()` use this same query mechanism, so they need the permission too. `subscriber_by_id()` and `subscribers(list_id=...)` do not.
 
