@@ -3,6 +3,42 @@
 This changelog is generated automatically from [GitHub Releases](https://github.com/mikeckennedy/listmonk/releases).
 
 
+# v0.7.33
+
+*2026-11-07* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.7.33)
+
+
+### Changed
+
+- [update_subscriber()](reference/update_subscriber.html#listmonk.update_subscriber) keeps the subscriber's current status unless you pass `status=`. It used to default to [enabled](reference/models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.enabled), so passing back a disabled or blocklisted subscriber to change their name quietly put them back on the mailing lists. [enable_subscriber()](reference/enable_subscriber.html#listmonk.enable_subscriber), [disable_subscriber()](reference/disable_subscriber.html#listmonk.disable_subscriber), and [block_subscriber()](reference/block_subscriber.html#listmonk.block_subscriber) pass their status explicitly and behave as before. If you relied on the implicit re-enable, pass `status=SubscriberStatuses.enabled`
+- [subscriber_by_id()](reference/subscriber_by_id.html#listmonk.subscriber_by_id) now calls Listmonk's direct `GET /api/subscribers/{id}` endpoint instead of a SQL `query=` filter, so it no longer needs the `subscribers:sql_query` permission. Listmonk answers an unknown ID with HTTP 400, which the function still reports as `None`; any other 4xx/5xx raises `httpx2.HTTPStatusError` as before
+- [create_campaign()](reference/create_campaign.html#listmonk.create_campaign) no longer lowercases `from_email`, so a display name such as `Newsletter <news@example.com>` is sent as written (surrounding whitespace is still stripped). [update_campaign()](reference/update_campaign.html#listmonk.update_campaign) already passed the address through untouched
+- [list_by_id()](reference/list_by_id.html#listmonk.list_by_id) raises [listmonk.errors.ValidationError](reference/errors.ValidationError.html#listmonk.errors.ValidationError) instead of a bare `Exception` when the server's result set does not contain the requested list (the listmonk[\#2117](https://github.com/mikeckennedy/listmonk/issues/2117) workaround path). [ValidationError](reference/errors.ValidationError.html#listmonk.errors.ValidationError) subclasses `Exception`, so existing `except Exception` handlers still catch it
+
+
+### Fixed
+
+- [subscriber_by_email()](reference/subscriber_by_email.html#listmonk.subscriber_by_email) and [subscriber_by_uuid()](reference/subscriber_by_uuid.html#listmonk.subscriber_by_uuid) now send the lookup value as a quoted SQL literal with embedded quotes escaped, and URL-encode the whole filter. Listmonk runs the `query` parameter as a raw SQL expression, so an attacker-controlled address such as `x' OR true --` used to match the first subscriber on the server instead of nobody, and `delete_subscriber(email)` would then have deleted that subscriber
+- [send_transactional_email()](reference/send_transactional_email.html#listmonk.send_transactional_email) reads attachment bytes up front instead of handing open file objects to httpx2, which were never closed
+- [test_campaign()](reference/test_campaign.html#listmonk.test_campaign) now sends the campaign's `altbody` and custom `headers` with the test request. Listmonk copies both from the request onto the test message, so the test copy used to arrive without the plain-text twin and without the custom headers the real send carries. Media IDs are deliberately not sent: the server keeps the stored attachments and would append duplicates
+- [set_url_base()](reference/set_url_base.html#listmonk.set_url_base) strips surrounding whitespace before removing the trailing slash, so `'https://example.com/ '` no longer keeps its slash
+- `tests/test_type_check.py` now passes the running interpreter's environment to `ty check --python`, so the type gate finds the project's `venv/` (ty only auto-discovers `.venv`) instead of reporting every third-party import as unresolved when the venv is not activated
+- `scripts/build_docs.py` refuses to mirror a site that is missing `llms.txt`, `llms-full.txt`, `skill.md`, the `.well-known/agent-skills` files, `robots.txt`, or `sitemap.xml`, since Great Docs reports success even when it skips them
+
+
+### Documentation
+
+- New user guide at https://mkennedy.codes/docs/listmonk/user-guide/getting-started.html, ten pages in sidebar order: getting started, errors and troubleshooting, subscribers, lists and segmentation, transactional email, campaigns, templates, recipes (signup form, unsubscribe link, receipt with PDF, password reset, user sync, newsletter, health check), testing your integration, and how it works. Every page is folded into `llms-full.txt`
+- The README usage section is now a guided tour that follows one subscriber from signup to deletion, with every code sample unchanged
+- Replaced the generated agent skill with a hand-written `skills/listmonk/SKILL.md` (wired through `skill.file` in `great-docs.yml`) that covers the rules of the package: call order, the raises-versus-returns-False error model, transactional subscriber modes, campaign status transitions, Go template syntax, and the permission behind the 403. `skill_extra_body.md` and the gotcha/decision-table lists in `great-docs.yml` folded into it
+- Corrected the [test_campaign()](reference/test_campaign.html#listmonk.test_campaign) docs: Listmonk answers HTTP 400 "No known subscribers to test." when none of the addresses are subscribers, which the client raises as `httpx2.HTTPStatusError`; it does not silently send nothing. A test pins the behaviour
+- README: documented [test_campaign()](reference/test_campaign.html#listmonk.test_campaign), `start/pause/cancel_campaign()`, `subscriber_mode`, and multi-recipient transactional sends, which had only been in the changelog; added an Error handling section (what raises, what returns `False` or `None`, timeouts) and FAQ entries for [OperationNotAllowedError](reference/errors.OperationNotAllowedError.html#listmonk.errors.OperationNotAllowedError) and the campaign-test 400; switched the media example to an image, which is all a default server accepts
+- Every public function, model, and exception now has an Examples section, so the reference pages and `llms-full.txt` show canonical usage; [update_campaign()](reference/update_campaign.html#listmonk.update_campaign) notes that dropping a past `send_at` returns a scheduled campaign to draft
+- Package docstring lists the entry points (functions, `models`, `errors`, `timeout_config`, `SSL_CERT_FILE`/`SSL_CERT_DIR`); changelog compare links added for 0.5.31 and 0.6.32
+
+**Full changelog:** [https://github.com/mikeckennedy/listmonk/compare/v0.6.32…v0.7.33](https://github.com/mikeckennedy/listmonk/compare/v0.6.32...v0.7.33)
+
+
 # v0.6.32
 
 *2026-10-18* · [GitHub](https://github.com/mikeckennedy/listmonk/releases/tag/v0.6.32)

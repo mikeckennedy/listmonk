@@ -107,7 +107,7 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Listmonk <span class="version-badge" title="Released 2026-10-18">v0.6.32</span></span>
+    <span class="navbar-title">Listmonk <span class="version-badge" title="Released 2026-11-07">v0.7.33</span></span>
     </a>
   </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -151,7 +151,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul class="collapse">
-  <li><a href="#v0.6.32" id="toc-v0.6.32" class="nav-link active" data-scroll-target="#v0.6.32">v0.6.32</a>
+  <li><a href="#v0.7.33" id="toc-v0.7.33" class="nav-link active" data-scroll-target="#v0.7.33">v0.7.33</a></li>
+  <li><a href="#v0.6.32" id="toc-v0.6.32" class="nav-link" data-scroll-target="#v0.6.32">v0.6.32</a>
   <ul class="collapse">
   <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section">[0.6.32] - 2026-10-17</a></li>
   </ul></li>
@@ -229,6 +230,43 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>This changelog is generated automatically from <a href="https://github.com/mikeckennedy/listmonk/releases">GitHub Releases</a>.</p>
+<section id="v0.7.33" class="level1 changelog-version">
+<h1 class="changelog-version">v0.7.33</h1>
+<p><em>2026-11-07</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.7.33">GitHub</a></p>
+<section id="changed" class="level3">
+<h3 class="anchored" data-anchor-id="changed">Changed</h3>
+<ul>
+<li><a href="reference/update_subscriber.html#listmonk.update_subscriber" class="gdls-link gdls-code">update_subscriber()</a> keeps the subscriber’s current status unless you pass <code>status=</code>. It used to default to <a href="reference/models.SubscriberStatuses.html#listmonk.models.SubscriberStatuses.enabled" class="gdls-link gdls-code">enabled</a>, so passing back a disabled or blocklisted subscriber to change their name quietly put them back on the mailing lists. <a href="reference/enable_subscriber.html#listmonk.enable_subscriber" class="gdls-link gdls-code">enable_subscriber()</a>, <a href="reference/disable_subscriber.html#listmonk.disable_subscriber" class="gdls-link gdls-code">disable_subscriber()</a>, and <a href="reference/block_subscriber.html#listmonk.block_subscriber" class="gdls-link gdls-code">block_subscriber()</a> pass their status explicitly and behave as before. If you relied on the implicit re-enable, pass <code>status=SubscriberStatuses.enabled</code></li>
+<li><a href="reference/subscriber_by_id.html#listmonk.subscriber_by_id" class="gdls-link gdls-code">subscriber_by_id()</a> now calls Listmonk’s direct <code>GET /api/subscribers/{id}</code> endpoint instead of a SQL <code>query=</code> filter, so it no longer needs the <code>subscribers:sql_query</code> permission. Listmonk answers an unknown ID with HTTP 400, which the function still reports as <code>None</code>; any other 4xx/5xx raises <code>httpx2.HTTPStatusError</code> as before</li>
+<li><a href="reference/create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign()</a> no longer lowercases <code>from_email</code>, so a display name such as <code>Newsletter &lt;news@example.com&gt;</code> is sent as written (surrounding whitespace is still stripped). <a href="reference/update_campaign.html#listmonk.update_campaign" class="gdls-link gdls-code">update_campaign()</a> already passed the address through untouched</li>
+<li><a href="reference/list_by_id.html#listmonk.list_by_id" class="gdls-link gdls-code">list_by_id()</a> raises <a href="reference/errors.ValidationError.html#listmonk.errors.ValidationError" class="gdls-link gdls-code">listmonk.errors.ValidationError</a> instead of a bare <code>Exception</code> when the server’s result set does not contain the requested list (the listmonk<a href="https://github.com/mikeckennedy/listmonk/issues/2117">#2117</a> workaround path). <a href="reference/errors.ValidationError.html#listmonk.errors.ValidationError" class="gdls-link gdls-code">ValidationError</a> subclasses <code>Exception</code>, so existing <code>except Exception</code> handlers still catch it</li>
+</ul>
+</section>
+<section id="fixed" class="level3">
+<h3 class="anchored" data-anchor-id="fixed">Fixed</h3>
+<ul>
+<li><a href="reference/subscriber_by_email.html#listmonk.subscriber_by_email" class="gdls-link gdls-code">subscriber_by_email()</a> and <a href="reference/subscriber_by_uuid.html#listmonk.subscriber_by_uuid" class="gdls-link gdls-code">subscriber_by_uuid()</a> now send the lookup value as a quoted SQL literal with embedded quotes escaped, and URL-encode the whole filter. Listmonk runs the <code>query</code> parameter as a raw SQL expression, so an attacker-controlled address such as <code>x' OR true --</code> used to match the first subscriber on the server instead of nobody, and <code>delete_subscriber(email)</code> would then have deleted that subscriber</li>
+<li><a href="reference/send_transactional_email.html#listmonk.send_transactional_email" class="gdls-link gdls-code">send_transactional_email()</a> reads attachment bytes up front instead of handing open file objects to httpx2, which were never closed</li>
+<li><a href="reference/test_campaign.html#listmonk.test_campaign" class="gdls-link gdls-code">test_campaign()</a> now sends the campaign’s <code>altbody</code> and custom <code>headers</code> with the test request. Listmonk copies both from the request onto the test message, so the test copy used to arrive without the plain-text twin and without the custom headers the real send carries. Media IDs are deliberately not sent: the server keeps the stored attachments and would append duplicates</li>
+<li><a href="reference/set_url_base.html#listmonk.set_url_base" class="gdls-link gdls-code">set_url_base()</a> strips surrounding whitespace before removing the trailing slash, so <code>'https://example.com/ '</code> no longer keeps its slash</li>
+<li><code>tests/test_type_check.py</code> now passes the running interpreter’s environment to <code>ty check --python</code>, so the type gate finds the project’s <code>venv/</code> (ty only auto-discovers <code>.venv</code>) instead of reporting every third-party import as unresolved when the venv is not activated</li>
+<li><code>scripts/build_docs.py</code> refuses to mirror a site that is missing <code>llms.txt</code>, <code>llms-full.txt</code>, <code>skill.md</code>, the <code>.well-known/agent-skills</code> files, <code>robots.txt</code>, or <code>sitemap.xml</code>, since Great Docs reports success even when it skips them</li>
+</ul>
+</section>
+<section id="documentation" class="level3">
+<h3 class="anchored" data-anchor-id="documentation">Documentation</h3>
+<ul>
+<li>New user guide at https://mkennedy.codes/docs/listmonk/user-guide/getting-started.html, ten pages in sidebar order: getting started, errors and troubleshooting, subscribers, lists and segmentation, transactional email, campaigns, templates, recipes (signup form, unsubscribe link, receipt with PDF, password reset, user sync, newsletter, health check), testing your integration, and how it works. Every page is folded into <code>llms-full.txt</code></li>
+<li>The README usage section is now a guided tour that follows one subscriber from signup to deletion, with every code sample unchanged</li>
+<li>Replaced the generated agent skill with a hand-written <code>skills/listmonk/SKILL.md</code> (wired through <code>skill.file</code> in <code>great-docs.yml</code>) that covers the rules of the package: call order, the raises-versus-returns-False error model, transactional subscriber modes, campaign status transitions, Go template syntax, and the permission behind the 403. <code>skill_extra_body.md</code> and the gotcha/decision-table lists in <code>great-docs.yml</code> folded into it</li>
+<li>Corrected the <a href="reference/test_campaign.html#listmonk.test_campaign" class="gdls-link gdls-code">test_campaign()</a> docs: Listmonk answers HTTP 400 “No known subscribers to test.” when none of the addresses are subscribers, which the client raises as <code>httpx2.HTTPStatusError</code>; it does not silently send nothing. A test pins the behaviour</li>
+<li>README: documented <a href="reference/test_campaign.html#listmonk.test_campaign" class="gdls-link gdls-code">test_campaign()</a>, <code>start/pause/cancel_campaign()</code>, <code>subscriber_mode</code>, and multi-recipient transactional sends, which had only been in the changelog; added an Error handling section (what raises, what returns <code>False</code> or <code>None</code>, timeouts) and FAQ entries for <a href="reference/errors.OperationNotAllowedError.html#listmonk.errors.OperationNotAllowedError" class="gdls-link gdls-code">OperationNotAllowedError</a> and the campaign-test 400; switched the media example to an image, which is all a default server accepts</li>
+<li>Every public function, model, and exception now has an Examples section, so the reference pages and <code>llms-full.txt</code> show canonical usage; <a href="reference/update_campaign.html#listmonk.update_campaign" class="gdls-link gdls-code">update_campaign()</a> notes that dropping a past <code>send_at</code> returns a scheduled campaign to draft</li>
+<li>Package docstring lists the entry points (functions, <code>models</code>, <code>errors</code>, <code>timeout_config</code>, <code>SSL_CERT_FILE</code>/<code>SSL_CERT_DIR</code>); changelog compare links added for 0.5.31 and 0.6.32</li>
+</ul>
+<p><strong>Full changelog:</strong> <a href="https://github.com/mikeckennedy/listmonk/compare/v0.6.32...v0.7.33">https://github.com/mikeckennedy/listmonk/compare/v0.6.32…v0.7.33</a></p>
+</section>
+</section>
 <section id="v0.6.32" class="level1 changelog-version">
 <h1 class="changelog-version">v0.6.32</h1>
 <p><em>2026-10-18</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.6.32">GitHub</a></p>
@@ -254,8 +292,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Type checking with <a href="https://github.com/astral-sh/ty">ty</a> as the authoritative checker: a <code>ty.toml</code> config, a <code>ty</code> dev dependency, and <code>tests/test_type_check.py</code>, which fails the suite on any diagnostic (and skips when ty isn’t installed). The tree is at zero diagnostics, checked against Python 3.10 — the floor of the supported range — so nothing newer than 3.10 slips into the public API</li>
 </ul>
 </section>
-<section id="fixed" class="level3">
-<h3 class="anchored" data-anchor-id="fixed">Fixed</h3>
+<section id="fixed-1" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-1">Fixed</h3>
 <ul>
 <li>Fixed the type errors and removed the 13 stale <code># type: ignore</code> comments that <code>ty check</code> reported. Two were real latent crashes in <code>example_client/client.py</code>, which used a subscriber and its UUID without checking either for <code>None</code>; the example now guards once, up front, instead of suppressing the warnings</li>
 </ul>
@@ -276,8 +314,8 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="reference/create_list.html#listmonk.create_list" class="gdls-link gdls-code">create_list()</a>, <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list()</a>, and <a href="reference/delete_list.html#listmonk.delete_list" class="gdls-link gdls-code">delete_list()</a> now accept the optional <code>timeout_config</code> parameter like every other network call (<a href="reference/delete_list.html#listmonk.delete_list" class="gdls-link gdls-code">delete_list()</a> previously hardcoded a 30-second timeout; all three now default to 10 seconds)</li>
 </ul>
 </section>
-<section id="changed" class="level3">
-<h3 class="anchored" data-anchor-id="changed">Changed</h3>
+<section id="changed-1" class="level3">
+<h3 class="anchored" data-anchor-id="changed-1">Changed</h3>
 <ul>
 <li>Import <code>httpx2</code> directly instead of aliasing it as <code>httpx</code>, so signatures, docstrings, and the docs site all show <code>httpx2.Timeout</code> / <code>httpx2.HTTPStatusError</code> — the names users actually import</li>
 <li>Tighten public signatures to match documented behavior: required parameters are no longer <code>Optional</code> (<code>create_campaign(name, subject)</code>, <code>create_template(name, body)</code>, <code>delete_campaign(campaign_id)</code>, <code>delete_template(template_id)</code>, <code>set_default_template(template_id)</code>, <code>confirm_optin(...)</code>), and functions that can never return <code>None</code> no longer claim <code>Optional</code> returns (<a href="reference/list_by_id.html#listmonk.list_by_id" class="gdls-link gdls-code">list_by_id</a>, <a href="reference/campaign_preview_by_id.html#listmonk.campaign_preview_by_id" class="gdls-link gdls-code">campaign_preview_by_id</a>, <a href="reference/template_preview_by_id.html#listmonk.template_preview_by_id" class="gdls-link gdls-code">template_preview_by_id</a>, <a href="reference/create_campaign.html#listmonk.create_campaign" class="gdls-link gdls-code">create_campaign</a>, <a href="reference/create_template.html#listmonk.create_template" class="gdls-link gdls-code">create_template</a>, <a href="reference/create_list.html#listmonk.create_list" class="gdls-link gdls-code">create_list</a>, <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list</a>)</li>
@@ -285,8 +323,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Accuracy pass over docstrings, the README, and the example client (corrected TLS/certifi guidance, README samples that would not run as written, stale claims about unimplemented list/template APIs)</li>
 </ul>
 </section>
-<section id="fixed-1" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-1">Fixed</h3>
+<section id="fixed-2" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-2">Fixed</h3>
 <ul>
 <li>Fix <a href="reference/update_list.html#listmonk.update_list" class="gdls-link gdls-code">update_list()</a> sending the list type as <code>list_type</code> instead of <code>type</code>, so changing a list’s type now actually takes effect</li>
 <li>Fix <code>Subscriber.model_dump()</code> crashing on server-populated subscribers (list-membership dicts and a <code>None</code> <code>updated_at</code> now serialize cleanly)</li>
@@ -301,8 +339,8 @@ ul.task-list li input[type="checkbox"] {
 <p><em>2026-06-03</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.4.1">GitHub</a></p>
 <section id="section-3" class="level2">
 <h2 class="anchored" data-anchor-id="section-3">[0.4.1] - 2026-06-03</h2>
-<section id="changed-1" class="level3">
-<h3 class="anchored" data-anchor-id="changed-1">Changed</h3>
+<section id="changed-2" class="level3">
+<h3 class="anchored" data-anchor-id="changed-2">Changed</h3>
 <ul>
 <li>Migrate the HTTP backend from <code>httpx</code> to <a href="https://github.com/pydantic/httpx2"><code>httpx2</code></a>, the Pydantic-maintained fork, after the original <code>httpx</code> project paused releases and locked down its issue tracker. <code>httpx2</code> is imported internally as <code>httpx</code>, so the public API and all call sites are unchanged.</li>
 <li>TLS certificates are now validated against the operating system trust store (via <code>truststore</code>, the <code>httpx2</code> default) instead of the bundled <code>certifi</code> CA list. If you self-host Listmonk behind a custom or corporate CA, install that CA in your OS trust store or set <code>SSL_CERT_FILE</code> / <code>SSL_CERT_DIR</code>. See the new SSL entry in the README F.A.Q.</li>
@@ -329,8 +367,8 @@ ul.task-list li input[type="checkbox"] {
 <p><em>2026-04-04</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.13">GitHub</a></p>
 <section id="section-5" class="level2">
 <h2 class="anchored" data-anchor-id="section-5">[0.3.13] - 2026-04-03</h2>
-<section id="fixed-2" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-2">Fixed</h3>
+<section id="fixed-3" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-3">Fixed</h3>
 <ul>
 <li>Fix <a href="reference/confirm_optin.html#listmonk.confirm_optin" class="gdls-link gdls-code">confirm_optin()</a> returning <code>False</code> on non-English Listmonk instances by using HTTP status codes instead of hardcoded English response strings (fixes <a href="https://github.com/mikeckennedy/listmonk/issues/23">#23</a>)</li>
 </ul>
@@ -348,8 +386,8 @@ ul.task-list li input[type="checkbox"] {
 <p><em>2026-04-04</em> · <a href="https://github.com/mikeckennedy/listmonk/releases/tag/v0.3.11">GitHub</a></p>
 <section id="section-6" class="level2">
 <h2 class="anchored" data-anchor-id="section-6">[0.3.11] - 2026-04-03</h2>
-<section id="fixed-3" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-3">Fixed</h3>
+<section id="fixed-4" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-4">Fixed</h3>
 <ul>
 <li>Fix campaign creation failing with listmonk server 6.0.0 - <code>headers</code> field now correctly uses a list of dictionaries instead of a plain dictionary (PR <a href="https://github.com/mikeckennedy/listmonk/issues/28">#28</a>)</li>
 </ul>
@@ -380,8 +418,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Add add_subscribers_to_lists function (thanks <a href="https://github.com/MochaSteve256"><span class="citation" data-cites="MochaSteve256">@MochaSteve256</span></a>)</li>
 </ul>
 </section>
-<section id="changed-2" class="level3">
-<h3 class="anchored" data-anchor-id="changed-2">Changed</h3>
+<section id="changed-3" class="level3">
+<h3 class="anchored" data-anchor-id="changed-3">Changed</h3>
 <ul>
 <li>Loosen some of the types to allow more flexible usage (avoid type errors when DTOs/ViewModels/etc have VALUE|None typing but are known to be in a good state)</li>
 <li>Refactor client implementation to improve organization and maintainability</li>
@@ -403,8 +441,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Ruff formatting configuration</li>
 </ul>
 </section>
-<section id="changed-3" class="level3">
-<h3 class="anchored" data-anchor-id="changed-3">Changed</h3>
+<section id="changed-4" class="level3">
+<h3 class="anchored" data-anchor-id="changed-4">Changed</h3>
 <ul>
 <li>Extensive type annotation improvements for better IDE support (PyLance/VS Code)</li>
 <li>HTTP response validation and parsing refactored for better error handling</li>
@@ -413,8 +451,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Documentation improvements in README.md</li>
 </ul>
 </section>
-<section id="fixed-4" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-4">Fixed</h3>
+<section id="fixed-5" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-5">Fixed</h3>
 <ul>
 <li>Custom exception renamed from <code>FileNotFoundError</code> to <a href="reference/errors.ListmonkFileNotFoundError.html#listmonk.errors.ListmonkFileNotFoundError" class="gdls-link gdls-code">ListmonkFileNotFoundError</a> to avoid builtin conflict</li>
 <li>Non-string to string types in <code>__all__</code> exports</li>
